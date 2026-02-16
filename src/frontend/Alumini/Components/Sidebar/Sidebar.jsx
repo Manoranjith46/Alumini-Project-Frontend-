@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import styles from "./sidebar.module.css";
 import collegeLogo from '../../../../assets/KSR_College_Logo.svg'
 import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function AlSidebar({ onLogout, onNavigate, currentView }) {
+export default function Sidebar({ onLogout, currentView }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,22 +14,9 @@ export default function AlSidebar({ onLogout, onNavigate, currentView }) {
     }
   };
 
-  const activeView = currentView ?? (location.pathname.includes('/mail') ? 'mail' : 'dashboard');
-
-  useEffect(() => {
-    if (activeView === 'mail') {
-      document.body.classList.add('mail-active');
-    } else {
-      document.body.classList.remove('mail-active');
-    }
-    return () => document.body.classList.remove('mail-active');
-  }, [activeView]);
 
   const handleNavClick = (e, view) => {
     e.preventDefault();
-    if (onNavigate) {
-      onNavigate(view);
-    }
     navigate(`/${view}`);
   };
 
@@ -48,7 +35,7 @@ export default function AlSidebar({ onLogout, onNavigate, currentView }) {
 
       <nav className={styles.sidebarNav}>
         <a 
-          className={`${styles.navLink} ${activeView === 'dashboard' ? styles.navLinkActive : ''} ${styles.dashboardLink}`} 
+          className={`${styles.navLink} ${currentView === 'dashboard' ? styles.navLinkActive : ''} ${styles.dashboardLink}`} 
           href="#"
           onClick={(e) => handleNavClick(e, 'dashboard')}
         >
@@ -58,7 +45,7 @@ export default function AlSidebar({ onLogout, onNavigate, currentView }) {
           </span>
         </a>
         <a 
-          className={`${styles.navLink} ${activeView === 'mail' ? styles.navLinkActive : ''}`} 
+          className={`${styles.navLink} ${currentView === 'mail' ? styles.navLinkActive : ''}`} 
           href="#"
           onClick={(e) => handleNavClick(e, 'mail')}
         >

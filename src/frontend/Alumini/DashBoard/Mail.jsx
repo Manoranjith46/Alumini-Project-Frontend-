@@ -38,7 +38,7 @@ export default function Mail({ onLogout, onNavigate, currentView }) {
 
   return (
     <div className={styles.pageWrapper}>
-      <Sidebar onLogout={onLogout} />
+      <Sidebar onLogout={onLogout} currentView={'mail'} />
 
       <main className={styles.mainContent}>
         <div className={styles.contentContainer}>

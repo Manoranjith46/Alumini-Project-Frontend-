@@ -1,12 +1,16 @@
 import styles from "./Dashboard.module.css";
 import Sidebar from "../Components/Sidebar/Sidebar";
+import { useNavigate } from 'react-router-dom';
 
-export default function Dashboard({ onLogout, onNavigate }) {
+
+export default function Dashboard({ onLogout }) {
+    const navigate = useNavigate();
+  
   return (
     <div className={styles.dashboardContainer}>
       
       {/* Sidebar */}
-      <Sidebar onLogout={onLogout}  />
+      <Sidebar onLogout={onLogout} currentView={'dashboard'} />
 
       {/* Main */}
       <main className={styles.mainContent}>
@@ -85,7 +89,7 @@ export default function Dashboard({ onLogout, onNavigate }) {
                 </div>
                 <button 
                   className={`${styles.buttonBase} ${styles.buttonSecondary}`}
-                  onClick={() => onNavigate && onNavigate('mail')}
+                  onClick={() => navigate('/mail') }
                 >
                   Go to Inbox
                 </button>
