@@ -16,6 +16,7 @@ import LoginGateway from './frontend/Auth/LoginGateway';
 import ForgotPassword from './frontend/Auth/ForgotPassword';
 import SendOtp from './frontend/Auth/SendOtp';
 import UpdatePassword from './frontend/Auth/UpdatePassword';
+import LandingPage from './frontend/Landing_Page/Landing';
 
 
 function App() {
@@ -36,6 +37,10 @@ function App() {
   return (
     <Router>
       <Routes>
+{/* Landing Page Routes */}
+        <Route 
+          path="/landing" 
+          element={<LandingPage />} />
 {/* Login GateWay Routes */}
         <Route 
           path="/login" 
@@ -104,7 +109,7 @@ function App() {
 
 
 {/* Master Route for Unknown EndPoint */}
-        <Route path="*" element={<Navigate to={isLoggedIn ? "/alumini/dashboard" : "/login"} />} />
+        <Route path="*" element={<Navigate to={isLoggedIn ? "/alumini/dashboard" : "/landing"} />} />
       </Routes>
     </Router>
   )

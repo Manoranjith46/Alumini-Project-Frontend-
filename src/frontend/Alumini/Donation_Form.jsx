@@ -101,11 +101,6 @@ const DonationFormPage = ({ onLogout }) => {
                 </div>
 
                 </div>
-
-                {/* Footer */}
-                <footer className={styles.pageFooter}>
-                © 2024 K.S.R College of Engineering Alumni Portal. All donations are tax-deductible.
-                </footer>
             </div>
         </main>
     </div>
