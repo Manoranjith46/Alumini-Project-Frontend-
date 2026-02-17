@@ -1,365 +1,361 @@
-import React, { useState } from 'react';
-import styles from './Landing.module.css';
+import { useNavigate } from 'react-router-dom';
+import styles from './landing.module.css';
 
-const LandingPage = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+export default function Landing() {
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  const navigate = useNavigate();
 
   return (
-    <div className={styles.pageContainer}>
-      
-      {/* Floating Navigation Bar */}
-      <nav className={styles.navbar}>
-        <div className={styles.navContent}>
-          {/* Logo */}
-          <div className={styles.logoArea}>
-             <div className={styles.sealIcon}>
-                <span className="material-symbols-outlined">account_balance</span>
-             </div>
-             <div className={styles.logoText}>
-                <span className={styles.logoKSRCE}>KSRCE</span>
-                <span className={styles.logoAlumni}>ALUMNI</span>
-             </div>
+    <div className={styles.body}>
+      {/* Navigation */}
+      <nav className={styles.nav}>
+        <div className={styles.navContainer}>
+          <div className={styles.navBrand}>
+            <img 
+              alt='K.S.R. College of Engineering Logo'
+              className={styles.logo}
+              src='src/assets/KSR_College_Logo.svg'
+            />
+            <span className={styles.brandText}>
+              KSRCE <span className={styles.brandAccent}>ALUMNI</span>
+            </span>
           </div>
-
-          {/* Desktop Links */}
           <div className={styles.navLinks}>
-            <a href="#home" className={styles.navLink}>HOME</a>
-            <a href="#network" className={styles.navLink}>NETWORK</a>
-            <a href="#events" className={styles.navLink}>EVENTS</a>
-            <a href="#stories" className={styles.navLink}>SUCCESS</a>
+            <a className={styles.navLink} href="#home">HOME</a>
+            <a className={styles.navLink} href="#network">NETWORK</a>
+            <a className={styles.navLink} href="#events">EVENTS</a>
+            <a className={styles.navLink} href="#stories">SUCCESS</a>
           </div>
-
-          {/* Action Button & Mobile Toggle */}
-          <div className={styles.navActions}>
-            <button className={styles.joinBtn}>JOIN PORTAL</button>
-            <button className={styles.hamburgerBtn} onClick={toggleMobileMenu}>
-              <span className="material-symbols-outlined">menu</span>
-            </button>
-          </div>
+          <button className={styles.navButton} onClick={() => { navigate('/login') }} >JOIN PORTAL</button>
         </div>
-
-        {/* Mobile Dropdown Menu */}
-        {isMobileMenuOpen && (
-          <div className={styles.mobileMenu}>
-            <a href="#home" className={styles.mobileNavLink}>HOME</a>
-            <a href="#network" className={styles.mobileNavLink}>NETWORK</a>
-            <a href="#events" className={styles.mobileNavLink}>EVENTS</a>
-            <a href="#stories" className={styles.mobileNavLink}>SUCCESS</a>
-            <button className={styles.mobileJoinBtn}>JOIN PORTAL</button>
-          </div>
-        )}
       </nav>
 
-      <main>
-        {/* HERO SECTION */}
-        <section className={styles.heroSection} id="home">
-          <div className={styles.heroBadge}>
-            <span className={styles.pingWrapper}>
-              <span className={styles.pingDot}></span>
-              <span className={styles.solidDot}></span>
+      {/* Hero Section */}
+      <section className={styles.hero} id="home">
+        <div className={styles.containerStandard}>
+          <div className={styles.badge}>
+            <span className={styles.pulseWrapper}>
+              <span className={styles.pulseRing}></span>
+              <span className={styles.pulseDot}></span>
             </span>
-            GLOBAL NETWORK FOR EXCELLENCE
+            Global Network for Excellence
           </div>
-          
           <h1 className={styles.heroTitle}>
-            Connecting Generations,<br />
-            Building Legacies
+            Connecting Generations,<br/>Building Legacies
           </h1>
-          
-          <p className={styles.heroSubtitle}>
-            A premium space where K.S.R.C.E. graduates unite to mentor, grow, 
-            and lead the future of engineering across the globe.
+          <p className={styles.heroDescription}>
+            A premium space where K.S.R.C.E. graduates unite to mentor, grow, and lead the future of engineering across the globe.
           </p>
-
-          <div className={styles.heroActions}>
-            <button className={styles.btnPrimary}>Explore Directory</button>
-            <button className={styles.btnSecondary}>Our Impact</button>
+          <div className={styles.heroButtons}>
+            <button className={styles.primaryButton}>Explore Directory</button>
+            <button className={styles.secondaryButton}>Our Impact</button>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ALUMNI NETWORK SECTION */}
-        <section className={styles.networkSection} id="network">
+      {/* Network Section */}
+      <section className={styles.section} id="network">
+        <div className={styles.containerStandard}>
           <div className={styles.sectionHeader}>
-            <div>
-              <h2 className={styles.sectionTitle}>The Alumni Network</h2>
-              <div className={styles.titleUnderline}></div>
-            </div>
+            <h2 className={styles.sectionTitle}>The Alumni Network</h2>
+            <div className={styles.titleAccent}></div>
           </div>
-
           <div className={styles.networkGrid}>
-            {/* Main Feature Card */}
             <div className={`${styles.glassCard} ${styles.cardLarge}`}>
-              <div>
-                <div className={`${styles.cardIconBox} ${styles.iconBlue} ${styles.hoverScale}`}>
-                  <span className="material-symbols-outlined">language</span>
+              <div className={styles.cardContent}>
+                <div>
+                  <div className={styles.iconBox}>
+                    <span className="material-symbols-outlined">language</span>
+                  </div>
+                  <h3 className={styles.cardTitle}>Global Reach</h3>
+                  <p className={styles.cardText}>
+                    Connect with 15,000+ alumni across 40 countries. From Silicon Valley to European Innovation Hubs, our network spans the most influential tech ecosystems in the world.
+                  </p>
                 </div>
-                <h3>Global Reach</h3>
-                <p>
-                  Connect with 15,000+ alumni across 40 countries. From Silicon Valley to European Innovation Hubs, our network spans the most influential tech ecosystems in the world.
-                </p>
-              </div>
-              
-              <div className={styles.avatarGroupRow}>
-                 <div className={styles.avatarGroup}>
-                    <div className={styles.avatarImg}></div>
-                    <div className={styles.avatarImgAlt1}></div>
-                    <div className={styles.avatarImgAlt2}></div>
-                    <div className={styles.avatarMore}>+12k</div>
-                 </div>
-                 <span className={styles.avatarText}>ACTIVE MEMBERS</span>
+                <div className={styles.cardFooter}>
+                  <div className={styles.avatarGroup}>
+                    <div className={styles.avatar1}></div>
+                    <div className={styles.avatar2}></div>
+                    <div className={styles.avatar3}></div>
+                    <div className={styles.avatar4}>+12k</div>
+                  </div>
+                  <span className={styles.cardLabel}>Active Members</span>
+                </div>
               </div>
             </div>
 
-            <div className={styles.networkCardColumn}>
-              {/* Feature Card: Mentorship */}
-              <div className={`${styles.glassCard} ${styles.cardHorizontal}`}>
-                <div className={`${styles.cardIconBoxLg} ${styles.iconOrange}`}>
+            <div className={`${styles.glassCard} ${styles.cardMedium}`}>
+              <div className={styles.cardRow}>
+                <div className={styles.iconBoxOrange}>
                   <span className="material-symbols-outlined">military_tech</span>
                 </div>
                 <div>
-                  <h3 className={styles.mb2}>Mentorship Program</h3>
-                  <p>A direct bridge between industry titans and the next generation of engineers.</p>
-                </div>
-              </div>
-              
-              <div className={styles.networkCardRow}>
-                {/* Feature Card: Career Hub */}
-                <div className={styles.glassCard}>
-                  <div className={`${styles.cardIconBox} ${styles.iconBlue}`}>
-                    <span className="material-symbols-outlined">business_center</span>
-                  </div>
-                  <h4>CAREER HUB</h4>
-                  <p className={styles.smallText}>Exclusive alumni job boards and priority referral pathways.</p>
-                </div>
-                
-                {/* Feature Card: Ventures */}
-                <div className={styles.glassCard}>
-                  <div className={`${styles.cardIconBox} ${styles.iconOrangeAlt}`}>
-                    <span className="material-symbols-outlined">bolt</span>
-                  </div>
-                  <h4>VENTURES</h4>
-                  <p className={styles.smallText}>Seed funding and strategic support for alumni-led startups.</p>
+                  <h3 className={styles.cardTitleMedium}>Mentorship Program</h3>
+                  <p className={styles.cardTextSmall}>
+                    A direct bridge between industry titans and the next generation of engineers.
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* UPCOMING GATHERINGS SECTION */}
-        <section className={styles.eventsSection} id="events">
-          <div className={styles.sectionHeaderFlex}>
+            <div className={styles.glassCard}>
+              <div className={styles.iconBoxSmall}>
+                <span className="material-symbols-outlined">business_center</span>
+              </div>
+              <h3 className={styles.cardTitleSmall}>Career Hub</h3>
+              <p className={styles.cardTextTiny}>
+                Exclusive alumni job boards and priority referral pathways.
+              </p>
+            </div>
+
+            <div className={styles.glassCard}>
+              <div className={styles.iconBoxSmallOrange}>
+                <span className="material-symbols-outlined">bolt</span>
+              </div>
+              <h3 className={styles.cardTitleSmall}>Ventures</h3>
+              <p className={styles.cardTextTiny}>
+                Seed funding and strategic support for alumni-led startups.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Events Section */}
+      <section className={styles.sectionWhite} id="events">
+        <div className={styles.containerStandard}>
+          <div className={styles.eventsHeader}>
             <div>
               <h2 className={styles.sectionTitle}>Upcoming Gatherings</h2>
-              <p className={styles.sectionSubtitle}>Moments to reconnect and celebrate our shared journey</p>
+              <p className={styles.sectionSubtitle}>
+                Moments to reconnect and celebrate our shared journey
+              </p>
             </div>
-            <a href="#" className={styles.viewAllLink}>VIEW ALL EVENTS</a>
+            <button className={styles.viewAllButton}>VIEW ALL EVENTS</button>
           </div>
-
           <div className={styles.eventsGrid}>
             {/* Event 1 */}
-            <div className={`${styles.glassCardEvent} ${styles.groupHover}`}>
-               <div className={styles.eventImagePlaceholder}>
-                  <div className={styles.dateBadge}>
-                     <span className={styles.dateMonth}>DEC</span>
-                     <span className={styles.dateDay}>24</span>
-                  </div>
-                  <span className={`material-symbols-outlined ${styles.watermarkIcon}`}>festival</span>
-               </div>
-               <div className={styles.eventInfo}>
-                  <div className={styles.eventTag}>
-                     <span className="material-symbols-outlined">pin_drop</span>
-                     Main Campus
-                  </div>
-                  <h3 className={styles.eventTitle}>Silver Jubilee Reunion '99</h3>
-                  <p className={styles.eventDesc}>Honoring 25 years of excellence. A night of nostalgia, networking, and celebrating institutional growth.</p>
-                  <button className={styles.registerBtn}>REGISTER NOW</button>
-               </div>
+            <div className={styles.eventCard}>
+              <div className={styles.eventImage}>
+                <div className={styles.eventDate}>
+                  <span className={styles.dateMonth}>Dec</span>
+                  <span className={styles.dateDay}>24</span>
+                </div>
+                <div className={styles.eventIcon}>
+                  <span className="material-symbols-outlined">festival</span>
+                </div>
+              </div>
+              <div className={styles.eventContent}>
+                <div className={styles.eventLocation}>
+                  <span className="material-symbols-outlined">pin_drop</span> Main Campus
+                </div>
+                <h3 className={styles.eventTitle}>Silver Jubilee Reunion '99</h3>
+                <p className={styles.eventDescription}>
+                  Honoring 25 years of excellence. A night of nostalgia, networking, and celebrating institutional growth.
+                </p>
+                <button className={styles.eventButton}>Register Now</button>
+              </div>
             </div>
 
             {/* Event 2 */}
-            <div className={`${styles.glassCardEvent} ${styles.groupHover}`}>
-               <div className={styles.eventImagePlaceholder}>
-                  <div className={styles.dateBadge}>
-                     <span className={styles.dateMonth}>JAN</span>
-                     <span className={styles.dateDay}>15</span>
-                  </div>
-                  <span className={`material-symbols-outlined ${styles.watermarkIcon}`}>data_object</span>
-               </div>
-               <div className={styles.eventInfo}>
-                  <div className={styles.eventTag}>
-                     <span className="material-symbols-outlined">podium</span>
-                     Virtual Hub
-                  </div>
-                  <h3 className={styles.eventTitle}>Alumni Tech Summit</h3>
-                  <p className={styles.eventDesc}>Deep dive into GenAI with alumni leading core engineering teams at global giants like Google and AWS.</p>
-                  <button className={styles.registerBtn}>REGISTER NOW</button>
-               </div>
+            <div className={styles.eventCard}>
+              <div className={styles.eventImage}>
+                <div className={styles.eventDate}>
+                  <span className={styles.dateMonth}>Jan</span>
+                  <span className={styles.dateDay}>15</span>
+                </div>
+                <div className={styles.eventIcon}>
+                  <span className="material-symbols-outlined">data_object</span>
+                </div>
+              </div>
+              <div className={styles.eventContent}>
+                <div className={styles.eventLocation}>
+                  <span className="material-symbols-outlined">podium</span> Virtual Hub
+                </div>
+                <h3 className={styles.eventTitle}>Alumni Tech Summit</h3>
+                <p className={styles.eventDescription}>
+                  Deep dive into GenAI with alumni leading core engineering teams at global giants like Google and AWS.
+                </p>
+                <button className={styles.eventButton}>Register Now</button>
+              </div>
             </div>
 
             {/* Event 3 */}
-            <div className={`${styles.glassCardEvent} ${styles.groupHover}`}>
-               <div className={styles.eventImagePlaceholder}>
-                  <div className={styles.dateBadge}>
-                     <span className={styles.dateMonth}>FEB</span>
-                     <span className={styles.dateDay}>02</span>
-                  </div>
-                  <span className={`material-symbols-outlined ${styles.watermarkIcon}`}>diversity_3</span>
-               </div>
-               <div className={styles.eventInfo}>
-                  <div className={styles.eventTag}>
-                     <span className="material-symbols-outlined">meeting_room</span>
-                     Placement Cell
-                  </div>
-                  <h3 className={styles.eventTitle}>Career Bridge Day</h3>
-                  <p className={styles.eventDesc}>A direct interaction day for final year students to meet hiring managers from our illustrious alumni pool.</p>
-                  <button className={styles.registerBtn}>REGISTER NOW</button>
-               </div>
+            <div className={styles.eventCard}>
+              <div className={styles.eventImage}>
+                <div className={styles.eventDate}>
+                  <span className={styles.dateMonth}>Feb</span>
+                  <span className={styles.dateDay}>02</span>
+                </div>
+                <div className={styles.eventIcon}>
+                  <span className="material-symbols-outlined">diversity_3</span>
+                </div>
+              </div>
+              <div className={styles.eventContent}>
+                <div className={styles.eventLocation}>
+                  <span className="material-symbols-outlined">meeting_room</span> Placement Cell
+                </div>
+                <h3 className={styles.eventTitle}>Career Bridge Day</h3>
+                <p className={styles.eventDescription}>
+                  A direct interaction day for final year students to meet hiring managers from our illustrious alumni pool.
+                </p>
+                <button className={styles.eventButton}>Register Now</button>
+              </div>
             </div>
           </div>
-        </section>
-
-        {/* SUCCESS PATHS SECTION (WITH ANIMATION) */}
-        <section className={styles.testimonialSection} id="stories">
-          <div className={styles.sectionHeaderCenter}>
-            <h2 className={styles.sectionTitle}>Success Paths</h2>
-            <p className={styles.sectionSubtitle}>How KSRCE shaped global industry leaders</p>
-          </div>
-
-          <div className={styles.testimonialWrapper}>
-             <div className={styles.testimonialSlider}>
-                {/* Slide 1 */}
-                <div className={styles.testimonialSlide}>
-                  <div className={styles.quoteIconBox}>
-                    <span className="material-symbols-outlined">person</span>
-                  </div>
-                  <blockquote className={styles.blockquote}>
-                    <span className="material-symbols-outlined">format_quote</span>
-                    <p>
-                      "The technical foundation at KSRCE was instrumental in my 
-                      journey to engineering leadership. This portal is a brilliant bridge 
-                      for us to give back."
-                    </p>
-                  </blockquote>
-                  <div className={styles.quoteAuthorArea}>
-                    <h4>Dr. Rajesh Kumar</h4>
-                    <p>BATCH OF 2008 <span>|</span> SENIOR ENGINEERING DIRECTOR</p>
-                  </div>
-                </div>
-
-                {/* Slide 2 */}
-                <div className={styles.testimonialSlide}>
-                  <div className={styles.quoteIconBox}>
-                    <span className="material-symbols-outlined">person</span>
-                  </div>
-                  <blockquote className={styles.blockquote}>
-                    <span className="material-symbols-outlined">format_quote</span>
-                    <p>
-                      "Founding my venture was possible because of the KSRCE network. The mentorship here is truly world-class and deeply rooted in excellence."
-                    </p>
-                  </blockquote>
-                  <div className={styles.quoteAuthorArea}>
-                    <h4>Sneha Kapoor</h4>
-                    <p>BATCH OF 2014 <span>|</span> TECH FOUNDER & CEO</p>
-                  </div>
-                </div>
-
-                {/* Slide 3 */}
-                <div className={styles.testimonialSlide}>
-                  <div className={styles.quoteIconBox}>
-                    <span className="material-symbols-outlined">person</span>
-                  </div>
-                  <blockquote className={styles.blockquote}>
-                    <span className="material-symbols-outlined">format_quote</span>
-                    <p>
-                      "KSRCE provided not just a degree, but a lifetime of connections that open doors globally. I am incredibly proud to be an alum."
-                    </p>
-                  </blockquote>
-                  <div className={styles.quoteAuthorArea}>
-                    <h4>Arun Varma</h4>
-                    <p>BATCH OF 2005 <span>|</span> PRINCIPAL ARCHITECT</p>
-                  </div>
-                </div>
-             </div>
-             
-             {/* Slider Indicators */}
-             <div className={styles.sliderIndicators}>
-               <div className={`${styles.indicator} ${styles.indicatorActive}`}></div>
-               <div className={styles.indicator}></div>
-               <div className={styles.indicator}></div>
-             </div>
-          </div>
-        </section>
-
-      </main>
-
-      {/* FOOTER */}
-      <footer className={styles.footer}>
-        <div className={styles.footerGrid}>
-          
-          <div className={styles.footerBrand}>
-             <div className={styles.footerLogoRow}>
-               <div className={styles.sealIconFooter}>
-                 <span className="material-symbols-outlined">account_balance</span>
-               </div>
-             </div>
-             <p className={styles.footerDesc}>
-               Building a bridge between our glorious past 
-               and an innovative future. K.S.R. College of 
-               Engineering Alumni Association.
-             </p>
-             <div className={styles.socialIcons}>
-               <a href="#"><span className="material-symbols-outlined">hub</span></a>
-               <a href="#"><span className="material-symbols-outlined">forum</span></a>
-             </div>
-          </div>
-
-          <div className={styles.footerLinksCol}>
-            <h4>NAVIGATION</h4>
-            <a href="#">Find Friends</a>
-            <a href="#">Event Gallery</a>
-            <a href="#">Job Portal</a>
-            <a href="#">Philanthropy</a>
-          </div>
-
-          <div className={styles.footerLinksCol}>
-            <h4>CONNECT</h4>
-            <a href="#">Campus Map</a>
-            <a href="#">Magazine</a>
-            <a href="#">Support Desk</a>
-          </div>
-
-          <div className={styles.footerNewsletter}>
-            <h4>NEWSLETTER</h4>
-            <p>Get curated alumni updates monthly.</p>
-            <div className={styles.newsletterInput}>
-              <input type="email" placeholder="Email address" />
-              <button><span className="material-symbols-outlined">arrow_forward</span></button>
-            </div>
-          </div>
-
         </div>
+      </section>
 
-        <div className={styles.footerBottom}>
-          <p>© 2024 K.S.R. COLLEGE OF ENGINEERING. ALL RIGHTS RESERVED.</p>
-          <div className={styles.footerBottomLinks}>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms & Conditions</a>
+      {/* Testimonials Section */}
+      <section className={styles.section} id="stories">
+        <div className={styles.containerStandard}>
+          <div className={styles.testimonialHeader}>
+            <h2 className={styles.sectionTitle}>Success Paths</h2>
+            <p className={styles.sectionSubtitle}>
+              How KSRCE shaped global industry leaders
+            </p>
+          </div>
+          <div className={styles.testimonialContainer}>
+            <div className={styles.testimonialSlider}>
+              {/* Testimonial 1 */}
+              <div className={styles.testimonialSlide}>
+                <div className={styles.testimonialAvatar}>
+                  <span className="material-symbols-outlined">person</span>
+                </div>
+                <blockquote className={styles.testimonialQuote}>
+                  <span className={`material-symbols-outlined ${styles.quoteIcon}`}>format_quote</span>
+                  <p className={styles.testimonialText}>
+                    "The technical foundation at KSRCE was instrumental in my journey to engineering leadership. This portal is a brilliant bridge for us to give back."
+                  </p>
+                </blockquote>
+                <div className={styles.testimonialAuthor}>
+                  <h4 className={styles.authorName}>Dr. Rajesh Kumar</h4>
+                  <p className={styles.authorDetails}>
+                    Batch of 2008 <span className={styles.separator}>|</span> Senior Engineering Director
+                  </p>
+                </div>
+              </div>
+
+              {/* Testimonial 2 */}
+              <div className={styles.testimonialSlide}>
+                <div className={styles.testimonialAvatar}>
+                  <span className="material-symbols-outlined">person</span>
+                </div>
+                <blockquote className={styles.testimonialQuote}>
+                  <span className={`material-symbols-outlined ${styles.quoteIcon}`}>format_quote</span>
+                  <p className={styles.testimonialText}>
+                    "Founding my venture was possible because of the KSRCE network. The mentorship here is truly world-class and deeply rooted in excellence."
+                  </p>
+                </blockquote>
+                <div className={styles.testimonialAuthor}>
+                  <h4 className={styles.authorName}>Sneha Kapoor</h4>
+                  <p className={styles.authorDetails}>
+                    Batch of 2014 <span className={styles.separator}>|</span> Tech Founder & CEO
+                  </p>
+                </div>
+              </div>
+
+              {/* Testimonial 3 */}
+              <div className={styles.testimonialSlide}>
+                <div className={styles.testimonialAvatar}>
+                  <span className="material-symbols-outlined">person</span>
+                </div>
+                <blockquote className={styles.testimonialQuote}>
+                  <span className={`material-symbols-outlined ${styles.quoteIcon}`}>format_quote</span>
+                  <p className={styles.testimonialText}>
+                    "KSRCE provided not just a degree, but a lifetime of connections that open doors globally. I am incredibly proud to be an alum."
+                  </p>
+                </blockquote>
+                <div className={styles.testimonialAuthor}>
+                  <h4 className={styles.authorName}>Arun Varma</h4>
+                  <p className={styles.authorDetails}>
+                    Batch of 2005 <span className={styles.separator}>|</span> Principal Architect
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className={styles.testimonialIndicators}>
+              <div className={styles.indicatorActive}></div>
+              <div className={styles.indicator}></div>
+              <div className={styles.indicator}></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className={styles.footer}>
+        <div className={styles.containerStandard}>
+          <div className={styles.footerGrid}>
+            <div className={styles.footerBrand}>
+              <img 
+                alt="Logo" 
+                className={styles.footerLogo}
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8SIg5LyU95x6iS3pVWVZJSwjj2MASrRCyifBm7m5gnlYpA7jmbbZAQ9fsgipqxdJjRKJ8-aJj9BC5gwOmh_sDXJ2ww1QsLcmEYf5TVBMZWQdbq2lkIOjI6Efk-ZXD7Tw92vYVAj2gKkVufZ4KqOUKm0QV8pq0AtO91RTWmoTQ8ni_HKdRUh2LRmZDKL9BEStabmCB-kuzSP8hHqaJ4dTN4uQtygaegu5ZCyEurTgAr6Zgj5o_OYiZ0OeUh6_hPaJDcRtBIrz2F3Kf"
+              />
+              <p className={styles.footerDescription}>
+                Building a bridge between our glorious past and an innovative future. K.S.R. College of Engineering Alumni Association.
+              </p>
+              <div className={styles.socialLinks}>
+                <a href="#" className={styles.socialLink}>
+                  <span className="material-symbols-outlined">hub</span>
+                </a>
+                <a href="#" className={styles.socialLink}>
+                  <span className="material-symbols-outlined">forum</span>
+                </a>
+              </div>
+            </div>
+
+            <div className={styles.footerColumn}>
+              <h5 className={styles.footerTitle}>Navigation</h5>
+              <ul className={styles.footerList}>
+                <li><a href="#" className={styles.footerLink}>Find Friends</a></li>
+                <li><a href="#" className={styles.footerLink}>Event Gallery</a></li>
+                <li><a href="#" className={styles.footerLink}>Job Portal</a></li>
+                <li><a href="#" className={styles.footerLink}>Philanthropy</a></li>
+              </ul>
+            </div>
+
+            <div className={styles.footerColumn}>
+              <h5 className={styles.footerTitle}>Connect</h5>
+              <ul className={styles.footerList}>
+                <li><a href="#" className={styles.footerLink}>Campus Map</a></li>
+                <li><a href="#" className={styles.footerLink}>Magazine</a></li>
+                <li><a href="#" className={styles.footerLink}>Support Desk</a></li>
+              </ul>
+            </div>
+
+            <div className={styles.footerColumn}>
+              <h5 className={styles.footerTitle}>Newsletter</h5>
+              <p className={styles.newsletterText}>Get curated alumni updates monthly.</p>
+              <div className={styles.newsletterForm}>
+                <input 
+                  className={styles.newsletterInput}
+                  placeholder="Email address" 
+                  type="email"
+                />
+                <button className={styles.newsletterButton}>
+                  <span className="material-symbols-outlined">arrow_forward</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.footerBottom}>
+            <p>© 2024 K.S.R. COLLEGE OF ENGINEERING. ALL RIGHTS RESERVED.</p>
+            <div className={styles.footerBottomLinks}>
+              <a href="#" className={styles.footerBottomLink}>Privacy Policy</a>
+              <a href="#" className={styles.footerBottomLink}>Terms & Conditions</a>
+            </div>
           </div>
         </div>
       </footer>
 
-      {/* Floating Action Button */}
-      <button className={styles.fabBtn}>
+      {/* Floating Button */}
+      <button className={styles.floatingButton} onClick={() => { navigate('/login') }}>
         <span className="material-symbols-outlined">person_add</span>
-        <span className={styles.fabTooltip}>JOIN NOW</span>
+        <span className={styles.floatingTooltip} >JOIN NOW</span>
       </button>
-
     </div>
   );
-};
-
-export default LandingPage;
+}
