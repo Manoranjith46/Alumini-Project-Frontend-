@@ -82,6 +82,28 @@
   width: 100%;
 }
 
+.navButton {
+  background: #FF9400;
+  color: white;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.1em;
+}
+
+.navButton:hover {
+  background: #e68600;
+}
+
+.navButton:active {
+  transform: scale(0.95);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
@@ -121,6 +143,11 @@
 
   .navLink {
     font-size: 0.75rem;
+  }
+
+  .navButton {
+    font-size: 9px;
+    padding: 10px 16px;
   }
 
   .brandName {

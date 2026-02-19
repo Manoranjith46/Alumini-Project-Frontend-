@@ -1,0 +1,854 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+.pageContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: #F8FAFC; 
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #111827; 
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ================== MAIN CONTENT ================== */
+.mainContent {
+  flex: 1;
+  margin-left: 60px;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease-in-out;
+  height: 100vh;
+  overflow-y: scroll;
+  scrollbar-color: linear-gradient(to bottom, #2563EB, #1D4ED8) #E5E7EB;
+  scrollbar-width: auto;
+}
+
+/* Volume Bar Style Scrollbar - Webkit (Chrome, Safari, Edge) */
+.mainContent::-webkit-scrollbar {
+  width: 10px;
+}
+
+.mainContent::-webkit-scrollbar-track {
+  background-color: #E5E7EB;
+  border-radius: 10px;
+  margin: 8px 0;
+}
+
+.mainContent::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #2563EB, #1D4ED8);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 2px solid #E5E7EB;
+  box-shadow: inset 0 0 6px rgba(37, 99, 235, 0.3);
+}
+
+.mainContent::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #1D4ED8, #1E40AF);
+  border-color: #2563EB;
+  box-shadow: inset 0 0 8px rgba(37, 99, 235, 0.5), 0 0 4px rgba(37, 99, 235, 0.4);
+}
+
+.mainContent::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(to bottom, #1E40AF, #1B3A7C);
+  box-shadow: inset 0 0 10px rgba(37, 99, 235, 0.7);
+}
+
+
+/* ================== UNIFIED FORM CARD ================== */
+.contentWrapper {
+  padding: 32px 40px;
+  flex: 1;
+}
+
+.mainDocumentCard {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 48px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Document Header */
+.docHeader {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.docHeader h2 { font-size: 25px; font-weight: 800; color: #111827; margin: 0 0 12px 0; }
+.docHeader h3 { font-size: 18px; font-weight: 700; color: #374151; margin: 0 0 12px 0; }
+.docHeader h4 { font-size: 17px; font-weight: 800; color: #2563EB; margin: 0; }
+
+/* Reviewer Inputs */
+.reviewerSection {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.inputGroup { 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px; 
+}
+.inputGroup2 {
+  display: flex; 
+  flex-direction: row;
+  gap: 16px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.inputGroupDate { 
+  flex: 1;
+  display: flex; 
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inputGroupTime {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dateInputWrapper {
+  width: 100%;
+}
+
+.TimeInputWrapper {
+  width: 100%;
+}
+
+.reviewerSection label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #6B7280;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.textInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #111827;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  background-color: #FAFAFA;
+  transition: border-color 0.2s;
+}
+.dateInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #111827;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  background-color: #FAFAFA;
+  transition: border-color 0.2s;
+}
+
+.TimeInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #111827;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  background-color: #FAFAFA;
+  transition: border-color 0.2s;
+}
+
+.textInput:focus, .dateInput:focus, .TimeInput:focus { border-color: #2563EB; background-color: #FFFFFF; }
+
+.mainDivider {
+  border: 0;
+  height: 1px;
+  background-color: #F1F5F9;
+  margin-bottom: 40px;
+}
+
+/* Grid Layout for Document Body */
+.docBody {
+  display: flex;
+  flex-direction: column;
+  gap: 40px; /* Space between each row */
+}
+
+.gridRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Left text takes slightly more space */
+  gap: 48px;
+  align-items: flex-start;
+}
+
+/* Left Column Styling */
+.leftCol {
+  color: #4B5563;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.blueHeading {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2563EB;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #EFF6FF; /* The blue underline from the image */
+  padding-bottom: 8px;
+}
+
+.italicText { font-style: italic; margin: 0; }
+.orderedList { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 12px; }
+.noBulletList { list-style-type: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+
+.peoBlock {
+  background-color: #F8FAFC;
+  border: 1px solid #F1F5F9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.peoBlock h6 { font-size: 16px; font-weight: 800; color: #1F2937; margin: 0 0 8px 0; }
+.peoBlock p { margin: 0; font-size: 16px; }
+
+
+/* Right Column Styling */
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.feedbackCard {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.cardTitle {
+  font-size: 17px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.radioGroup {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #4B5563;
+  cursor: pointer;
+}
+
+.radioLabel input[type="radio"] {
+  accent-color: #2563EB;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.commentBox {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.commentBox:focus { border-color: #2563EB; }
+.commentBox::placeholder { color: #9CA3AF; }
+
+/* Signature & Submit Section */
+.signatureSection {
+  margin-top: 16px;
+}
+
+.signatureTitleWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.signatureTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: #6B7280;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.clearBtn {
+  padding: 6px 14px;
+  background-color: #EF4444;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.clearBtn:hover {
+  background-color: #DC2626;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+.clearBtn:active {
+  transform: scale(0.95);
+}
+
+.uploadBox {
+  border: 2px dashed #CBD5E1;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  background-color: #F8FAFC;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+}
+.uploadBox:hover {
+  background-color: #F1F5F9;
+  border-color: #94A3B8;
+}
+
+.uploadIcon {
+  color: #9CA3AF;
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+
+.uploadText {
+  font-size: 17px;
+  font-weight: 600;
+  color: #64748B;
+  margin: 0 0 6px 0;
+}
+
+.uploadSubtext {
+  font-size: 14px;
+  color: #9CA3AF;
+  margin: 0;
+}
+
+.modalContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #F8FAFC; /* Subtle background for the page */
+  padding: 24px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ================== MAIN CARD ================== */
+.card {
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 800px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+/* ================== HEADER ================== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.resetBtn {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resetBtn:hover {
+  background-color: #F8FAFC;
+  color: #0F172A;
+  border-color: #CBD5E1;
+}
+
+/* ================== CROPPER AREA ================== */
+.cropperArea {
+  width: 100%;
+  height: 360px;
+  /* Replicating the exact stark grid background from your screenshot */
+  background-color: #FFFFFF;
+  border: 1px solid #111827; 
+  background-image:
+    linear-gradient(to right, #111827 1px, transparent 1px),
+    linear-gradient(to bottom, #111827 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: top left;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Simulating the dark dashboard image shown in the screenshot */
+.mockUploadedImage {
+  width: 85%;
+  height: 85%;
+  background-color: #374151; /* Dark gray */
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  border: 1px solid #4B5563;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.mockImageInnerGrid {
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* ================== BOTTOM UPLOAD BUTTON ================== */
+.uploadBtn {
+  width: 100%;
+  background-color: #0084D6; /* Exact blue color */
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 18px;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 132, 214, 0.3);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.uploadBtn:hover {
+  background-color: #006BB5;
+}
+
+.uploadBtn:active {
+  transform: scale(0.98);
+}
+
+.uploadBtn span {
+  font-size: 24px;
+}
+
+/* Add this to ESignCropper.module.css */
+.cropperContainer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+/* ================== RESPONSIVE DESIGN ================== */
+
+/* Tablets (768px and below) */
+@media (max-width: 768px) {
+  .card {
+    padding: 24px;
+  }
+  
+  .title {
+    font-size: 24px;
+  }
+
+  .cropperArea {
+    height: 300px;
+    margin-bottom: 32px;
+  }
+}
+
+/* Small Mobile (425px and below) */
+@media (max-width: 425px) {
+  .card {
+    padding: 20px 16px;
+  }
+
+  .header {
+    margin-bottom: 24px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .resetBtn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cropperArea {
+    height: 250px;
+    background-size: 30px 30px; /* Scale down background grid */
+  }
+
+  .uploadBtn {
+    padding: 16px;
+    font-size: 16px;
+  }
+
+  .uploadBtn span {
+    font-size: 20px;
+  }
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.signaturePreview {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.gridOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent),
+    linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent);
+  background-size: 50px 50px;
+  border-radius: 6px;
+}
+
+.submitBtn {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  margin-top: 8px;
+}
+.submitBtn:hover {
+  background-color: #1D4ED8;
+}
+
+.overlay { display: none; }
+
+/* ================== E-SIGN MODAL ================== */
+
+.modalContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 506px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 19px;
+  border-bottom: 1px solid #E5E7EB;
+  background-color: #F9FAFB;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.resetBtn {
+  background-color: transparent;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: #6B7280;
+}
+
+.resetBtn:hover {
+  background-color: #F3F4F6;
+  border-color: #D1D5DB;
+  color: #374151;
+}
+
+.resetBtn span {
+  font-size: 16px;
+}
+
+.cropperArea {
+  flex: 1;
+  padding: 19px;
+  background-color: #F9FAFB;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 320px;
+}
+
+.mockUploadedImage {
+  position: relative;
+  width: 400px;
+  height: 120px;
+  background-color: #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px dashed #2563EB;
+  cursor: grab;
+  user-select: none;
+}
+
+.mockUploadedImage:active {
+  cursor: grabbing;
+}
+
+.mockUploadedImage::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.cropperImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: 100%;
+  display: block;
+  pointer-events: none;
+  transition: transform 0.05s ease-out;
+  transform-origin: center center;
+}
+
+.mockImageInnerGrid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(0deg, rgba(100, 116, 139, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 116, 139, 0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.cropperHint {
+  margin-top: 10px;
+  font-size: 10px;
+  color: #6B7280;
+  text-align: center;
+  font-weight: 500;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 19px;
+  border-top: 1px solid #E5E7EB;
+  background-color: #F9FAFB;
+}
+
+.cancelBtn {
+  background-color: #F3F4F6;
+  color: #374151;
+  border: 1px solid #D1D5DB;
+  padding: 10px 19px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.cancelBtn:hover {
+  background-color: #E5E7EB;
+  border-color: #9CA3AF;
+}
+
+/* Reuse uploadBtn for modal upload button */
+.uploadBtn {
+  background-color: #2563EB;
+  color: white;
+  border: none;
+  padding: 10px 19px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.uploadBtn:hover {
+  background-color: #1D4ED8;
+}
+
+.uploadBtn span {
+  font-size: 16px;
+}
+
+
+/* ================== RESPONSIVE BREAKPOINTS ================== */
+
+@media (max-width: 1200px) {
+  .gridRow { gap: 32px; }
+  .contentWrapper { padding: 32px; }
+  .mainDocumentCard { padding: 32px; }
+}
+
+@media (max-width: 1024px) {
+  /* Stack the row contents for tablets */
+  .gridRow {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .blueHeading { border-bottom: none; margin-bottom: 8px; }
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebarOpen { transform: translateX(0); }
+  
+  .mainContent { margin-left: 0; }
+  .hamburgerBtn { display: block; }
+  .profileInfo { display: none; } 
+  
+  .topHeader { padding: 16px 24px; }
+  .contentWrapper { padding: 24px; }
+  .mainDocumentCard { padding: 24px; }
+
+  .overlay {
+    display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(17, 24, 39, 0.4); z-index: 40;
+  }
+  
+  .reviewerSection { flex-direction: column; gap: 16px; margin-bottom: 24px; }
+  .inputGroup, .inputGroupDate { width: 100%; }
+}
+
+@media (max-width: 425px) {
+  .topHeader { padding: 12px 16px; gap: 12px;}
+  .contentWrapper { padding: 16px; }
+  .mainDocumentCard { padding: 20px; }
+  
+  .docHeader h2 { font-size: 17px; }
+  .docHeader h3 { font-size: 16px; }
+  .docHeader h4 { font-size: 15px; }
+  
+  .feedbackCard { padding: 16px; }
+  .radioGroup { flex-direction: column; gap: 12px; }
+}

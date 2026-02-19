@@ -48,7 +48,7 @@ export default function LoginGateway({ onLogin }) {
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
-      <NavBar />
+      <NavBar isLanding={false } />
       
       {/* Particles Background */}
       <div className={styles.particlesContainer}>
@@ -70,13 +70,12 @@ export default function LoginGateway({ onLogin }) {
 
       {/* Login Card */}
       <div className={styles.contentWrapper}>
+        <br />
+        <br />
         <div className={styles.glassCard}>
           
           {/* Logo & Header */}
           <div className={styles.headerSection}>
-            <div className={styles.logoBox}>
-              <img src={ksrLogo} alt="KSR College Logo" className={styles.logoSvg} />
-            </div>
             <div className={styles.headerText}>
               <h1 className={styles.title}>Login Gateway</h1>
               <p className={styles.subtitle}>K.S.R. College of Engineering</p>

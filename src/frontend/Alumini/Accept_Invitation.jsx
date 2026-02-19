@@ -1,7 +1,33 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from './Components/Sidebar/Sidebar';
-import styles from './Mail_form.module.css';
+import styles from './Accept_Invitation.module.css';
 
 export default function MailForm({ onLogout }) {
+  const navigate = useNavigate();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [startYear, setStartYear] = useState('');
+
+  const handleStartYearChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+    if (value.length <= 4) {
+      // If the value is 4 digits, check if it's between 2000 and 2100
+      if (value.length === 4) {
+        const year = parseInt(value);
+        if (year < 2000 || year > 2100) {
+          return; // Don't update if year is less than 2000 or greater than 2100
+        }
+      }
+      setStartYear(value);
+    }
+  };
+
+  const getEndYear = () => {
+    if (startYear.length === 4) {
+      return (parseInt(startYear) + 4).toString();
+    }
+    return '';
+  };
 
   return (
     <div className={styles.pageContainer}>
@@ -15,6 +41,12 @@ export default function MailForm({ onLogout }) {
 
         <div className={styles.contentWrapper}>
           
+          {/* Back Button */}
+          <div className={styles.backButton} onClick={() => window.history.back()}>
+            <span className="material-symbols-outlined">arrow_back</span>
+            <span>Back</span>
+          </div>
+          
           {/* Top Email Message Card */}
           <div className={styles.emailMessageCard}>
             <div className={styles.emailHeader}>
@@ -25,12 +57,18 @@ export default function MailForm({ onLogout }) {
                 <span className={styles.divider}>|</span>
                 <span className={styles.subject}>Invitation: Virtual Networking Session</span>
               </div>
-              <button className={styles.collapseBtn}>
-                <span className="material-symbols-outlined">expand_more</span>
+              <button className={styles.collapseBtn} onClick={() => setIsExpanded(!isExpanded)}>
+                <span className={`material-symbols-outlined ${isExpanded ? styles.iconExpanded : ''}`}>
+                  expand_more
+                </span>
               </button>
             </div>
             <div className={styles.emailBody}>
-              <p>Dear Alumni, You are invited to our session next Friday...</p>
+              {isExpanded ? (
+                <p>Dear Alumni, You are invited to our session next Friday for an exclusive networking event with technology professionals. Register via the link provided in your portal.</p>
+              ) : (
+                <p>Dear Alumni, You are invited to our session next Friday...</p>
+              )}
             </div>
           </div>
 
@@ -112,15 +150,23 @@ export default function MailForm({ onLogout }) {
                 {/* Batch (Year of Passing) */}
                 <div className={styles.inputGroup}>
                   <label className={styles.inputLabel}>Batch (Year of Passing)</label>
-                  <div className={styles.selectWrapper}>
-                    <select className={styles.selectField} defaultValue="">
-                      <option value="" disabled>Select Year</option>
-                      <option value="2023">2023</option>
-                      <option value="2022">2022</option>
-                      <option value="2021">2021</option>
-                      <option value="2020">2020</option>
-                    </select>
-                    <span className={`material-symbols-outlined ${styles.selectIcon}`}>expand_more</span>
+                  <div className={styles.batchFieldWrapper}>
+                    <input 
+                      type="text" 
+                      className={styles.batchInputField} 
+                      placeholder="Start Year"
+                      value={startYear}
+                      onChange={handleStartYearChange}
+                      maxLength={4}
+                    />
+                    <span className={styles.batchSeparator}>-</span>
+                    <input 
+                      type="text" 
+                      className={styles.batchInputField} 
+                      placeholder="End Year"
+                      value={getEndYear()}
+                      readOnly
+                    />
                   </div>
                 </div>
 

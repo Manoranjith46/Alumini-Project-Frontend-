@@ -62,12 +62,36 @@
 
 .contentWrapper {
   flex: 1;
-  padding: 48px 56px;
+  padding: 25px 20px 20px 10px;
   margin: 0 auto;
   width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
+  padding-bottom: 20px;
+  min-height: min-content;
+  overflow-x: hidden;
+}
+
+/* Back Button */
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: fit-content;
+}
+
+.backButton:hover {
+  color: #2563eb;
+}
+
+.backButton span {
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* ================== EMAIL MESSAGE CARD ================== */
@@ -132,6 +156,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.collapseBtn:hover {
+  color: #0084D6;
+}
+
+.collapseBtn span {
+  transition: transform 0.3s ease;
+}
+
+.iconExpanded {
+  transform: rotate(180deg);
 }
 
 .emailBody {
@@ -140,7 +177,59 @@
   color: #4B5563;
   line-height: 1.6;
 }
-.emailBody p { margin: 0; }
+
+.emailBody p { 
+  margin: 0 0 16px 0;
+}
+
+.emailBody p:last-child {
+  margin-bottom: 0;
+}
+
+.signature {
+  font-weight: 600;
+  color: #0084D6;
+}
+
+.eventDetails {
+  background-color: #F0F9FF;
+  border-left: 4px solid #0084D6;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 8px;
+}
+
+.eventDetails h4 {
+  color: #0084D6;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.eventDetails h4 span {
+  font-size: 20px;
+}
+
+.eventDetails ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.eventDetails li {
+  padding: 8px 0;
+  color: #374151;
+  font-size: 15px;
+}
+
+.eventDetails li span {
+  font-weight: 600;
+  color: #111827;
+  margin-right: 8px;
+}
 
 /* ================== FORM CARD ================== */
 .formCard {
@@ -182,9 +271,65 @@
   background-color: #FFFFFF;
 }
 
+.selectField[value=""] {
+  color: #9CA3AF;
+}
+
 .inputField::placeholder, .selectField:invalid {
   color: #9CA3AF;
   font-weight: 400;
+}
+
+.selectField option[value=""] {
+  color: #9CA3AF;
+}
+
+.selectField {
+  color: #111827;
+}
+
+.selectField:has(option[value=""]:checked) {
+  color: #9CA3AF;
+}
+
+.batchFieldWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.batchInputField {
+  flex: 1;
+  padding: 14px 16px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #111827;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  background-color: #FFFFFF;
+}
+
+.batchInputField::placeholder {
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+.batchInputField:focus {
+  outline: none;
+  border-color: #0084D6;
+  box-shadow: 0 0 0 3px rgba(0, 132, 214, 0.1);
+}
+
+.batchInputField:read-only {
+  background-color: #F9FAFB;
+  cursor: not-allowed;
+}
+
+.batchSeparator {
+  color: #6B7280;
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .inputField:focus, .selectField:focus {

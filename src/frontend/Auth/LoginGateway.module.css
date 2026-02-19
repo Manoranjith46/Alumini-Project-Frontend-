@@ -1,17 +1,16 @@
 /* Login Gateway Container */
 .container {
-  min-height: 100vh;
+  height: 100vh;
   width: 100vw;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #F8FAFC;
   padding: 1.5rem;
-  padding-top: calc(1.5rem + 80px); /* Account for floating navbar */
+  padding-top: calc(1.5rem + 80px);
   padding-bottom: 2.5rem; /* Extra padding at bottom */
   font-family: 'Inter', sans-serif;
-  overflow-y: auto; /* Allow scrolling if needed */
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
 }
 
@@ -102,17 +101,6 @@
   margin-bottom: 1.5rem;
 }
 
-.logoBox {
-  width: 12rem;
-  height: 4.5rem;
-  background: transparent;
-  /* border-radius: 1rem; */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* padding: 0.75rem; */
-  /* margin-bottom: 1.5rem; */
-}
 
 @keyframes float {
   0%, 100% {
@@ -409,10 +397,5 @@
 
   .title {
     font-size: 1.5rem;
-  }
-
-  .logoBox {
-    width: 4rem;
-    height: 4rem;
   }
 }

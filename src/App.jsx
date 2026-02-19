@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import AluminiDashboard from './frontend/Alumini/Dashboard';
 import Mail from './frontend/Alumini/Mail';
 import ViewMail from './frontend/Alumini/ViewMail';
-import MailForm from './frontend/Alumini/Mail_Form';
+import MailForm from './frontend/Alumini/Accept_Invitation';
 import EventsReunion from './frontend/Alumini/Event_Reunion';
 import View_Invitation from './frontend/Alumini/View_Invitaion';
 import Donation_History from './frontend/Alumini/Donation_History';
@@ -17,6 +17,7 @@ import ForgotPassword from './frontend/Auth/ForgotPassword';
 import SendOtp from './frontend/Auth/SendOtp';
 import UpdatePassword from './frontend/Auth/UpdatePassword';
 import LandingPage from './frontend/Landing_Page/Landing';
+import Feedback from './frontend/Alumini/Feedback';
 
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
         <Route 
           path="/landing" 
           element={<LandingPage />} />
+
 {/* Login GateWay Routes */}
         <Route 
           path="/login" 
@@ -54,11 +56,13 @@ function App() {
         <Route 
           path="/update-password" 
           element={isLoggedIn ? <Navigate to="/alumini/dashboard" /> : <UpdatePassword onLogin={handleLogin} />} />
+
 {/* Alumini DashBoard Routes */}
         <Route
           path="/alumini/dashboard"
           element={isLoggedIn ? <AluminiDashboard onLogout={handleLogout} /> : <Navigate to="/login" />}
         />
+
 {/* Alumini Mail */}
         <Route
           path="/alumini/mail"
@@ -72,6 +76,7 @@ function App() {
           path="/alumini/mail/viewmail/acceptmail"
           element={isLoggedIn ? <MailForm onLogout={handleLogout} /> : <Navigate to="/login" />}
         />
+
 {/* Alumini Events and Reunion */}
         <Route
           path="/alumini/event_reunion"
@@ -81,6 +86,7 @@ function App() {
           path="/alumini/event_reunion/view_invitation"
           element={isLoggedIn ? <View_Invitation onLogout={handleLogout} /> : <Navigate to="/login" />}
         />
+
 {/* Alumini Donation History and Form */}
         <Route
           path="/alumini/donation_history"
@@ -90,6 +96,7 @@ function App() {
           path="/alumini/donation_history/donation_form"
           element={isLoggedIn ? <DonationFormPage onLogout={handleLogout} /> : <Navigate to="/login" />}
         />
+
 {/* Alumini Job Reference History and Form */}
         <Route
           path="/alumini/JobReference_History"
@@ -99,6 +106,13 @@ function App() {
           path="/alumini/JobReference_History/JobReference_Form"
           element={isLoggedIn ? <JobReference_Form onLogout={handleLogout} /> : <Navigate to="/login" />}
         />
+
+{/* Alumini Feedback */}
+        <Route
+          path="/alumini/feedback"
+          element={isLoggedIn ? <Feedback onLogout={handleLogout} /> : <Navigate to="/login" />}
+        />
+
 {/* Alumini Profile */}
         <Route
           path="/alumini/profile"

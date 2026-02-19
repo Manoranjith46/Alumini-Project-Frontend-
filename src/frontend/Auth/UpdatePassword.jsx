@@ -38,6 +38,16 @@ export default function UpdatePassword() {
     <div className={styles.container}>
       <main className={styles.main}>
         <div className={styles.card}>
+          {/* Back Button */}
+          <button
+            type="button"
+            className={styles.backButtonTop}
+            onClick={handleGoBack}
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+            <span>Back</span>
+          </button>
+
           {/* Progress Stepper */}
           <div className={styles.stepperWrapper}>
             <div className={styles.stepper}>
@@ -138,26 +148,9 @@ export default function UpdatePassword() {
                 <span>Update Password</span>
                 <span className="material-symbols-outlined">lock</span>
               </button>
-
-              <div className={styles.backButtonWrapper}>
-                <button
-                  type="button"
-                  className={styles.backButton}
-                  onClick={handleGoBack}
-                >
-                  <span className="material-symbols-outlined">arrow_back</span>
-                  Go Back
-                </button>
-              </div>
             </div>
           </form>
         </div>
-
-        {/* Footer */}
-        <p className={styles.footer}>
-          Need help? Contact{' '}
-          <a href="#" className={styles.footerLink}>Alumni Support</a>
-        </p>
       </main>
     </div>
   );

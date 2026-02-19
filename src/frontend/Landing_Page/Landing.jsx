@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import styles from './landing.module.css';
+import NavBar from '../Alumini/Components/Navbar/NavBar';
 
 export default function Landing() {
 
@@ -8,27 +9,7 @@ export default function Landing() {
   return (
     <div className={styles.body}>
       {/* Navigation */}
-      <nav className={styles.nav}>
-        <div className={styles.navContainer}>
-          <div className={styles.navBrand}>
-            <img 
-              alt='K.S.R. College of Engineering Logo'
-              className={styles.logo}
-              src='src/assets/KSR_College_Logo.svg'
-            />
-            <span className={styles.brandText}>
-              KSRCE <span className={styles.brandAccent}>ALUMNI</span>
-            </span>
-          </div>
-          <div className={styles.navLinks}>
-            <a className={styles.navLink} href="#home">HOME</a>
-            <a className={styles.navLink} href="#network">NETWORK</a>
-            <a className={styles.navLink} href="#events">EVENTS</a>
-            <a className={styles.navLink} href="#stories">SUCCESS</a>
-          </div>
-          <button className={styles.navButton} onClick={() => { navigate('/login') }} >JOIN PORTAL</button>
-        </div>
-      </nav>
+      <NavBar isLanding={true} />
 
       {/* Hero Section */}
       <section className={styles.hero} id="home">
@@ -291,7 +272,7 @@ export default function Landing() {
               <img 
                 alt="Logo" 
                 className={styles.footerLogo}
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8SIg5LyU95x6iS3pVWVZJSwjj2MASrRCyifBm7m5gnlYpA7jmbbZAQ9fsgipqxdJjRKJ8-aJj9BC5gwOmh_sDXJ2ww1QsLcmEYf5TVBMZWQdbq2lkIOjI6Efk-ZXD7Tw92vYVAj2gKkVufZ4KqOUKm0QV8pq0AtO91RTWmoTQ8ni_HKdRUh2LRmZDKL9BEStabmCB-kuzSP8hHqaJ4dTN4uQtygaegu5ZCyEurTgAr6Zgj5o_OYiZ0OeUh6_hPaJDcRtBIrz2F3Kf"
+                src="src/assets/KSR_College_Banner.svg"
               />
               <p className={styles.footerDescription}>
                 Building a bridge between our glorious past and an innovative future. K.S.R. College of Engineering Alumni Association.

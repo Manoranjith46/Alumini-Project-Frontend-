@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styles from './NavBar.module.css';
 import ksrLogo from '../../../../assets/KSR_College_Logo.svg';
 
-export default function NavBar() {
+export default function NavBar( { isLanding } ) {
+  const navigate = useNavigate();
+
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
@@ -20,8 +24,10 @@ export default function NavBar() {
           <Link to="/network" className={styles.navLink}>NETWORK</Link>
           <Link to="/events" className={styles.navLink}>EVENTS</Link>
           <Link to="/success" className={styles.navLink}>SUCCESS</Link>
+          { isLanding && <button className={styles.navButton} onClick={() => { navigate('/login') }} >JOIN US</button> }          
         </div>
       </div>
     </nav>
   );
 }
+            

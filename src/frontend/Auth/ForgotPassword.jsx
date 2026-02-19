@@ -77,25 +77,51 @@ export default function ForgotPassword() {
               </div>
             </div>
 
+            {/* Help Section */}
+            <div className={styles.helpSection}>
+              <div className={styles.helpCard}>
+                <div className={styles.helpIcon}>
+                  <span className="material-symbols-outlined">info</span>
+                </div>
+                <div className={styles.helpContent}>
+                  <h3>What happens next?</h3>
+                  <ul className={styles.helpList}>
+                    <li>
+                      <span className={styles.stepNumber}>1</span>
+                      <span>We'll send a verification code to your email</span>
+                    </li>
+                    <li>
+                      <span className={styles.stepNumber}>2</span>
+                      <span>Enter the 4-digit code to verify your identity</span>
+                    </li>
+                    <li>
+                      <span className={styles.stepNumber}>3</span>
+                      <span>Create a new secure password for your account</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
             <button type="submit" className={styles.submitButton}>
               <span>Send OTP</span>
               <span className="material-symbols-outlined">arrow_forward</span>
             </button>
           </form>
-        </div>
 
-        {/* Footer Link */}
-        <div className={styles.footer}>
-          <p className={styles.footerText}>
-            Already have an account?{' '}
-            <button 
-              type="button"
-              onClick={() => navigate('/login')} 
-              className={styles.footerLink}
-            >
-              Log in
-            </button>
-          </p>
+          {/* Footer Link */}
+          <div className={styles.footer}>
+            <p className={styles.footerText}>
+              Already have an account?{' '}
+              <button 
+                type="button"
+                onClick={() => navigate('/login')} 
+                className={styles.footerLink}
+              >
+                Log in
+              </button>
+            </p>
+          </div>
         </div>
       </main>
     </div>

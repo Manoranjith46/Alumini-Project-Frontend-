@@ -172,6 +172,18 @@
   text-align: center;
   font-family: 'Inter', sans-serif;
 }
+
+.amountInput:focus {
+  box-shadow: none ;
+  outline: none ;
+  border: none ;
+}
+
+.amountInput:focus-within {
+  border: none;
+}
+
+
 /* Hide number input spinners */
 .amountInput::-webkit-outer-spin-button,
 .amountInput::-webkit-inner-spin-button {
