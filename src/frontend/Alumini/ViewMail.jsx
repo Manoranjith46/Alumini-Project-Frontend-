@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './ViewMail.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 
-const ViewMail = ({ onLogout }) => {
+const Alumini_ViewMail = ({ onLogout }) => {
   const navigate = useNavigate();
 
   return (
@@ -124,4 +124,4 @@ const ViewMail = ({ onLogout }) => {
   );
 };
 
-export default ViewMail;
+export default Alumini_ViewMail;

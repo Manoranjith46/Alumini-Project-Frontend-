@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from './Components/Sidebar/Sidebar';
 import styles from './Accept_Invitation.module.css';
 
-export default function MailForm({ onLogout }) {
+export default function Alumini_MailForm({ onLogout }) {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [startYear, setStartYear] = useState('');

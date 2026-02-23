@@ -3,7 +3,7 @@ import Sidebar from './Components/Sidebar/Sidebar';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-const Donation_History = ({ onLogout }) => {
+const Alumini_Donation_History = ({ onLogout }) => {
   // Mock data matching the screenshot exactly
   const donationData = [
     { id: '01', cause: 'Scholarship Fund 2024', type: 'Online', txId: 'TXN-882910321', amount: '₹15,000.00', date: 'Oct 24, 2023', status: 'Sent' },
@@ -179,4 +179,4 @@ const Donation_History = ({ onLogout }) => {
   );
 };
 
-export default Donation_History;
+export default Alumini_Donation_History;

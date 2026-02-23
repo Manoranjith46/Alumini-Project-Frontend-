@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Event_Reunion.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 
-const EventsReunion = ({ onLogout }) => {
+const Alumini_EventsReunion = ({ onLogout }) => {
 
   const emails = [
     {
@@ -165,4 +165,4 @@ const EventsReunion = ({ onLogout }) => {
   );
 };
 
-export default EventsReunion;
+export default Alumini_EventsReunion;

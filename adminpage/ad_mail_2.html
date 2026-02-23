@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KSRCE Alumni Portal - Alumni Mail</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'forest-green': '#228B22',
+            'sidebar-gray': '#F9FAFB',
+            'main-bg': '#F8FAFC',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Fonts (Inter for a clean UI) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="global-styles">
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-main-bg text-slate-800 flex h-screen overflow-hidden">
+<!-- BEGIN: Sidebar -->
+<aside class="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0" data-purpose="sidebar-navigation">
+<div class="p-6">
+<h1 class="text-xl font-bold text-slate-900">KSRCE Alumni Portal</h1>
+</div>
+<nav class="flex-1 px-4 space-y-1 mt-4">
+<!-- Dashboard -->
+<a class="flex items-center px-3 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        Dashboard
+      </a>
+<!-- Mail (Active State) -->
+<a class="flex items-center px-3 py-3 text-sm font-medium text-white bg-forest-green rounded-lg shadow-sm" data-purpose="active-nav-item" href="#">
+<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        Mail
+      </a>
+<!-- Job & Reference (Updated to match list) -->
+<a class="flex items-center px-3 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        Job &amp; Reference
+      </a>
+<!-- Donation -->
+<a class="flex items-center px-3 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        Donation
+      </a>
+<!-- Events & Reunion -->
+<a class="flex items-center px-3 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        Events &amp; Reunion
+      </a>
+<!-- Feedback -->
+<a class="flex items-center px-3 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        Feedback
+      </a>
+</nav>
+<!-- Sidebar Bottom Section -->
+<div class="p-4 border-t border-slate-200" data-purpose="sidebar-footer">
+<a class="flex items-center px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1" href="#">
+<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        Profile
+      </a>
+<a class="flex items-center px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        Logout
+      </a>
+</div>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Content Area -->
+<main class="flex-1 overflow-y-auto p-8" data-purpose="main-content">
+<!-- BEGIN: Header Title -->
+<div class="mb-8" data-purpose="page-header">
+<h2 class="text-2xl font-bold text-slate-800">Alumni Mail</h2>
+</div>
+<!-- END: Header Title -->
+<!-- BEGIN: Input Section -->
+<section class="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6" data-purpose="input-form-fields"><div class="flex flex-col">
+<label class="text-sm font-medium text-slate-600 mb-2" for="admin-email">Admin Email</label>
+<input class="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-forest-green focus:border-forest-green outline-none transition-all" id="admin-email" placeholder="admin@ksrce.ac.in" type="email"/>
+</div>
+<div class="flex flex-col">
+<label class="text-sm font-medium text-slate-600 mb-2" for="alumni-name">Enter Alumni Name</label>
+<input class="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-forest-green focus:border-forest-green outline-none transition-all" id="alumni-name" placeholder="Name" type="text"/>
+</div>
+<div class="flex flex-col">
+<label class="text-sm font-medium text-slate-600 mb-2" for="alumni-email">Alumni Email</label>
+<input class="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-forest-green focus:border-forest-green outline-none transition-all" id="alumni-email" placeholder="example@email.com" type="email"/>
+</div>
+</section>
+<!-- END: Input Section -->
+<!-- BEGIN: Controls Section -->
+<section class="mb-10 flex items-center space-x-4" data-purpose="action-controls">
+<button class="px-6 py-2 border-2 border-forest-green text-forest-green font-semibold rounded-lg hover:bg-forest-green hover:text-white transition-all">
+        Form
+      </button>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-forest-green"></div>
+</label>
+</section>
+<!-- END: Controls Section -->
+<!-- BEGIN: Event Card Section -->
+<section class="max-w-6xl mx-auto py-12" data-purpose="event-display">
+<div class="bg-white rounded-2xl shadow-md border border-slate-100 p-16 space-y-12">
+<!-- Event Name -->
+<div data-purpose="event-header">
+<h3 class="font-bold text-slate-900 border-b border-slate-100 pb-6 text-5xl">Tech Innovators Summit 2026</h3>
+</div>
+<!-- Date & Location Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6" data-purpose="event-metadata">
+<div class="flex flex-col">
+<span class="text-xs uppercase tracking-wider font-semibold text-slate-400">Date</span>
+<span class="font-medium text-slate-700 text-xl text-2xl">March 20, 2026</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs uppercase tracking-wider font-semibold text-slate-400">Location</span>
+<span class="font-medium text-slate-700 text-xl text-2xl">KSRCE Convention Centre</span>
+</div>
+</div>
+<!-- Description -->
+<div class="pt-2" data-purpose="event-description">
+<span class="text-xs uppercase tracking-wider font-semibold text-slate-400 block mb-2">Description</span>
+<p class="text-slate-600 leading-relaxed text-lg text-xl leading-relaxed">Join us for a full-day seminar regarding emerging AI technologies and networking opportunities for alumni. This event aims to bring together industry leaders and former students to discuss the future of AI and foster meaningful professional connections.</p>
+</div>
+</div>
+</section><div class="flex justify-end space-x-4 mt-8" data-purpose="form-actions">
+<button class="px-8 py-2.5 bg-white border-2 border-forest-green text-forest-green font-semibold rounded-lg hover:bg-slate-50 transition-all">
+        Discard
+      </button>
+<button class="px-8 py-2.5 bg-forest-green text-white font-semibold rounded-lg hover:bg-opacity-90 transition-all shadow-md">
+        Submit
+      </button>
+</div>
+<!-- END: Event Card Section -->
+</main>
+<!-- END: Main Content Area -->
+</body></html>

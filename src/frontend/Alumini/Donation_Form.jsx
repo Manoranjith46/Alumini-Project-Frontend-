@@ -2,7 +2,7 @@ import { useState } from 'react';
 import styles from './Donation_Form.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 
-const DonationFormPage = ({ onLogout }) => {
+const Alumini_DonationFormPage = ({ onLogout }) => {
   const [amount, setAmount] = useState('1000');
   const [selectedMethod, setSelectedMethod] = useState('upi');
 
@@ -107,4 +107,4 @@ const DonationFormPage = ({ onLogout }) => {
   );
 };
 
-export default DonationFormPage;
+export default Alumini_DonationFormPage;

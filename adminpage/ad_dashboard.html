@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KSRCE Alumni Portal Dashboard</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2E6F40",
+                        "background-light": "#F8FAFC",
+                        "background-dark": "#0F172A",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                font-family: 'Inter', sans-serif;
+            }
+        }
+        .sidebar-active {
+            background-color: rgba(46, 111, 64, 0.1);
+            color: #2E6F40;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }.overlap-column {
+            margin-left: -128px;}
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 transition-colors duration-200 overflow-x-hidden">
+<aside class="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col shadow-2xl">
+<div class="p-6">
+<h1 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">school</span>
+            KSRCE Portal
+        </h1>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg sidebar-active font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+            Dashboard
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">mail</span>
+            Mail
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">work</span>
+            Job &amp; Reference
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">volunteer_activism</span>
+            Donation
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+            Events &amp; Reunion
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">feedback</span>
+            Feedback
+        </a>
+</nav>
+<div class="p-4 mt-auto border-t border-slate-200 dark:border-slate-800 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+            Profile
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+            Logout
+        </a>
+</div>
+</aside>
+<main class="ml-64 min-h-screen">
+<header class="sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 h-16 flex items-center justify-between px-8 z-40">
+<div class="flex items-center gap-4 flex-1 max-w-2xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg pl-10 text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search alumni, jobs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="relative text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<div class="text-sm font-semibold dark:text-white">Mohammed Ashik M</div>
+<div class="text-[10px] text-slate-400 uppercase tracking-wider">Class of 2018</div>
+</div>
+<img alt="Profile" class="w-9 h-9 rounded-full ring-2 ring-slate-100 dark:ring-slate-800" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDxsNmGHJS4TO6MjPYdAg6oNXiyZ7Xh78kZgm9lsfgXsBK2T70asN2eP7qf_lvE8bRMgMvaqSUHihcEO2W_XKcwX5W4MYd106wTTZbnc-ltRKtYlnXqg72coW16fUw8Gg2rEYPURS73pTyg7sgl_DNd-R4bpG9jeM2WP2WzwaEZnA11ZEpbUqfCEqLX8vtvoEJ8SsQsh_W1YP3aEooWbTJSSIcMsuHlEQ9QujCTaMRhjsMwC9tK1YFfoScM2bkVeu8ov-qFc0BQJJA"/>
+</div>
+</div>
+</header>
+<div class="p-8">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+<div class="overlap-column bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col h-[280px] z-10 transition-transform duration-300">
+<div class="flex items-center justify-between mb-4 pl-[128px] lg:pl-0">
+<h2 class="font-bold text-lg dark:text-white uppercase tracking-tight">Mail</h2>
+<span class="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] px-2 py-0.5 rounded-full font-bold">2 New</span>
+</div>
+<div class="space-y-3 overflow-hidden flex-1 pl-[128px] lg:pl-0">
+<div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-1">
+                            Welcome back to the network, Mohammed! We have some new alumni connect...
+                        </p>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-1">
+                            New job referral available for SDE-1 role at Google. Interested...
+                        </p>
+</div>
+</div>
+<button class="mt-4 w-full py-2 text-sm font-medium text-slate-400 hover:text-primary transition-colors flex items-center justify-center gap-2 pl-[128px] lg:pl-0">
+                    Go to Inbox
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col h-[280px] z-20">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">work</span>
+</div>
+<h2 class="font-bold text-lg dark:text-white">Career Hub</h2>
+</div>
+<span class="text-[10px] text-slate-400 font-bold uppercase">12 Active</span>
+</div>
+<div class="space-y-2 overflow-hidden flex-1">
+<div class="p-3 border border-slate-100 dark:border-slate-800 rounded-xl flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer group transition-all">
+<div>
+<h4 class="font-bold text-sm text-slate-900 dark:text-white">Senior Dev, Google</h4>
+<p class="text-[10px] text-slate-400 mt-0.5">Referral by Rahul S.</p>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform text-lg">chevron_right</span>
+</div>
+<div class="p-3 border border-slate-100 dark:border-slate-800 rounded-xl flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer group transition-all">
+<div>
+<h4 class="font-bold text-sm text-slate-900 dark:text-white">Lead Architect, IBM</h4>
+<p class="text-[10px] text-slate-400 mt-0.5">Open Referral</p>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform text-lg">chevron_right</span>
+</div>
+</div>
+<button class="mt-4 w-full border border-primary text-primary text-sm font-bold py-2 rounded-2xl hover:bg-primary/5 transition-colors">
+                    Explore All Jobs
+                </button>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col h-[280px] z-20">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">payments</span>
+</div>
+<span class="bg-emerald-50 dark:bg-emerald-900/30 text-primary dark:text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/20">Scholarship Goal</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<h2 class="font-bold text-sm text-slate-500 dark:text-slate-400 mb-1">Latest Department Donation</h2>
+<div class="text-4xl font-extrabold text-slate-900 dark:text-white mb-1">₹50,000</div>
+<p class="text-xs text-slate-400 mb-4">Computer Science Dept</p>
+<div class="flex items-center gap-1.5 text-slate-400 text-[10px] uppercase font-semibold">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                        Received 2 hours ago
+                    </div>
+</div>
+<button class="mt-4 w-full bg-primary hover:bg-emerald-800 text-white text-sm font-bold py-3 rounded-2xl shadow-lg shadow-primary/20 transition-all">
+                    View History
+                </button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+<div class="lg:col-span-1 overlap-column z-10">
+<div class="bg-white dark:bg-slate-900 rounded-3xl shadow-sm overflow-hidden border border-slate-100 dark:border-slate-800 h-full flex flex-col">
+<div class="p-8 flex flex-col h-full">
+<div class="flex justify-between items-start mb-4 pl-[128px] lg:pl-0">
+<span class="bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Upcoming</span>
+<span class="material-symbols-outlined text-slate-300">event</span>
+</div>
+<div class="flex-1 flex flex-col justify-center pl-[128px] lg:pl-0">
+<h3 class="font-bold text-2xl mb-4 dark:text-white text-center lg:text-left">Alumni Reunion 2024</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-8 text-center lg:text-left leading-relaxed">
+                                Join us for an evening of nostalgia and networking as we celebrate 40 years of excellence. Reconnect with old friends and make new memories.
+                            </p>
+<div class="flex gap-4 mb-8">
+<div class="flex-1 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl text-center border border-slate-100 dark:border-slate-700">
+<div class="text-2xl font-bold text-slate-800 dark:text-white">24</div>
+<div class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Days</div>
+</div>
+<div class="flex-1 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl text-center border border-slate-100 dark:border-slate-700">
+<div class="text-2xl font-bold text-slate-800 dark:text-white">08</div>
+<div class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Hrs</div>
+</div>
+</div>
+</div>
+<button class="w-full bg-[#0F172A] hover:bg-slate-800 text-white font-bold py-5 rounded-2xl shadow-xl transition-all ml-[128px] lg:ml-0 lg:w-auto">
+                            RSVP Today
+                        </button>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2 z-20">
+<div class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 h-full">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-red-500">emoji_events</span>
+</div>
+<h2 class="text-xl font-bold dark:text-white">Achievements &amp; News</h2>
+</div>
+<a class="text-primary text-sm font-semibold flex items-center gap-1 hover:underline" href="#">
+                            View All
+                            <span class="material-symbols-outlined text-sm">open_in_new</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col">
+<span class="text-[10px] font-bold text-red-500 uppercase mb-2">Oct 24, 2023</span>
+<h4 class="font-bold text-slate-900 dark:text-white mb-2 text-sm">Startup center secures ₹5Cr Funding</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Major grant to boost innovation hub, benefiting 50+ student startups across departments.</p>
+<a class="mt-auto text-primary text-[11px] font-bold flex items-center gap-1 hover:gap-2 transition-all uppercase" href="#">
+                                Read More <span class="material-symbols-outlined text-sm">chevron_right</span>
+</a>
+</div>
+<div class="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col">
+<span class="text-[10px] font-bold text-red-500 uppercase mb-2">Oct 22, 2023</span>
+<h4 class="font-bold text-slate-900 dark:text-white mb-2 text-sm">Dr. Arul wins "Researcher"</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Honored for breakthrough contributions in Renewable Energy Systems and sustainable engineering.</p>
+<a class="mt-auto text-primary text-[11px] font-bold flex items-center gap-1 hover:gap-2 transition-all uppercase" href="#">
+                                Read More <span class="material-symbols-outlined text-sm">chevron_right</span>
+</a>
+</div>
+<div class="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col">
+<span class="text-[10px] font-bold text-red-500 uppercase mb-2">Oct 20, 2023</span>
+<h4 class="font-bold text-slate-900 dark:text-white mb-2 text-sm">Industry Partnership</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">MoU signed for internship programs and specialized training modules for final year students.</p>
+<a class="mt-auto text-primary text-[11px] font-bold flex items-center gap-1 hover:gap-2 transition-all uppercase" href="#">
+                                Read More <span class="material-symbols-outlined text-sm">chevron_right</span>
+</a>
+</div>
+<div class="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col">
+<span class="text-[10px] font-bold text-red-500 uppercase mb-2">Oct 18, 2023</span>
+<h4 class="font-bold text-slate-900 dark:text-white mb-2 text-sm">Alumni Sports Meet</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Join the annual football and cricket tournament at the campus grounds. Register now.</p>
+<a class="mt-auto text-primary text-[11px] font-bold flex items-center gap-1 hover:gap-2 transition-all uppercase" href="#">
+                                Read More <span class="material-symbols-outlined text-sm">chevron_right</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<button class="fixed bottom-6 right-6 w-12 h-12 bg-white dark:bg-slate-800 shadow-xl rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700 hover:scale-110 transition-transform z-50" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-200">dark_mode</span>
+</button>
+
+</body></html>

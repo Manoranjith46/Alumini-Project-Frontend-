@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KSRCE Alumni Portal - Scrollable Mail History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0081C9",
+                        "view-blue": "#0284c7",
+                        "view-blue-hover": "#0369a1",
+                        "background-main": "#F8FAFC",
+                        "midnight-navy": "#001E2B",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-transition { transition: width 0.3s ease-in-out; }
+        .main-scrollable::-webkit-scrollbar {
+            width: 12px;
+        }
+        .main-scrollable::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-left: 1px solid #e2e8f0;
+        }
+        .main-scrollable::-webkit-scrollbar-thumb {
+            background-color: #0284c7;
+            border-radius: 10px;
+            border: 3px solid #f1f5f9;
+        }
+        .main-scrollable::-webkit-scrollbar-thumb:hover {
+            background-color: #0369a1;
+        }
+        .mail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        .mail-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            border: 2px solid transparent;
+            position: relative;
+            padding: 24px;
+            min-height: 280px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .mail-card:nth-child(3n+1) { border-color: #d1d5db; }
+        .mail-card:nth-child(3n+2) { border-color: #22c55e; }
+        .mail-card:nth-child(3n+3) { border-color: #ef4444; }
+        .mail-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            z-index: 10;
+        }
+        .btn-view {
+            width: calc(100% - 16px);
+            margin: 0 auto;
+            padding: 10px 0;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-align: center;
+            display: block;
+        }
+        .btn-view-grey-solid {
+            background-color: #6B7280;
+            color: white;
+            border: 2px solid #6B7280;
+        }
+        .btn-view-grey-solid:hover {
+            background-color: #4b5563;
+            border-color: #4b5563;
+        }
+        .btn-view-grey-outline {
+            background-color: transparent;
+            border: 2px solid #6B7280;
+            color: #6B7280;
+        }
+        .btn-view-grey-outline:hover {
+            background-color: #f9fafb;
+        }
+        .btn-view-green-solid {
+            background-color: #22c55e;
+            color: white;
+            border: 2px solid #22c55e;
+        }
+        .btn-view-green-solid:hover {
+            background-color: #16a34a;
+            border-color: #16a34a;
+        }
+        .btn-view-green-outline {
+            background-color: transparent;
+            border: 2px solid #22c55e;
+            color: #22c55e;
+        }
+        .btn-view-green-outline:hover {
+            background-color: #f0fdf4;
+        }
+        .btn-view-red-solid {
+            background-color: #ef4444;
+            color: white;
+            border: 2px solid #ef4444;
+        }
+        .btn-view-red-solid:hover {
+            background-color: #dc2626;
+            border-color: #dc2626;
+        }
+        .btn-view-red-outline {
+            background-color: transparent;
+            border: 2px solid #ef4444;
+            color: #ef4444;
+        }
+        .btn-view-red-outline:hover {
+            background-color: #fef2f2;
+        }
+        .custom-sidebar-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-sidebar-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] font-display text-slate-900 h-screen flex overflow-hidden">
+<aside class="sidebar-transition group fixed left-0 top-0 h-screen bg-white z-50 flex flex-col w-[70px] hover:w-[260px] border-r border-slate-200 shadow-sm" id="sidebar">
+<div class="flex items-center px-5 py-6 border-b border-slate-100 overflow-hidden whitespace-nowrap shrink-0">
+<span class="font-semibold text-midnight-navy text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">KSRCE Alumni Portal</span>
+<span class="material-symbols-outlined text-primary group-hover:hidden min-w-[30px]">school</span>
+</div>
+<nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto custom-sidebar-scrollbar overflow-x-hidden">
+<a class="flex items-center gap-4 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-midnight-navy transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="opacity-0 group-hover:opacity-100 whitespace-nowrap font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 px-3 py-2 rounded-lg bg-primary text-white font-semibold transition-all shadow-sm shadow-primary/30" href="#">
+<span class="material-symbols-outlined">mail</span>
+<span class="opacity-0 group-hover:opacity-100 whitespace-nowrap font-medium">Mail</span>
+</a>
+<a class="flex items-center gap-4 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-midnight-navy transition-all" href="#">
+<span class="material-symbols-outlined">work</span>
+<span class="opacity-0 group-hover:opacity-100 whitespace-nowrap font-medium">Job &amp; Reference</span>
+</a>
+<a class="flex items-center gap-4 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-midnight-navy transition-all" href="#">
+<span class="material-symbols-outlined">volunteer_activism</span>
+<span class="opacity-0 group-hover:opacity-100 whitespace-nowrap font-medium">Donation</span>
+</a>
+<a class="flex items-center gap-4 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-midnight-navy transition-all" href="#">
+<span class="material-symbols-outlined">event</span>
+<span class="opacity-0 group-hover:opacity-100 whitespace-nowrap font-medium">Events &amp; Reunion</span>
+</a>
+<a class="flex items-center gap-4 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-midnight-navy transition-all" href="#">
+<span class="material-symbols-outlined">feedback</span>
+<span class="opacity-0 group-hover:opacity-100 whitespace-nowrap font-medium">Feedback</span>
+</a>
+</nav>
+<div class="p-3 border-t border-slate-100 mt-auto shrink-0 bg-white">
+<a class="flex items-center gap-4 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-midnight-navy transition-all" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="opacity-0 group-hover:opacity-100 whitespace-nowrap font-medium">Profile</span>
+</a>
+<a class="flex items-center gap-4 px-3 py-2 rounded-lg text-red-500 hover:bg-red-50 transition-all mt-2" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="opacity-0 group-hover:opacity-100 whitespace-nowrap font-medium">Logout</span>
+</a>
+</div>
+</aside>
+<main class="flex-1 ml-[70px] h-screen overflow-y-scroll main-scrollable">
+<div class="w-full max-w-7xl mx-auto p-8 lg:p-12">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-3xl font-bold text-midnight-navy">Mail History</h2>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center px-6 h-10 bg-white border-2 border-[#228B22] text-[#228B22] font-semibold text-sm rounded-lg shadow-sm hover:shadow-md transition-all">
+    Drafts
+</button>
+<div class="relative group">
+<input class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-72" placeholder="Search mail..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-sm">search</span>
+</div>
+<button class="p-2 bg-white border border-slate-200 text-slate-500 hover:text-primary hover:border-primary rounded-lg transition-all">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+</div>
+</div>
+<div class="mail-grid pb-12"><div class="mail-card rounded-xl flex items-center justify-center cursor-pointer border-[#22c55e] hover:bg-slate-50 transition-colors">
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-6xl text-[#22c55e]">add</span>
+<span class="text-[#22c55e] font-semibold text-lg">New mail</span>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Alumni Office</span>
+</div>
+<p class="text-slate-600 text-base line-clamp-3 leading-relaxed">Invitation: Virtual Networking Session for Technology Professionals scheduled for next Friday. Register via the link.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">09:12 AM</span>
+<button class="btn-view btn-view-green-solid">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Admin Portal</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Your profile verification has been completed successfully. Welcome to the official KSRCE network.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Oct 24</span>
+<button class="btn-view btn-view-red-solid">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Placement Cell</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">New Internship guidelines for alumni-led startups are now available for download.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Oct 20</span>
+<button class="btn-view btn-view-grey-outline">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Career Cell</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Exciting news! We have three new SDE-1 openings at top product firms specifically looking for our alumni.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Oct 18</span>
+<button class="btn-view btn-view-green-outline">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Events Team</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Early bird registration for Grand Reunion 2024 is now open. Book your tickets before Nov 1st.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Oct 15</span>
+<button class="btn-view btn-view-red-outline">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Scholarship Board</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Applications for the Merit Scholarship 2025 are now being accepted. Refer potential candidates.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Oct 12</span>
+<button class="btn-view btn-view-grey-outline">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Library Admin</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Alumni access to digital library archives has been extended for another year.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Oct 10</span>
+<button class="btn-view btn-view-green-solid">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Tech Support</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Maintenance notice: The alumni portal will be undergoing scheduled updates this Sunday.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Oct 05</span>
+<button class="btn-view btn-view-red-solid">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Alumni Survey</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Help us improve! Please fill out the 5-minute career growth survey.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Sep 28</span>
+<button class="btn-view btn-view-grey-outline">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Sports Dept</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Invitation: Annual Alumni vs Students Cricket Match this Sunday at the Main Ground.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Sep 25</span>
+<button class="btn-view btn-view-green-outline">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Chapter Meet</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">The Bangalore Chapter is hosting a dinner meet at Indiranagar this Friday. RSVP now.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Sep 20</span>
+<button class="btn-view btn-view-red-outline">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Health &amp; Wellness</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Join the Alumni Yoga Retreat this weekend. Limited spots available.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Sep 15</span>
+<button class="btn-view btn-view-grey-outline">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Career Mentorship</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Final call for mentor applications for the 2024-25 academic year mentoring program.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Sep 10</span>
+<button class="btn-view btn-view-green-solid">View</button>
+</div>
+</div>
+<div class="mail-card rounded-xl flex flex-col cursor-pointer">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-midnight-navy text-lg">Notice Board</span>
+</div>
+<p class="text-slate-500 text-base line-clamp-3 leading-relaxed">Archive updates: Old graduation photos are being digitized for the portal gallery.</p>
+</div>
+<div class="mt-auto flex flex-col items-center gap-3">
+<span class="text-xs font-bold text-slate-400">Sep 05</span>
+<button class="btn-view btn-view-red-solid">View</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

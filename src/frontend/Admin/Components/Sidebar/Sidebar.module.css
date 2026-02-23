@@ -54,7 +54,7 @@
 }
 
 .sidebarIcon {
-  color: #0284c7;
+  color: #2E7D32; /* Forest Green */
   min-width: 30px;
   transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -78,7 +78,7 @@
 }
 
 .sidebarNav:hover {
-  scrollbar-color: #2085f6 #e9f1fc;
+  scrollbar-color: #2E7D32 #E8F5E9; /* Green scrollbar on hover */
 }
 
 .sidebarNav::-webkit-scrollbar {
@@ -94,8 +94,8 @@
 }
 
 .sidebarNav:hover::-webkit-scrollbar-track {
-  background: #e9f1fc;
-  border: 1px solid #dde6f4;
+  background: #E8F5E9; /* Light green track */
+  border: 1px solid #C8E6C9;
 }
 
 .sidebarNav::-webkit-scrollbar-thumb {
@@ -105,13 +105,13 @@
 }
 
 .sidebarNav:hover::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #2085f6, #4338CA);
-  box-shadow: 0 2px 4px rgba(32, 133, 246, 0.2);
+  background: linear-gradient(180deg, #4CAF50, #1B5E20); /* Green gradient */
+  box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
 }
 
 .sidebarNav::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #4096ff, #5449db) !important;
-  box-shadow: 0 3px 6px rgba(32, 133, 246, 0.3);
+  background: linear-gradient(180deg, #66BB6A, #2E7D32) !important; /* Lighter green gradient on hover */
+  box-shadow: 0 3px 6px rgba(46, 125, 50, 0.3);
 }
 
 .sidebarNav::-webkit-scrollbar-button {
@@ -132,22 +132,24 @@
 }
 
 .navLink:hover:not(.navLinkActive) {
-  background-color: #E6F3FA;
-  color: #0284C7;
+  background-color: #E8F5E9; /* Soft green hover background */
+  color: #2E7D32; /* Forest green text */
 }
+
 .navLink:focus {
   background-color: #f8f8f8;
   color: #001E2B;
 }
+
 .navLinkActive {
-    color: #fff;
-    font-weight: 600;
-    background-color: #0081C9;
+  color: #fff;
+  font-weight: 600;
+  background-color: #2E7D32; /* Solid Forest Green active state */
 }
 
 .navLinkActive:hover {
-    background-color: #0081C9;
-    color: #fff;
+  background-color: #1B5E20; /* Darker Forest Green on hover */
+  color: #fff;
 }
 
 .navLinkText {

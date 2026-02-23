@@ -1,7 +1,7 @@
 import styles from './View_Invitation.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 
-const View_Invitation = ({ onLogout }) => {
+const Alumini_View_Invitation = ({ onLogout }) => {
 
   return (
     <div className={styles.pageContainer}>
@@ -118,4 +118,4 @@ const View_Invitation = ({ onLogout }) => {
   );
 };
 
-export default View_Invitation;
+export default Alumini_View_Invitation;

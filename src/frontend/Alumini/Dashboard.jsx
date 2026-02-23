@@ -3,7 +3,7 @@ import Sidebar from "./Components/Sidebar/Sidebar";
 import { useNavigate } from 'react-router-dom';
 
 
-export default function AluminiDashboard({ onLogout }) {
+export default function Alumini_Dashboard({ onLogout }) {
     const navigate = useNavigate();
   
   return (

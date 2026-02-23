@@ -1,7 +1,7 @@
 import Sidebar from './Components/Sidebar/Sidebar';
 import styles from './JobReference_Form.module.css';
 
-const JobReference_Form = ({ onLogout }) => {
+const Alumini_JobReference_Form = ({ onLogout }) => {
 
   return (
     <div className={styles.pageContainer}>
@@ -112,4 +112,4 @@ const JobReference_Form = ({ onLogout }) => {
   );
 };
 
-export default JobReference_Form;
+export default Alumini_JobReference_Form;

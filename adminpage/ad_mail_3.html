@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mail Drafts - KSRCE Alumni Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#228B22",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Public Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-sidebar-item {
+            background-color: rgba(34, 139, 34, 0.15);
+            border-right: 4px solid #228B22;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display">
+<div class="flex min-h-screen">
+<!-- Sidebar -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark flex flex-col fixed h-full z-10">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-primary rounded-lg p-2 text-white">
+<span class="material-symbols-outlined text-2xl">school</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-lg font-bold leading-none tracking-tight">KSRCE Alumni</h1>
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Portal</p>
+</div>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-sm font-medium">Events</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg border-r-4 border-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">mail</span>
+<span class="text-sm font-semibold">Mail</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-medium">Directory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">work</span>
+<span class="text-sm font-medium">Jobs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-sm font-medium">Help Center</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 min-h-screen flex flex-col">
+<!-- Header -->
+
+<!-- Dashboard Content -->
+<div class="p-8 max-w-6xl mx-auto w-full flex-1">
+<!-- Mail Actions -->
+<div class="flex items-center gap-3 mb-8">
+<button class="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
+<span class="material-symbols-outlined text-xl">drafts</span>
+<span>Drafts</span>
+<span class="ml-1 px-2 py-0.5 bg-white/20 rounded-full text-xs">12</span>
+</button>
+
+
+</div>
+<!-- Drafts List Header -->
+<div class="mb-4 px-6 flex items-center text-xs font-bold text-slate-500 uppercase tracking-widest">
+<div class="w-1/4">Recipient</div>
+<div class="flex-1">Subject Line</div>
+<div class="w-32 text-right">Last Saved</div>
+</div>
+<!-- Drafts List -->
+<div class="space-y-3">
+<!-- Draft Item 1 -->
+<div class="group relative flex items-center px-6 py-5 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-primary/40 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all cursor-pointer">
+<div class="w-1/4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined text-lg">person</span>
+</div>
+<span class="font-bold text-slate-900 dark:text-white">Dr. Arul Kumar</span>
+</div>
+<div class="flex-1">
+<p class="text-slate-600 dark:text-slate-300 font-medium">Guest Lecture Invitation - Dept of IT</p>
+<p class="text-sm text-slate-400 line-clamp-1 mt-0.5">Dear Dr. Arul, We would like to formally invite you to share your expertise...</p>
+</div>
+<div class="w-32 text-right">
+<span class="text-xs font-semibold text-slate-400 group-hover:hidden">2 hours ago</span>
+<div class="hidden group-hover:flex items-center justify-end gap-2">
+<button class="p-1.5 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Edit">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Draft Item 2 -->
+<div class="group relative flex items-center px-6 py-5 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-primary/40 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all cursor-pointer">
+<div class="w-1/4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg">groups</span>
+</div>
+<span class="font-bold text-slate-900 dark:text-white">Batch of 2015</span>
+</div>
+<div class="flex-1">
+<p class="text-slate-600 dark:text-slate-300 font-medium">Annual Meetup Coordination</p>
+<p class="text-sm text-slate-400 line-clamp-1 mt-0.5">Hi everyone, looking forward to our 10-year reunion next year. Let's start...</p>
+</div>
+<div class="w-32 text-right">
+<span class="text-xs font-semibold text-slate-400 group-hover:hidden">Yesterday</span>
+<div class="hidden group-hover:flex items-center justify-end gap-2">
+<button class="p-1.5 text-primary hover:bg-primary/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Draft Item 3 -->
+<div class="group relative flex items-center px-6 py-5 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-primary/40 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all cursor-pointer">
+<div class="w-1/4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined text-lg">domain</span>
+</div>
+<span class="font-bold text-slate-900 dark:text-white">Placement Cell</span>
+</div>
+<div class="flex-1">
+<p class="text-slate-600 dark:text-slate-300 font-medium">Internship Opportunities for Juniors</p>
+<p class="text-sm text-slate-400 line-clamp-1 mt-0.5">I am writing to share a few internship openings at my current firm that would...</p>
+</div>
+<div class="w-32 text-right">
+<span class="text-xs font-semibold text-slate-400 group-hover:hidden">Oct 24, 2023</span>
+<div class="hidden group-hover:flex items-center justify-end gap-2">
+<button class="p-1.5 text-primary hover:bg-primary/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Draft Item 4 -->
+<div class="group relative flex items-center px-6 py-5 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-primary/40 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all cursor-pointer opacity-70">
+<div class="w-1/4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined text-lg">person</span>
+</div>
+<span class="font-bold text-slate-900 dark:text-white">Prof. Sundaram</span>
+</div>
+<div class="flex-1">
+<p class="text-slate-600 dark:text-slate-300 font-medium">Project Review Documents</p>
+<p class="text-sm text-slate-400 line-clamp-1 mt-0.5">Sending over the final documentation for the research project we discussed...</p>
+</div>
+<div class="w-32 text-right">
+<span class="text-xs font-semibold text-slate-400 group-hover:hidden">Oct 20, 2023</span>
+<div class="hidden group-hover:flex items-center justify-end gap-2">
+<button class="p-1.5 text-primary hover:bg-primary/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / Pagination -->
+
+</div>
+</main>
+</div>
+</body></html>

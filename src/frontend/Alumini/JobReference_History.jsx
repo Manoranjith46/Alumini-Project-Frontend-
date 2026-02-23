@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './JobReference_History.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 
-const JobReference_History = ({ onLogout }) => {
+const Alumini_JobReference_History = ({ onLogout }) => {
   const [activeMenuId, setActiveMenuId] = useState(null);
   const navigate = useNavigate();
   const menuRef = useRef(null);
@@ -185,4 +185,4 @@ const JobReference_History = ({ onLogout }) => {
   );
 };
 
-export default JobReference_History;
+export default Alumini_JobReference_History;

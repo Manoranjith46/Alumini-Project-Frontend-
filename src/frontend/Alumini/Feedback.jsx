@@ -35,7 +35,7 @@ const getCroppedImg = (imageSrc, pixelCrop) => {
   });
 };
 
-const Feedback = ({ onLogout }) => {
+const Alumini_Feedback = ({ onLogout }) => {
 
   const [signatureFile, setSignatureFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -372,4 +372,4 @@ const Feedback = ({ onLogout }) => {
   );
 };
 
-export default Feedback;
+export default Alumini_Feedback;

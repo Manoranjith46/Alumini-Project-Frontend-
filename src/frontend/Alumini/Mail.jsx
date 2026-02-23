@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Mail.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 
-export default function Mail({ onLogout }) {
+export default function Alumini_Mail({ onLogout }) {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 

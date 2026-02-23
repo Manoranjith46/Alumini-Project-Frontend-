@@ -1,0 +1,262 @@
+/* Ensure you have Public Sans and Material Symbols imported in your index.html/CSS */
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap');
+
+.pageLayout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Public Sans', sans-serif;
+  background-color: #f8f6f6;
+  color: #0f172a;
+}
+
+/* --- Main Content --- */
+.mainContent {
+  flex: 1;
+  margin-left: 70px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.contentWrapper {
+  padding: 2rem;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+}
+
+/* Scrollbar(VolumeBar) */
+.mainContent::-webkit-scrollbar {
+  width: 12px;
+}
+
+.mainContent::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-left: 1px solid #e2e8f0;
+}
+
+.mainContent::-webkit-scrollbar-thumb {
+  background-color: #228B22;
+  border-radius: 10px;
+  border: 3px solid #f1f5f9;
+}
+
+.mainContent::-webkit-scrollbar-thumb:hover {
+  background-color: #1a6b1a;
+}
+
+/* Back Button */
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #475569;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: fit-content;
+  padding: 24px 0px 0px 24px;
+}
+
+.backButton:hover {
+  color: #228B22;
+}
+
+.backButton span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Actions Header */
+.actionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.draftsBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.5rem;
+  background-color: #228B22;
+  color: #ffffff;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 15px -3px rgba(34, 139, 34, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.draftsBtn:hover {
+  transform: scale(1.02);
+}
+
+.draftsBtn .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.badge {
+  margin-left: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+}
+
+/* List Headers */
+.listHeader {
+  margin-bottom: 1rem;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Grid Columns */
+.colRecipient {
+  width: 25%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.colSubject {
+  flex: 1;
+}
+
+.colDate {
+  width: 8rem;
+  text-align: right;
+}
+
+/* Draft Cards */
+.draftsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.draftCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.draftCard:hover {
+  border-color: rgba(34, 139, 34, 0.4);
+  box-shadow: 0 20px 25px -5px rgba(226, 232, 240, 0.5), 0 8px 10px -6px rgba(226, 232, 240, 0.5);
+}
+
+.fadedCard {
+  opacity: 0.7;
+}
+
+.avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarSlate {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.avatarPrimary {
+  background-color: rgba(34, 139, 34, 0.1);
+  color: #228B22;
+}
+
+.avatar .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+.recipientName {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.subjectTitle {
+  color: #475569;
+  font-weight: 500;
+  margin: 0;
+}
+
+.snippetText {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin: 0.125rem 0 0 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -line-clamp: 1; /* Limits to 1 line */
+}
+
+/* Group Hover Logic for Date & Actions */
+.dateText {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  display: block;
+}
+
+.actionGroup {
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.draftCard:hover .dateText {
+  display: none;
+}
+
+.draftCard:hover .actionGroup {
+  display: flex;
+}
+
+.iconBtn {
+  padding: 0.375rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+.editBtn {
+  color: #228B22;
+}
+.editBtn:hover {
+  background-color: rgba(34, 139, 34, 0.1);
+}
+
+.deleteBtn {
+  color: #ef4444;
+}
+.deleteBtn:hover {
+  background-color: #fef2f2;
+}
