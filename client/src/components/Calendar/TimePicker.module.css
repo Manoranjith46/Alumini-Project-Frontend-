@@ -1,0 +1,265 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.timePickerContainer {
+  width: 280px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  position: relative;
+  overflow: hidden;
+  max-width: calc(100vw - 40px);
+}
+
+/* Theme Variables */
+.admin {
+  --primary-color: #2E6F40;
+  --primary-hover: #255833;
+  --primary-light: #EAF1EC;
+}
+
+.alumni {
+  --primary-color: #007BFF;
+  --primary-hover: #0069D9;
+  --primary-light: #E7F3FF;
+}
+
+.coordinator {
+  --primary-color: #FF3D00;
+  --primary-hover: #E63600;
+  --primary-light: #FFF1F0;
+}
+
+/* Header */
+.timePickerHeader {
+  padding: 16px 20px 0;
+  border-bottom: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.viewTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: -1px;
+  flex: 1;
+}
+
+.viewTab {
+  flex: 1;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.viewTab:hover {
+  color: #374151;
+}
+
+.activeTab {
+  color: var(--primary-color) !important;
+  border-bottom-color: var(--primary-color) !important;
+}
+
+.closeButton {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6B7280;
+  margin-bottom: -1px;
+}
+
+.closeButton:hover {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.closeButton span {
+  font-size: 20px;
+}
+
+/* Current Time Display */
+.currentTimeDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 4px;
+}
+
+.timeSegment {
+  font-size: 36px;
+  font-weight: 700;
+  color: #9CA3AF;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  min-width: 70px;
+  text-align: center;
+}
+
+.activeSegment {
+  color: var(--primary-color);
+  background: var(--primary-light);
+}
+
+.timeSeparator {
+  font-size: 36px;
+  font-weight: 700;
+  color: #374151;
+}
+
+/* Time Picker Body */
+.timePickerBody {
+  display: flex;
+  gap: 12px;
+  padding: 0 20px 16px;
+}
+
+.timeColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.activeColumn {
+  border-color: var(--primary-color);
+}
+
+.columnLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 8px;
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.scrollContainer {
+  max-height: 160px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+/* Custom scrollbar */
+.scrollContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+  background: #E7F3FF;
+  border-radius: 3px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #2563EB, #1D4ED8);
+  border-radius: 3px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #1D4ED8, #1E40AF);
+}
+
+.timeCell {
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin: 2px 0;
+}
+
+.timeCell:hover {
+  background: #F3F4F6;
+}
+
+.timeCell.selected {
+  background: var(--primary-color);
+  color: #FFFFFF;
+}
+
+.timeCell.selected:hover {
+  background: var(--primary-hover);
+}
+
+/* Footer */
+.timePickerFooter {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #E5E7EB;
+}
+
+.cancelButton,
+.applyButton {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.cancelButton {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.cancelButton:hover {
+  background: #E5E7EB;
+}
+
+.applyButton {
+  background: var(--primary-color);
+  color: #FFFFFF;
+}
+
+.applyButton:hover {
+  background: var(--primary-hover);
+}
+
+/* Responsive */
+@media (max-width: 320px) {
+  .timePickerContainer {
+    width: 260px;
+  }
+  
+  .timeSegment {
+    font-size: 28px;
+    min-width: 55px;
+    padding: 6px 8px;
+  }
+  
+  .timeSeparator {
+    font-size: 28px;
+  }
+}
