@@ -83,8 +83,8 @@ export default function Sidebar({ onLogout, currentView }) {
             Donation
           </span>
         </a>
-        <a 
-        className={`${styles.navLink} ${currentView === 'event_and_reunion_history' ? styles.navLinkActive : ''}`} 
+        <a
+        className={`${styles.navLink} ${currentView === 'event_and_reunion_history' ? styles.navLinkActive : ''}`}
         href="#"
         onClick={(e) => handleNavClick(e, 'event_and_reunion_history')}>
           <span className="material-symbols-outlined">event</span>

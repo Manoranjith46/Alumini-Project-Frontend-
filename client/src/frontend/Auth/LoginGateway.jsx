@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
 import styles from './LoginGateway.module.css';
 import NavBar from '../../components/Navbar/NavBar';
 import { useAuth } from '../../context/authContext/authContext';
@@ -43,11 +44,37 @@ export default function LoginGateway() {
     }
   };
 
-  const handleGoogleLogin = (e) => {
-    e.preventDefault();
+  const handleGoogleSuccess = async (tokenResponse) => {
     setError('');
-    alert('Google Authentication will be implemented soon');
-  }
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/google-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: tokenResponse.access_token }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || 'Login failed');
+        return;
+      }
+
+      saveUser({ ...data.user, token: data.token });
+
+      const role = data.user.role;
+      if (role === 'alumni') navigate('/alumini/dashboard');
+      else if (role === 'admin') navigate('/admin/dashboard');
+      else if (role === 'coordinator') navigate('/coordinator/dashboard');
+    } catch (error) {
+      setError('Unable to connect to server');
+    }
+  };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => setError('Google login failed'),
+  });
 
 
   const handleForgotPassword = () => {
@@ -164,7 +191,7 @@ export default function LoginGateway() {
           </div>
 
           {/* Google Login */}
-          <button type="button" className={styles.googleButton} onClick={handleGoogleLogin}>
+          <button type="button" className={styles.googleButton} onClick={() => googleLogin()}>
             <svg className={styles.googleIcon} viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

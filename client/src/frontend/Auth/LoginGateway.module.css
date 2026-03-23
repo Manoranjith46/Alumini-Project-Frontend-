@@ -341,6 +341,13 @@
   white-space: nowrap;
 }
 
+/* Google Button Wrapper */
+.googleButtonWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 /* Google Button */
 .googleButton {
   width: 100%;

@@ -1,7 +1,7 @@
-
-import { 
-  Mail, 
-  Users, 
+import { useState, useEffect } from 'react';
+import {
+  Mail,
+  Users,
   ArrowLeft,
   Edit,
   Trash2,
@@ -9,46 +9,114 @@ import {
   MapPin
 } from 'lucide-react';
 import styles from './AD_View_Faculty.module.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from './Components/Sidebar/Sidebar';
+import { useAuth } from '../../context/authContext/authContext';
 
-const Admin_View_Faculty = ( { onLogout } ) => {
+const API_BASE = import.meta.env.VITE_API_URL;
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
+const Admin_View_Faculty = ({ onLogout }) => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const { user } = useAuth();
+  const [facultyData, setFacultyData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Dummy Faculty Data
-  const facultyData = {
-    id: 'FAC-2045',
-    name: 'Dr. Vadin Santhiya G',
-    designation: 'HOD & Professor',
-    department: 'Computer Science and Engineering (CSE)',
-    email: 'hod.cse@ksrce.ac.in',
-    phone: '+91 98765 43210',
-    location: 'Coimbatore, Tamil Nadu',
-    status: 'Active',
-    joinDate: '12 Aug, 2015',
-    personalInfo: {
-      dob: '15 May, 1980',
-      gender: 'Female',
-      bloodGroup: 'O+',
-      address: '123, Faculty Quarters, KSRCE Campus, Tiruchengode - 637215'
-    },
-    education: [
-      { degree: 'Ph.D. in Computer Science', institution: 'Anna University, Chennai', year: '2014' },
-      { degree: 'M.E. in Software Engineering', institution: 'PSG College of Technology', year: '2005' },
-      { degree: 'B.E. in CSE', institution: 'Government College of Engineering', year: '2002' }
-    ],
-    experience: '18 Years total (10 Years at KSRCE)',
-    publications: 24,
-    patents: 2
-  };
+  useEffect(() => {
+    const fetchFaculty = async () => {
+      if (!user?.token) {
+        setError('Please login to view faculty details');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/api/faculty/${id}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch faculty details');
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.faculty) {
+          setFacultyData(data.faculty);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchFaculty();
+    }
+  }, [id, user]);
 
   const handleBack = () => {
     navigate('/admin/department');
   };
 
   const handleEdit = () => {
-    navigate('/admin/department/edit_faculty');
+    navigate(`/admin/department/edit_faculty/${id}`);
   };
+
+  if (loading) {
+    return (
+      <div className={styles.dashboardWrapper}>
+        <Sidebar currentView={'department'} onLogout={onLogout} />
+        <main className={styles.mainContent}>
+          <div className={styles.dashboardContent}>
+            <p>Loading faculty details...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.dashboardWrapper}>
+        <Sidebar currentView={'department'} onLogout={onLogout} />
+        <main className={styles.mainContent}>
+          <div className={styles.dashboardContent}>
+            <p className={styles.error}>{error}</p>
+            <button className={styles.backBtn} onClick={handleBack}>
+              <ArrowLeft size={16} /> Back to Department
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!facultyData) {
+    return (
+      <div className={styles.dashboardWrapper}>
+        <Sidebar currentView={'department'} onLogout={onLogout} />
+        <main className={styles.mainContent}>
+          <div className={styles.dashboardContent}>
+            <p>Faculty not found</p>
+            <button className={styles.backBtn} onClick={handleBack}>
+              <ArrowLeft size={16} /> Back to Department
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const profileInitial = facultyData.name.replace('Dr. ', '').trim().charAt(0).toUpperCase();
 
@@ -60,7 +128,7 @@ const Admin_View_Faculty = ( { onLogout } ) => {
 
         {/* Dashboard Content Area */}
         <div className={styles.dashboardContent}>
-          
+
           {/* Breadcrumb & Actions */}
           <div className={styles.pageHeader}>
             <div>
@@ -100,10 +168,10 @@ const Admin_View_Faculty = ( { onLogout } ) => {
                     <Mail size={16} /> <span>{facultyData.email}</span>
                   </div>
                   <div className={styles.contactItem}>
-                    <Phone size={16} /> <span>{facultyData.phone}</span>
+                    <Phone size={16} /> <span>{facultyData.phone || 'N/A'}</span>
                   </div>
                   <div className={styles.contactItem}>
-                    <MapPin size={16} /> <span>{facultyData.location}</span>
+                    <MapPin size={16} /> <span>{facultyData.location || 'N/A'}</span>
                   </div>
                 </div>
               </div>
@@ -120,27 +188,27 @@ const Admin_View_Faculty = ( { onLogout } ) => {
                 <div className={styles.cardBody}>
                   <div className={styles.infoRow}>
                     <span className={styles.infoLabel}>Staff ID</span>
-                    <span className={styles.infoValue}>{facultyData.id}</span>
+                    <span className={styles.infoValue}>{facultyData.staffId}</span>
                   </div>
                   <div className={styles.infoRow}>
                     <span className={styles.infoLabel}>Date of Birth</span>
-                    <span className={styles.infoValue}>{facultyData.personalInfo.dob}</span>
+                    <span className={styles.infoValue}>{formatDate(facultyData.personalInfo?.dob)}</span>
                   </div>
                   <div className={styles.infoRow}>
                     <span className={styles.infoLabel}>Gender</span>
-                    <span className={styles.infoValue}>{facultyData.personalInfo.gender}</span>
+                    <span className={styles.infoValue}>{facultyData.personalInfo?.gender || 'N/A'}</span>
                   </div>
                   <div className={styles.infoRow}>
                     <span className={styles.infoLabel}>Blood Group</span>
-                    <span className={styles.infoValue}>{facultyData.personalInfo.bloodGroup}</span>
+                    <span className={styles.infoValue}>{facultyData.personalInfo?.bloodGroup || 'N/A'}</span>
                   </div>
                   <div className={styles.infoRow}>
                     <span className={styles.infoLabel}>Date of Joining</span>
-                    <span className={styles.infoValue}>{facultyData.joinDate}</span>
+                    <span className={styles.infoValue}>{formatDate(facultyData.joinDate)}</span>
                   </div>
                   <div className={`${styles.infoRow} ${styles.fullWidth}`}>
                     <span className={styles.infoLabel}>Residential Address</span>
-                    <span className={styles.infoValue}>{facultyData.personalInfo.address}</span>
+                    <span className={styles.infoValue}>{facultyData.personalInfo?.address || 'N/A'}</span>
                   </div>
                 </div>
               </div>

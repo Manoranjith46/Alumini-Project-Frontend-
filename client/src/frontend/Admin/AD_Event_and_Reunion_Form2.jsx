@@ -30,6 +30,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   const [flyerBlob, setFlyerBlob] = useState(null);
   const [flyerPreviewUrl, setFlyerPreviewUrl] = useState(null);
   const [sending, setSending] = useState(false);
+  const [enhancing, setEnhancing] = useState(false);
 
   // Handle banner upload
   const handleBannerChange = (e) => {
@@ -265,10 +266,34 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
     generateFlyer(eventName, eventDate, eventTime, eventLocation, '');
   };
 
-  // Handle "Generate via Description" form submit — placeholder for AI implementation
-  const handleDescGenerate = (e) => {
+  // Handle "Generate via Description" form submit — enhance text using Ollama
+  const handleDescGenerate = async (e) => {
     e.preventDefault();
-    alert('AI-powered description generation coming soon!');
+    if (!eventDesc.trim()) {
+      alert('Please enter a description to enhance');
+      return;
+    }
+
+    setEnhancing(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/ai/enhance-text`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ text: eventDesc }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to enhance text');
+
+      setEventDesc(data.data);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setEnhancing(false);
+    }
   };
 
   // Send invitation — store flyer image in MongoDB via GridFS
@@ -401,9 +426,9 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
                       onChange={(e) => setEventDesc(e.target.value)}
                     ></textarea>
                   </div>
-                  <button onClick={handleDescGenerate} className={styles.generateBtn}>
+                  <button onClick={handleDescGenerate} className={styles.generateBtn} disabled={enhancing}>
                   <span className="material-symbols-outlined">auto_awesome</span>
-                    <span>Generate</span>
+                    <span>{enhancing ? 'Enhancing...' : 'Enhance Text'}</span>
                   </button>
                 </form>
               </section>

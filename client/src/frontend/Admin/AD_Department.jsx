@@ -14,6 +14,7 @@ const Admin_Department = ( { onLogout } ) => {
 
   // State Management
   const [departments, setDepartments] = useState([]);
+  const [coordinatorCount, setCoordinatorCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -60,7 +61,30 @@ const Admin_Department = ( { onLogout } ) => {
       }
     };
 
+    const fetchCoordinatorCount = async () => {
+      if (!user?.token) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/coordinators/all`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.coordinators) {
+            setCoordinatorCount(data.coordinators.length);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching coordinator count:', err);
+        // Don't show error for coordinator count, just keep it as 0
+      }
+    };
+
     fetchDepartments();
+    fetchCoordinatorCount();
   }, [user?.token]);
 
   // Simple Modal Handlers
@@ -156,8 +180,8 @@ const Admin_Department = ( { onLogout } ) => {
                 <div className={styles.statLabel}>Total Departments</div>
               </div>
               <div className={styles.statCard}>
-                <div className={styles.statNumber}>{departments.reduce((total, dept) => total + dept.alumniCount, 0)}</div>
-                <div className={styles.statLabel}>Total Alumni</div>
+                <div className={styles.statNumber}>{coordinatorCount}</div>
+                <div className={styles.statLabel}>Total Co-Ordinators</div>
               </div>
             <button className={styles.addBtn} onClick={handleOpenModal}>
               <Plus size={20} />

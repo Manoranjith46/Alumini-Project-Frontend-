@@ -1,12 +1,17 @@
 import { createRoot } from 'react-dom/client'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import './index.css'
 import App from './App'
 import AuthProvider from './context/authContext/authContext'
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 // This is react-dom at work: attaching your React app to the HTML div with id "root"
 const root = createRoot(document.getElementById('root'));
 root.render(
-  <AuthProvider>
-    <App />
-  </AuthProvider>
+  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </GoogleOAuthProvider>
 );

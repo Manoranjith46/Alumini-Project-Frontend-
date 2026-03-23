@@ -47,3 +47,53 @@ export const login = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+export const googleLogin = async (req, res) => {
+  try {
+    const { access_token } = req.body;
+
+    // Fetch user info from Google using access token
+    const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+
+    if (!googleRes.ok) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid Google token',
+      });
+    }
+
+    const googleUser = await googleRes.json();
+    const email = googleUser.email;
+
+    // Check if user exists in the database
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Contact Your Admin',
+      });
+    }
+
+    // Generate JWT
+    const token = generateToken({ id: user._id, role: user.role });
+
+    res.status(200).json({
+      success: true,
+      message: 'Authenticated successfully',
+      token,
+      user: {
+        id: user._id,
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(500).json({ success: false, message: 'Google authentication failed' });
+  }
+};
