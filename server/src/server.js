@@ -20,7 +20,19 @@ const app = express();
 
 // --- Middleware ---
 app.use(cors({
-  origin: ['https://jsfl43xn-5173.inc1.devtunnels.ms', 'http://localhost:5173', 'https://jsfl43xn-5000.inc1.devtunnels.ms', 'http://localhost:5000'],
+  // Local - F
+  // Local - B
+  // Vercel - F
+  // Vercel - F(T)
+  // Render - B(T)
+
+  origin: [
+    'http://localhost:5173', 
+    'http://localhost:5000',
+    'https://alumni--portal.vercel.app/',
+    'https://alumini-portal-t.vercel.app/',
+    'https://alumini-project-backend-dqpj.onrender.com',
+  ],
   credentials: true
 }));
 app.use(json());
@@ -50,7 +62,7 @@ app.use('/api/ai', aiRoutes);
 
 
 // --- Start the Server ---
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);

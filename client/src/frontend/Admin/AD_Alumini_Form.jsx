@@ -1,8 +1,42 @@
+import React, { useState } from 'react';
 import styles from './AD_Alumini_form.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 import { DateInput } from '../../components/Calendar';
 
 const Admin_Alumini_Form = ( { onLogout } ) => {
+  const [showExams, setShowExams] = useState(false);
+  const [qualRows, setQualRows] = useState([{ id: 1 }]);
+  const [alumniRows, setAlumniRows] = useState([{ id: 1 }]);
+  const [othersExam, setOthersExam] = useState({ name: '', marks: '' });
+  const [startYear, setStartYear] = useState('');
+  const endYear = startYear ? parseInt(startYear) + 4 : '';
+
+  const addQualRow = () => {
+    setQualRows([...qualRows, { id: Date.now() }]);
+  };
+
+  const deleteQualRow = (id) => {
+    if (qualRows.length > 1) {
+      setQualRows(qualRows.filter(row => row.id !== id));
+    }
+  };
+
+  const addAlumniRow = () => {
+    setAlumniRows([...alumniRows, { id: Date.now() }]);
+  };
+
+  const deleteAlumniRow = (id) => {
+    if (alumniRows.length > 1) {
+      setAlumniRows(alumniRows.filter(row => row.id !== id));
+    }
+  };
+
+  const handleOthersExamChange = (field, value) => {
+    setOthersExam(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   return (
     <div className={styles.pageLayout}>
@@ -18,53 +52,9 @@ const Admin_Alumini_Form = ( { onLogout } ) => {
               <span className="material-symbols-outlined">arrow_back</span>
               <span>Back</span>
           </div>
-        
-        {/* Top Notification Banner */}
-        <div className={styles.notificationBanner}>
-          <div className={styles.notificationLeft}>
-            <span className={`material-symbols-outlined ${styles.notifIcon}`}>notifications</span>
-            <div className={styles.notifTextWrapper}>
-              <span className={styles.badgeUpdate}>Update</span>
-              <span className={styles.notifSender}>From: Alumni Office</span>
-              <span className={styles.notifDivider}>|</span>
-              <span className={styles.notifMessage}>Invitation: Virtual Networking Session</span>
-            </div>
-          </div>
-          <button className={styles.expandBtn}>
-            <span className="material-symbols-outlined">expand_more</span>
-          </button>
-        </div>
 
         <div className={styles.formContainer}>
-          
-          {/* Registration Status Section */}
-          <section className={styles.formCard}>
-            <h2 className={styles.sectionTitle}>Registration Status</h2>
-            <div className={styles.gridThreeCol}>
-              <div className={styles.inputGroup}>
-                <label className={styles.inputLabel}>Already a Member</label>
-                <div className={styles.radioGroup}>
-                  <label className={styles.radioLabel}>
-                    <input type="radio" name="member" className={styles.radioInput} />
-                    <span>Yes</span>
-                  </label>
-                  <label className={styles.radioLabel}>
-                    <input type="radio" name="member" className={styles.radioInput} />
-                    <span>No</span>
-                  </label>
-                </div>
-              </div>
-              <div className={styles.inputGroup}>
-                <label className={styles.inputLabel}>New Registration</label>
-                <input type="text" className={styles.textInput} />
-              </div>
-              <div className={styles.inputGroup}>
-                <label className={styles.inputLabel}>Alumni Registration Number</label>
-                <input type="text" className={styles.textInput} />
-              </div>
-            </div>
-          </section>
-
+  
           {/* Section 1: Personal Details */}
           <section className={styles.formCard}>
             <h2 className={styles.sectionTitle}>Section 1: Personal Details</h2>
@@ -80,6 +70,10 @@ const Admin_Alumini_Form = ( { onLogout } ) => {
                   <input type="text" className={styles.textInput} placeholder="e.g. Robert Pierce" />
                 </div>
               </div>
+              <div>
+                <label htmlFor="email" className={styles.inputLabel} >Email Address</label>
+                <input type="email" id="email" className={styles.textInput} placeholder="Email Address" />
+              </div>
 
               <div className={styles.gridThreeCol}>
                 <div className={styles.inputGroup}>
@@ -88,26 +82,56 @@ const Admin_Alumini_Form = ( { onLogout } ) => {
                 </div>
                 <div className={styles.inputGroup}>
                   <label className={styles.inputLabel}>Years of Study (From)</label>
-                  <select className={styles.selectInput}>
-                    <option>Select Year</option>
+                  <select
+                    className={styles.selectInput}
+                    value={startYear}
+                    onChange={(e) => setStartYear(e.target.value)}
+                  >
+                    <option value="">Select Year</option>
+                    {Array.from({ length: 50 }, (_, i) => 2001 + i).map((year) => (
+                      <option className={styles.dd} key={year} value={year}>{year}</option>
+                    ))}
                   </select>
                 </div>
                 <div className={styles.inputGroup}>
                   <label className={styles.inputLabel}>(To)</label>
-                  <select className={styles.selectInput}>
-                    <option>Select Year</option>
-                  </select>
+                  <input
+                    type="text"
+                    className={styles.selectInput}
+                    value={endYear}
+                    disabled
+                    placeholder="Auto-filled"
+                    style={{ cursor: 'not-allowed', backgroundColor: '#f5f5f5'}}
+                  />
                 </div>
               </div>
 
               <div className={styles.gridTwoCol}>
                 <div className={styles.inputGroup}>
-                  <label className={styles.inputLabel}>Course / Branch</label>
-                  <input type="text" className={styles.textInput} placeholder="e.g. B.E Computer Science and Engineering" />
+                  <label className={styles.inputLabel}>Degree</label>
+                  <select className={styles.selectInput}>
+                    <option value="">Select Degree</option>
+                    <option value="B.E">B.E</option>
+                    <option value="B.Tech">B.Tech</option>
+                    <option value="M.E">M.E</option>
+                    <option value="M.Tech">M.Tech</option>
+                    <option value="MBA">MBA</option>
+                    <option value="MCA">MCA</option>
+                    <option value="Ph.D">Ph.D</option>
+                  </select>
                 </div>
                 <div className={styles.inputGroup}>
-                  <label className={styles.inputLabel}>Nick name (optional)</label>
-                  <input type="text" className={styles.textInput} placeholder="e.g. Alex" />
+                  <label className={styles.inputLabel}>Course / Branch</label>
+                  <select className={styles.selectInput}>
+                    <option value="">Select Course / Branch</option>
+                    <option value="CSE">Computer Science and Engineering (CSE)</option>
+                    <option value="IT">Information Technology (IT)</option>
+                    <option value="ECE">Electronics and Communication Engineering (ECE)</option>
+                    <option value="EEE">Electrical and Electronics Engineering (EEE)</option>
+                    <option value="MECH">Mechanical Engineering (MECH)</option>
+                    <option value="CIVIL">Civil Engineering (CIVIL)</option>
+                    <option value="AIDS">Artificial Intelligence and Data Science (AIDS)</option>
+                  </select>
                 </div>
               </div>
 
@@ -126,7 +150,6 @@ const Admin_Alumini_Form = ( { onLogout } ) => {
                       <input type="text" className={styles.textInput} placeholder="PIN Code" />
                     </div>
                     <input type="text" className={styles.textInput} placeholder="Mobile Number" />
-                    <input type="email" className={styles.textInput} placeholder="Email Address" />
                   </div>
                 </div>
 
@@ -160,27 +183,51 @@ const Admin_Alumini_Form = ( { onLogout } ) => {
               <div>
                 <label className={styles.inputLabel}>Competitive Exams Cleared</label>
                 <div className={styles.radioGroup}>
-                  <label className={styles.radioLabelDisabled}>
-                    <input type="radio" name="exam_cleared" disabled className={styles.radioInput} />
+                  <label className={styles.radioLabel}>
+                    <input type="radio" name="exam_cleared" className={styles.radioInput} onChange={() => setShowExams(true)} />
                     <span>Yes</span>
                   </label>
-                  <label className={styles.radioLabelDisabled}>
-                    <input type="radio" name="exam_cleared" disabled className={styles.radioInput} />
+                  <label className={styles.radioLabel}>
+                    <input type="radio" name="exam_cleared" className={styles.radioInput} onChange={() => setShowExams(false)} defaultChecked />
                     <span>No</span>
                   </label>
                 </div>
-                
-                <div className={styles.examsBox}>
-                  <p className={styles.examsBoxTitle}>Exams and Marks/Score</p>
-                  <div className={styles.examsGrid}>
-                    {['GRE', 'TOEFL', 'UPSC', 'GATE', 'IAS', 'Others'].map((exam) => (
-                      <div key={exam} className={styles.examItem}>
-                        <span className={styles.examName}>{exam}</span>
-                        <input type="text" className={styles.examInput} placeholder="Marks" />
+
+                {showExams && (
+                  <div className={styles.examsBox}>
+                    <p className={styles.examsBoxTitle}>Exams and Marks/Score</p>
+                    <div className={styles.examsContainer}>
+                      {['GRE', 'TOEFL', 'UPSC', 'GATE', 'IAS'].map((exam) => (
+                        <div key={exam} className={styles.examRow}>
+                          <label className={styles.examLabel}>{exam}</label>
+                          <input type="text" className={styles.examMarksInput} placeholder="Enter mark" />
+                        </div>
+                      ))}
+
+                      {/* Others Exam Section */}
+                      <div className={styles.examDivider}></div>
+                      <div className={styles.examRow}>
+                        <label className={styles.examLabel}>Other Exam</label>
+                        <div className={styles.othersInputGroup}>
+                          <input
+                            type="text"
+                            className={styles.examMarksInput}
+                            placeholder="Exam name"
+                            value={othersExam.name}
+                            onChange={(e) => handleOthersExamChange('name', e.target.value)}
+                          />
+                          <input
+                            type="text"
+                            className={styles.examMarksInput}
+                            placeholder="Mark"
+                            value={othersExam.marks}
+                            onChange={(e) => handleOthersExamChange('marks', e.target.value)}
+                          />
+                        </div>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* College Qualifications Table */}
@@ -195,28 +242,40 @@ const Admin_Alumini_Form = ( { onLogout } ) => {
                         <th>Year of Passing</th>
                         <th>% of Marks</th>
                         <th>Board / University</th>
+                        <th style={{ width: '50px', textAlign: 'center' }}>Action</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td><input type="text" className={styles.tableInput} defaultValue="e.g. B.E" /></td>
-                        <td><input type="text" className={styles.tableInput} defaultValue="KSRCE" /></td>
-                        <td><input type="text" className={styles.tableInput} defaultValue="2018" /></td>
-                        <td><input type="text" className={styles.tableInput} defaultValue="85%" /></td>
-                        <td><input type="text" className={styles.tableInput} defaultValue="Anna University" /></td>
-                      </tr>
-                      <tr>
-                        <td><input type="text" className={styles.tableInput} placeholder="..." /></td>
-                        <td><input type="text" className={styles.tableInput} placeholder="..." /></td>
-                        <td><input type="text" className={styles.tableInput} placeholder="..." /></td>
-                        <td><input type="text" className={styles.tableInput} placeholder="..." /></td>
-                        <td><input type="text" className={styles.tableInput} placeholder="..." /></td>
-                      </tr>
+                      {qualRows.map((row) => (
+                        <tr key={row.id}>
+                          <td><input type="text" className={styles.tableInput} placeholder="e.g. B.E" /></td>
+                          <td><input type="text" className={styles.tableInput} placeholder="KSRCE" /></td>
+                          <td><input type="text" className={styles.tableInput} placeholder="2018" /></td>
+                          <td><input type="text" className={styles.tableInput} placeholder="85%" /></td>
+                          <td><input type="text" className={styles.tableInput} placeholder="Anna University" /></td>
+                          <td style={{ textAlign: 'center' }}>
+                            <button
+                              type="button"
+                              className={styles.deleteBtn}
+                              onClick={() => deleteQualRow(row.id)}
+                              title="Delete row"
+                            >
+                              <span className="material-symbols-outlined">delete</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
-                </div>
+                  <button
+                    type="button"
+                    className={styles.addRowBtn}
+                    onClick={addQualRow}
+                  >
+                    + Add Row
+                  </button>
               </div>
-
+<br />
               {/* Employment Details */}
               <div>
                 <p className={styles.subSectionTitle}>Employment Details</p>
@@ -249,16 +308,15 @@ const Admin_Alumini_Form = ( { onLogout } ) => {
                   </div>
                 </div>
               </div>
-
-            </div>
+            </div>            
+          </div>
           </section>
 
           {/* Section 3: Additional Info */}
           <section className={styles.formCard}>
             <h2 className={styles.sectionTitle}>Section 3: Additional Info</h2>
             
-            <div className={styles.gridTwoCol}>
-              
+            <div className={styles.gridTwoCol}>              
               {/* Entrepreneur */}
               <div className={styles.formStack}>
                 <div className={styles.inputGroup}>
@@ -326,25 +384,38 @@ const Admin_Alumini_Form = ( { onLogout } ) => {
                       <th>Batch</th>
                       <th>E-Mail</th>
                       <th>Phone/Mobile No.</th>
+                      <th style={{ width: '50px', textAlign: 'center' }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td><input type="text" className={styles.tableInputSm} /></td>
-                      <td><input type="text" className={styles.tableInputSm} /></td>
-                      <td><input type="text" className={styles.tableInputSm} /></td>
-                      <td><input type="text" className={styles.tableInputSm} /></td>
-                      <td><input type="text" className={styles.tableInputSm} /></td>
-                    </tr>
-                    <tr>
-                      <td><input type="text" className={styles.tableInputSm} /></td>
-                      <td><input type="text" className={styles.tableInputSm} /></td>
-                      <td><input type="text" className={styles.tableInputSm} /></td>
-                      <td><input type="text" className={styles.tableInputSm} /></td>
-                      <td><input type="text" className={styles.tableInputSm} /></td>
-                    </tr>
+                    {alumniRows.map((row) => (
+                      <tr key={row.id}>
+                        <td><input type="text" className={styles.tableInputSm} placeholder="John Doe" /></td>
+                        <td><input type="text" className={styles.tableInputSm} placeholder="B.E / B.Tech" /></td>
+                        <td><input type="text" className={styles.tableInputSm} placeholder="2020" /></td>
+                        <td><input type="text" className={styles.tableInputSm} placeholder="john@email.com" /></td>
+                        <td><input type="text" className={styles.tableInputSm} placeholder="9876543210" /></td>
+                        <td style={{ textAlign: 'center' }}>
+                          <button
+                            type="button"
+                            className={styles.deleteBtn}
+                            onClick={() => deleteAlumniRow(row.id)}
+                            title="Delete row"
+                          >
+                            <span className="material-symbols-outlined">delete</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
+                <button
+                  type="button"
+                  className={styles.addRowBtn}
+                  onClick={addAlumniRow}
+                >
+                  + Add Row
+                </button>
               </div>
             </div>
 

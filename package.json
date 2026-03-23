@@ -4,8 +4,8 @@
   "description": "Alumni Portal Application",
   "type": "module",
   "scripts": {
-    "start": "cd server && npm start",
-    "dev": "concurrently \"cd client && npm run dev\" \"cd server && npm run dev\"",
+    "start": "npm start",
+    "dev": "npm run dev",
     "build": "npm --prefix client install && npm --prefix client run build"
   },
   "dependencies": {
