@@ -2,16 +2,17 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Calendar from './Calendar';
 import styles from './DateInput.module.css';
 
-const DateInput = ({ 
-  value, 
-  onChange, 
-  theme = 'admin', 
+const DateInput = ({
+  value,
+  onChange,
+  theme = 'admin',
   className = '',
   id,
   name,
   placeholder = 'Select date',
   defaultToToday = false,
-  ...props 
+  yearRange = 'default',
+  ...props
 }) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
@@ -106,7 +107,7 @@ const DateInput = ({
   };
 
   const formatDisplayDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString || typeof dateString !== 'string') return '';
     // Parse date string as local date to avoid timezone issues
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(year, month - 1, day);
@@ -144,6 +145,7 @@ const DateInput = ({
             onChange={handleCalendarChange}
             onClose={() => setIsCalendarOpen(false)}
             theme={theme}
+            yearRange={yearRange}
           />
         </div>
       )}

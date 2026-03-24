@@ -8,9 +8,11 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import invitationRoutes from './routes/invitationRoutes.js';
 import coordinatorRoutes from './routes/coordinatorRoutes.js';
+import alumniRoutes from './routes/alumniRoutes.js';
 import departmentRoutes from './routes/departmentRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import imageRoutes from './routes/imageRoutes.js';
 
 // Load environment variables from a .env file
 config();
@@ -27,7 +29,7 @@ app.use(cors({
   // Render - B(T)
 
   origin: [
-    'http://localhost:5173', 
+    'http://localhost:5173',
     'http://localhost:5000',
     'https://alumni--portal.vercel.app/',
     'https://alumini-portal-t.vercel.app/',
@@ -35,7 +37,8 @@ app.use(cors({
   ],
   credentials: true
 }));
-app.use(json());
+// JSON body size limit (1mb for form data)
+app.use(json({ limit: '1mb' }));
 
 // Database Connection
 connectDB();
@@ -54,11 +57,15 @@ app.use('/api/invitations', invitationRoutes);
 
 app.use('/api/coordinators', coordinatorRoutes);
 
+app.use('/api/alumni', alumniRoutes);
+
 app.use('/api/departments', departmentRoutes);
 
 app.use('/api/users', userRoutes);
 
 app.use('/api/ai', aiRoutes);
+
+app.use('/api/images', imageRoutes);
 
 
 // --- Start the Server ---

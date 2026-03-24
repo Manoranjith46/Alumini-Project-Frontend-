@@ -401,3 +401,24 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Loading and Error States */
+.loadingState,
+.errorState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.errorState {
+  color: #dc2626;
+}
+
+/* Badge Gray for N/A */
+.badgeGray {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}

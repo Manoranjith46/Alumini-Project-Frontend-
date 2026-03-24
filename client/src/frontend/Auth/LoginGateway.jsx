@@ -63,9 +63,12 @@ export default function LoginGateway() {
       saveUser({ ...data.user, token: data.token });
 
       const role = data.user.role;
+      console.log('Google login role:', role);
+
       if (role === 'alumni') navigate('/alumini/dashboard');
       else if (role === 'admin') navigate('/admin/dashboard');
       else if (role === 'coordinator') navigate('/coordinator/dashboard');
+      // else navigate('/alumini/dashboard');
     } catch (error) {
       setError('Unable to connect to server');
     }

@@ -163,7 +163,7 @@ export const updateDepartment = async (req, res) => {
     const department = await Department.findByIdAndUpdate(
       id,
       updateData,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!department) {
@@ -207,7 +207,7 @@ export const deleteDepartment = async (req, res) => {
     const department = await Department.findByIdAndUpdate(
       id,
       { isActive: false },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!department) {
@@ -252,7 +252,7 @@ export const updateAlumniCount = async (req, res) => {
     const department = await Department.findByIdAndUpdate(
       id,
       { alumniCount },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!department) {

@@ -273,7 +273,7 @@
 .selectInput {
   height: 2.5rem;
   padding: 0 0.75rem;
-  color: var(--text-light);
+  color: #000000;
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -623,4 +623,238 @@
 
 .submitBtn span {
   font-size: 1.25rem;
+}
+
+.submitBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Submit Message */
+.submitMessage {
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.successMessage {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.errorMessage {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+/* Small text input */
+.textInputSm {
+  width: 100%;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  background-color: var(--bg-white);
+  color: var(--text-dark);
+  font-family: inherit;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.textInputSm:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ================== SUBMIT MESSAGE ================== */
+.submitMessage {
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.successMessage {
+  background-color: #DCFCE7;
+  color: #166534;
+  border: 1px solid #BBF7D0;
+}
+
+.errorMessage {
+  background-color: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+/* ================== SIGNATURE UPLOAD ================== */
+.signatureUploadBox {
+  border: 2px dashed var(--border-color);
+  border-radius: 0.5rem;
+  background: var(--bg-surface);
+  padding: 24px 0 16px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  margin-top: 0.5rem;
+}
+
+.signatureUploadBox:hover {
+  border-color: var(--primary);
+}
+
+.uploadText {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.uploadSubtext {
+  color: var(--text-light);
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.signaturePreview {
+  max-width: 220px;
+  max-height: 60px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.clearSignatureBtn {
+  background: #FFF;
+  color: #EF4444;
+  border: 1px solid #F87171;
+  border-radius: 0.375rem;
+  padding: 4px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.clearSignatureBtn:hover {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+
+/* ================== MODAL STYLES ================== */
+.modalContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalCard {
+  background: #FFF;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  padding: 32px 24px 24px 24px;
+  min-width: 340px;
+  max-width: 420px;
+  width: 100%;
+  position: relative;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.resetBtn {
+  background: var(--bg-surface);
+  border: none;
+  border-radius: 0.375rem;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  transition: background 0.2s;
+}
+
+.resetBtn:hover {
+  background: var(--border-color);
+}
+
+.cropperArea {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: #333;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.modalFooter {
+  display: flex;
+  gap: 16px;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  background: #FFF;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: background 0.2s;
+}
+
+.cancelBtn:hover {
+  background: var(--bg-surface);
+}
+
+.uploadBtn {
+  flex: 2;
+  padding: 12px 16px;
+  border-radius: 0.5rem;
+  border: none;
+  background: var(--primary);
+  color: #FFF;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.uploadBtn:hover {
+  background: var(--primary-hover);
 }

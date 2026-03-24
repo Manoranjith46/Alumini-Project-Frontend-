@@ -181,7 +181,7 @@ export const updateCoordinator = async (req, res) => {
 		}
 
 		const coordinator = await Coordinator.findByIdAndUpdate(id, req.body, {
-			new: true,
+			returnDocument: 'after',
 			runValidators: true,
 		}).populate('userId', 'userId name email role');
 
@@ -221,7 +221,7 @@ export const deleteCoordinator = async (req, res) => {
 		await Coordinator.findByIdAndUpdate(
 			id,
 			{ isActive: false },
-			{ new: true }
+			{ returnDocument: 'after' }
 		);
 
 		// Also delete/deactivate the associated user

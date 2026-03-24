@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './Calendar.module.css';
 
-const Calendar = ({ value, onChange, onClose, theme = 'admin' }) => {
+const Calendar = ({ value, onChange, onClose, theme = 'admin', yearRange = 'default' }) => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(value ? new Date(value.split('-').map(Number).map((n, i) => i === 1 ? n - 1 : n)) : today);
   const [selectedDate, setSelectedDate] = useState(value ? new Date(value.split('-').map(Number).map((n, i) => i === 1 ? n - 1 : n)) : today);
@@ -178,11 +178,21 @@ const Calendar = ({ value, onChange, onClose, theme = 'admin' }) => {
 
   const renderYearView = () => {
     const currentYear = today.getFullYear();
-    const startYear = currentYear - 10;
-    const endYear = currentYear + 10;
+    let startYear, endYear;
+
+    // Extended range for DOB fields (1950 to current year)
+    if (yearRange === 'dob') {
+      startYear = 1950;
+      endYear = currentYear;
+    } else {
+      // Default: 10 years before and after current year
+      startYear = currentYear - 10;
+      endYear = currentYear + 10;
+    }
+
     const years = [];
-    
-    for (let year = startYear; year <= endYear; year++) {
+
+    for (let year = endYear; year >= startYear; year--) {
       years.push(year);
     }
 
