@@ -5,7 +5,7 @@ import { DateInput } from '../../components/Calendar';
 import { useAuth } from '../../context/authContext/authContext';
 import Cropper from 'react-easy-crop';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Helper to convert base64 to Blob for upload
 const base64ToBlob = (base64) => {
