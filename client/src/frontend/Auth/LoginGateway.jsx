@@ -5,6 +5,8 @@ import styles from './LoginGateway.module.css';
 import NavBar from '../../components/Navbar/NavBar';
 import { useAuth } from '../../context/authContext/authContext';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 
 export default function LoginGateway() {
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ export default function LoginGateway() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier: email, password }),
@@ -47,7 +49,7 @@ export default function LoginGateway() {
   const handleGoogleSuccess = async (tokenResponse) => {
     setError('');
     try {
-      const res = await fetch('http://localhost:5000/api/auth/google-login', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/google-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_token: tokenResponse.access_token }),

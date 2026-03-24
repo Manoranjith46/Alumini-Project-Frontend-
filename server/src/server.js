@@ -22,17 +22,11 @@ const app = express();
 
 // --- Middleware ---
 app.use(cors({
-  // Local - F
-  // Local - B
-  // Vercel - F
-  // Vercel - F(T)
-  // Render - B(T)
-
   origin: [
     'http://localhost:5173',
     'http://localhost:5000',
-    'https://alumni--portal.vercel.app/',
-    'https://alumini-portal-t.vercel.app/',
+    'https://alumni--portal.vercel.app',
+    'https://alumini-portal-t.vercel.app',
     'https://alumini-project-frontend-t.onrender.com',
   ],
   credentials: true
