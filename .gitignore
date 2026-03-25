@@ -1,4 +1,7 @@
 node_modules/
-flyer1.jpeg
-flyer2.jpeg
-flyer3.jpeg
+*.env
+.env
+dist/
+build/
+.DS_Store
+*.log
