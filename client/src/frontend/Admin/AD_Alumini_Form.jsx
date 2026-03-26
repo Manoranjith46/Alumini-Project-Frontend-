@@ -7,6 +7,16 @@ import Cropper from 'react-easy-crop';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+const createClientTraceId = () => `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+
+const logClientStep = (traceId, flow, step, details = {}) => {
+  console.log(`[RegistrationMailClient:${traceId}][${flow}][Step ${step}]`, details);
+};
+
+const logClientBreak = (traceId, flow, step, reason, details = {}) => {
+  console.warn(`[RegistrationMailClient:${traceId}][${flow}][BREAK at Step ${step}] ${reason}`, details);
+};
+
 // Helper to convert base64 to Blob for upload
 const base64ToBlob = (base64) => {
   const parts = base64.split(';base64,');
@@ -321,8 +331,15 @@ const Admin_Alumini_Form = ({ onLogout }) => {
 
   // Handle form submission
   const handleSubmit = async () => {
+    const clientTraceId = createClientTraceId();
     setIsSubmitting(true);
     setSubmitMessage({ type: '', text: '' });
+    logClientStep(clientTraceId, 'send-prefilled-link', 1, {
+      email: formData.email,
+      registerNumber: formData.registerNumber,
+      hasAuthToken: Boolean(user?.token),
+      apiBaseUrl: API_BASE_URL,
+    });
 
     // Validate required fields
     if (
@@ -334,6 +351,15 @@ const Admin_Alumini_Form = ({ onLogout }) => {
       !formData.degree ||
       !formData.branch
     ) {
+      logClientBreak(clientTraceId, 'send-prefilled-link', 2, 'Required fields missing', {
+        registerNumber: Boolean(formData.registerNumber),
+        name: Boolean(formData.name),
+        email: Boolean(formData.email),
+        dob: Boolean(formData.dob),
+        yearFrom: Boolean(formData.yearFrom),
+        degree: Boolean(formData.degree),
+        branch: Boolean(formData.branch),
+      });
       setSubmitMessage({
         type: 'error',
         text: 'Please fill all required fields (Name, Register Number, Email, DOB, Year, Degree, Branch)',
@@ -381,6 +407,7 @@ const Admin_Alumini_Form = ({ onLogout }) => {
       }));
 
     // Build request payload
+    logClientStep(clientTraceId, 'send-prefilled-link', 3, { message: 'Building request payload' });
     const payload = {
       registerNumber: formData.registerNumber,
       name: formData.name,
@@ -415,6 +442,7 @@ const Admin_Alumini_Form = ({ onLogout }) => {
 
       // Check if token exists
       if (!token) {
+        logClientBreak(clientTraceId, 'send-prefilled-link', 4, 'Auth token missing');
         setSubmitMessage({
           type: 'error',
           text: 'You are not logged in. Please login as admin first.',
@@ -423,7 +451,17 @@ const Admin_Alumini_Form = ({ onLogout }) => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/registration/send-prefilled-link`, {
+      const endpoint = `${API_BASE_URL}/api/registration/send-prefilled-link`;
+      logClientStep(clientTraceId, 'send-prefilled-link', 5, {
+        endpoint,
+        apiBaseUrl: API_BASE_URL,
+        email: formData.email,
+        hasAuthToken: Boolean(token),
+        hasPrefilledPayload: Boolean(payload),
+        pageOrigin: window.location.origin,
+      });
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -435,10 +473,35 @@ const Admin_Alumini_Form = ({ onLogout }) => {
         }),
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data = null;
+
+      try {
+        logClientStep(clientTraceId, 'send-prefilled-link', 6, { message: 'Parsing response body' });
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch (parseError) {
+        logClientBreak(clientTraceId, 'send-prefilled-link', 6, 'Non-JSON response', {
+          status: response.status,
+          responseText,
+          parseError,
+        });
+      }
+
+      logClientStep(clientTraceId, 'send-prefilled-link', 7, {
+        status: response.status,
+        ok: response.ok,
+        data,
+      });
 
       // Handle authentication errors
       if (response.status === 401) {
+        logClientBreak(clientTraceId, 'send-prefilled-link', 8, 'Unauthorized', {
+          status: response.status,
+          data,
+          serverTraceId: data?.traceId,
+          serverFlow: data?.flow,
+          serverStep: data?.step,
+        });
         setSubmitMessage({
           type: 'error',
           text: 'Session expired. Please login again.',
@@ -448,6 +511,11 @@ const Admin_Alumini_Form = ({ onLogout }) => {
       }
 
       if (response.ok && data.success) {
+        logClientStep(clientTraceId, 'send-prefilled-link', 9, {
+          message: 'Success response received',
+          serverTraceId: data?.traceId,
+          serverStep: data?.step,
+        });
         setSubmitMessage({
           type: 'success',
           text: `Registration link with pre-filled data sent successfully to ${formData.email}!`,
@@ -483,18 +551,31 @@ const Admin_Alumini_Form = ({ onLogout }) => {
         setQualRows([{ id: 1, course: '', institution: '', yearOfPassing: '', percentage: '', boardUniversity: '' }]);
         setAlumniRows([{ id: 1, name: '', degree: '', batch: '', email: '', phone: '' }]);
       } else {
+        logClientBreak(clientTraceId, 'send-prefilled-link', 10, 'API returned non-OK status', {
+          status: response.status,
+          data,
+          serverTraceId: data?.traceId,
+          serverFlow: data?.flow,
+          serverStep: data?.step,
+        });
         setSubmitMessage({
           type: 'error',
-          text: data.message || 'Failed to create alumni. Please try again.',
+          text: data?.message || 'Failed to create alumni. Please try again.',
         });
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
+      logClientBreak(clientTraceId, 'send-prefilled-link', 11, 'Fetch failed', {
+        error,
+        message: error?.message,
+        stack: error?.stack,
+        apiBaseUrl: API_BASE_URL,
+      });
       setSubmitMessage({
         type: 'error',
         text: 'Network error. Please check your connection and try again.',
       });
     } finally {
+      logClientStep(clientTraceId, 'send-prefilled-link', 12, { message: 'handleSubmit finished' });
       setIsSubmitting(false);
     }
   };

@@ -7,6 +7,16 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+const createClientTraceId = () => `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+
+const logClientStep = (traceId, flow, step, details = {}) => {
+  console.log(`[RegistrationMailClient:${traceId}][${flow}][Step ${step}]`, details);
+};
+
+const logClientBreak = (traceId, flow, step, reason, details = {}) => {
+  console.warn(`[RegistrationMailClient:${traceId}][${flow}][BREAK at Step ${step}] ${reason}`, details);
+};
+
 // Helper function to format address object to string
 const formatAddress = (address) => {
   if (!address || typeof address !== 'object') return '-';
@@ -78,16 +88,33 @@ const Admin_Alumini = ( { onLogout } ) => {
 
   // Send registration links
   const handleSendRegistrationLinks = async () => {
+    const clientTraceId = createClientTraceId();
     if (emailList.length === 0) {
+      logClientBreak(clientTraceId, 'send-links', 1, 'No emails added');
       setEmailError('Please add at least one email');
       return;
     }
 
     setSendingEmails(true);
     setEmailError('');
+    logClientStep(clientTraceId, 'send-links', 2, {
+      emailCount: emailList.length,
+      hasAuthToken: Boolean(user?.token),
+      apiBaseUrl: API_BASE_URL,
+    });
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/registration/send-links`, {
+      const endpoint = `${API_BASE_URL}/api/registration/send-links`;
+      logClientStep(clientTraceId, 'send-links', 3, {
+        endpoint,
+        apiBaseUrl: API_BASE_URL,
+        emailCount: emailList.length,
+        emails: emailList,
+        hasAuthToken: Boolean(user?.token),
+        pageOrigin: window.location.origin,
+      });
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,9 +123,33 @@ const Admin_Alumini = ( { onLogout } ) => {
         body: JSON.stringify({ emails: emailList }),
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data = null;
 
-      if (data.success) {
+      try {
+        logClientStep(clientTraceId, 'send-links', 4, { message: 'Parsing response body' });
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch (parseError) {
+        logClientBreak(clientTraceId, 'send-links', 4, 'Non-JSON response', {
+          status: response.status,
+          responseText,
+          parseError,
+        });
+      }
+
+      logClientStep(clientTraceId, 'send-links', 5, {
+        status: response.status,
+        ok: response.ok,
+        data,
+      });
+
+      if (data?.success) {
+        logClientStep(clientTraceId, 'send-links', 6, {
+          sent: data.sent,
+          failedCount: data.failed?.length || 0,
+          serverTraceId: data?.traceId,
+          serverStep: data?.step,
+        });
         let message = `Successfully sent ${data.sent} registration link(s)!`;
         if (data.failed?.length > 0) {
           message += `\n\nFailed:\n${data.failed.map(f => `${f.email}: ${f.reason}`).join('\n')}`;
@@ -108,12 +159,25 @@ const Admin_Alumini = ( { onLogout } ) => {
         setEmailList([]);
         setEmailInput('');
       } else {
-        setEmailError(data.message || 'Failed to send links');
+        logClientBreak(clientTraceId, 'send-links', 6, 'API returned non-OK status', {
+          status: response.status,
+          data,
+          serverTraceId: data?.traceId,
+          serverFlow: data?.flow,
+          serverStep: data?.step,
+        });
+        setEmailError(data?.message || 'Failed to send links');
       }
     } catch (error) {
       setEmailError('Failed to send registration links. Please try again.');
-      console.error('Error sending registration links:', error);
+      logClientBreak(clientTraceId, 'send-links', 7, 'Fetch failed', {
+        error,
+        message: error?.message,
+        stack: error?.stack,
+        apiBaseUrl: API_BASE_URL,
+      });
     } finally {
+      logClientStep(clientTraceId, 'send-links', 8, { message: 'handleSendRegistrationLinks finished' });
       setSendingEmails(false);
     }
   };

@@ -5,6 +5,16 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+const createClientTraceId = () => `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+
+const logClientStep = (traceId, flow, step, details = {}) => {
+  console.log(`[RegistrationMailClient:${traceId}][${flow}][Step ${step}]`, details);
+};
+
+const logClientBreak = (traceId, flow, step, reason, details = {}) => {
+  console.warn(`[RegistrationMailClient:${traceId}][${flow}][BREAK at Step ${step}] ${reason}`, details);
+};
+
 const AD_Alumni_Registration_Form = ({ onLogout }) => {
   const { user } = useAuth();
 
@@ -28,11 +38,18 @@ const AD_Alumni_Registration_Form = ({ onLogout }) => {
 
   // Handle form submission - creates token and sends registration email
   const handleSubmit = async () => {
+    const clientTraceId = createClientTraceId();
     setIsSubmitting(true);
     setSubmitMessage({ type: '', text: '' });
+    logClientStep(clientTraceId, 'send-single-link', 1, {
+      email: formData.email,
+      hasAuthToken: Boolean(user?.token),
+      apiBaseUrl: API_BASE_URL,
+    });
 
     // Validate email
     if (!formData.email) {
+      logClientBreak(clientTraceId, 'send-single-link', 2, 'Email missing');
       setSubmitMessage({
         type: 'error',
         text: 'Please enter an email address',
@@ -44,6 +61,7 @@ const AD_Alumni_Registration_Form = ({ onLogout }) => {
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
+      logClientBreak(clientTraceId, 'send-single-link', 3, 'Invalid email format', { email: formData.email });
       setSubmitMessage({
         type: 'error',
         text: 'Please enter a valid email address',
@@ -53,7 +71,16 @@ const AD_Alumni_Registration_Form = ({ onLogout }) => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/registration/send-single-link`, {
+      const endpoint = `${API_BASE_URL}/api/registration/send-single-link`;
+      logClientStep(clientTraceId, 'send-single-link', 4, {
+        endpoint,
+        apiBaseUrl: API_BASE_URL,
+        email: formData.email,
+        hasAuthToken: Boolean(user?.token),
+        pageOrigin: window.location.origin,
+      });
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,9 +91,32 @@ const AD_Alumni_Registration_Form = ({ onLogout }) => {
         }),
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data = null;
+
+      try {
+        logClientStep(clientTraceId, 'send-single-link', 5, { message: 'Parsing response body' });
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch (parseError) {
+        logClientBreak(clientTraceId, 'send-single-link', 5, 'Non-JSON response', {
+          status: response.status,
+          responseText,
+          parseError,
+        });
+      }
+
+      logClientStep(clientTraceId, 'send-single-link', 6, {
+        status: response.status,
+        ok: response.ok,
+        data,
+      });
 
       if (response.ok) {
+        logClientStep(clientTraceId, 'send-single-link', 7, {
+          message: 'Success response received',
+          serverTraceId: data?.traceId,
+          serverStep: data?.step,
+        });
         setSubmitMessage({
           type: 'success',
           text: `Registration link sent successfully to ${formData.email}!`,
@@ -74,18 +124,31 @@ const AD_Alumni_Registration_Form = ({ onLogout }) => {
         // Reset form
         setFormData({ email: '' });
       } else {
+        logClientBreak(clientTraceId, 'send-single-link', 7, 'API returned non-OK status', {
+          status: response.status,
+          data,
+          serverTraceId: data?.traceId,
+          serverFlow: data?.flow,
+          serverStep: data?.step,
+        });
         setSubmitMessage({
           type: 'error',
-          text: data.message || 'Failed to send registration link',
+          text: data?.message || 'Failed to send registration link',
         });
       }
     } catch (error) {
-      console.error('Error sending registration link:', error);
+      logClientBreak(clientTraceId, 'send-single-link', 8, 'Fetch failed', {
+        error,
+        message: error?.message,
+        stack: error?.stack,
+        apiBaseUrl: API_BASE_URL,
+      });
       setSubmitMessage({
         type: 'error',
         text: 'Error connecting to server. Please try again.',
       });
     } finally {
+      logClientStep(clientTraceId, 'send-single-link', 9, { message: 'handleSubmit finished' });
       setIsSubmitting(false);
     }
   };

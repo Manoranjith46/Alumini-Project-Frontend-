@@ -16,42 +16,87 @@ const createTransporter = () => {
 	});
 };
 
+const createTraceId = () => `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+
+const getErrorDebugInfo = (error) => ({
+	message: error?.message || 'Unknown error',
+	code: error?.code || null,
+	command: error?.command || null,
+	responseCode: error?.responseCode || null,
+	response: error?.response || null,
+	stack: error?.stack ? error.stack.split('\n').slice(0, 3).join(' | ') : null,
+});
+
+const logStep = (traceId, flow, step, details = {}) => {
+	console.log(`[RegistrationMail:${traceId}][${flow}][Step ${step}]`, details);
+};
+
+const logBreak = (traceId, flow, step, reason, details = {}) => {
+	console.warn(`[RegistrationMail:${traceId}][${flow}][BREAK at Step ${step}] ${reason}`, details);
+};
+
+const sendStepFailure = (res, status, traceId, flow, step, message, extra = {}) => {
+	return res.status(status).json({
+		success: false,
+		message,
+		traceId,
+		flow,
+		step,
+		...extra,
+	});
+};
+
 /**
  * Send registration links to multiple emails
  * POST /api/registration/send-links
  */
 export const sendRegistrationLinks = async (req, res) => {
+	const traceId = createTraceId();
 	try {
 		const { emails } = req.body;
+		logStep(traceId, 'send-links', 1, {
+			emailCount: Array.isArray(emails) ? emails.length : 0,
+			hasAuthHeader: Boolean(req.headers.authorization),
+			hasEmailUser: Boolean(process.env.EMAIL_USER),
+			hasEmailAppPassword: Boolean(process.env.EMAIL_APP_PASSWORD),
+			portalUrl: process.env.PORTAL_URL || 'http://localhost:5173',
+		});
 
 		if (!emails || !Array.isArray(emails) || emails.length === 0) {
-			return res.status(400).json({
-				success: false,
-				message: 'Please provide an array of emails',
-			});
+			logBreak(traceId, 'send-links', 2, 'Invalid or empty emails array', { emails });
+			return sendStepFailure(res, 400, traceId, 'send-links', 2, 'Please provide an array of emails');
 		}
 
 		// Validate email formats
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		const invalidEmails = emails.filter((e) => !emailRegex.test(e));
 		if (invalidEmails.length > 0) {
-			return res.status(400).json({
-				success: false,
-				message: `Invalid email format: ${invalidEmails.join(', ')}`,
-			});
+			logBreak(traceId, 'send-links', 3, 'Invalid email format', { invalidEmails });
+			return sendStepFailure(
+				res,
+				400,
+				traceId,
+				'send-links',
+				3,
+				`Invalid email format: ${invalidEmails.join(', ')}`,
+				{ invalidEmails }
+			);
 		}
 
+		logStep(traceId, 'send-links', 4, { message: 'Creating transporter' });
 		const transporter = createTransporter();
 		const portalBaseUrl = process.env.PORTAL_URL || 'http://localhost:5173';
 
 		const sent = [];
 		const failed = [];
 
-		for (const email of emails) {
+		for (const [index, email] of emails.entries()) {
 			try {
+				logStep(traceId, 'send-links', 5, { index, email, message: 'Processing recipient' });
 				// Check if user already exists
 				const existingUser = await User.findOne({ email: email.toLowerCase() });
 				if (existingUser) {
+					logBreak(traceId, 'send-links', 6, 'Existing user found', { index, email });
 					failed.push({ email, reason: 'User already registered' });
 					continue;
 				}
@@ -64,12 +109,19 @@ export const sendRegistrationLinks = async (req, res) => {
 				});
 
 				if (existingToken) {
+					logBreak(traceId, 'send-links', 7, 'Existing active token found', { index, email });
 					failed.push({ email, reason: 'Registration link already sent' });
 					continue;
 				}
 
 				// Create new token (2-day expiry)
 				const tokenRecord = await RegistrationToken.createToken(email.toLowerCase());
+				logStep(traceId, 'send-links', 8, {
+					index,
+					email,
+					tokenPrefix: tokenRecord.token?.slice(0, 8),
+					expiresAt: tokenRecord.expiresAt,
+				});
 
 				// Create registration link
 				const registrationUrl = `${portalBaseUrl}/register/alumni/${tokenRecord.token}`;
@@ -114,31 +166,54 @@ export const sendRegistrationLinks = async (req, res) => {
 				`;
 
 				// Send email
-				await transporter.sendMail({
+				logStep(traceId, 'send-links', 9, { index, email, registrationUrl });
+				const mailInfo = await transporter.sendMail({
 					from: `"Alumni Portal" <${process.env.EMAIL_USER}>`,
 					to: email,
 					subject: 'Complete Your Alumni Portal Registration',
 					html: emailHtml,
 				});
+				logStep(traceId, 'send-links', 10, {
+					index,
+					email,
+					messageId: mailInfo?.messageId,
+				});
 
 				sent.push(email);
 			} catch (error) {
-				console.error(`Failed to send to ${email}:`, error.message);
+				console.error(`[RegistrationMail:${traceId}][send-links][BREAK at Step 9] Failed to send`, {
+					index,
+					email,
+					...getErrorDebugInfo(error),
+				});
 				failed.push({ email, reason: error.message });
 			}
 		}
+
+		logStep(traceId, 'send-links', 11, {
+			sentCount: sent.length,
+			failedCount: failed.length,
+		});
 
 		res.status(200).json({
 			success: true,
 			message: `Sent ${sent.length} registration link(s)`,
 			sent: sent.length,
 			failed: failed,
+			traceId,
+			flow: 'send-links',
+			step: 11,
 		});
 	} catch (error) {
-		console.error('Error sending registration links:', error);
+		const debug = getErrorDebugInfo(error);
+		console.error(`[RegistrationMail:${traceId}][send-links][BREAK at Step 12] Error sending registration links`, debug);
 		res.status(500).json({
 			success: false,
-			message: 'Server error',
+			message: debug.message || 'Server error',
+			traceId,
+			flow: 'send-links',
+			step: 12,
+			debug,
 		});
 	}
 };
@@ -148,35 +223,39 @@ export const sendRegistrationLinks = async (req, res) => {
  * POST /api/registration/send-single-link
  */
 export const sendSingleRegistrationLink = async (req, res) => {
+	const traceId = createTraceId();
 	try {
 		const { email } = req.body;
+		logStep(traceId, 'send-single-link', 1, {
+			email,
+			hasAuthHeader: Boolean(req.headers.authorization),
+			hasEmailUser: Boolean(process.env.EMAIL_USER),
+			hasEmailAppPassword: Boolean(process.env.EMAIL_APP_PASSWORD),
+			portalUrl: process.env.PORTAL_URL || 'http://localhost:5173',
+		});
 
 		if (!email) {
-			return res.status(400).json({
-				success: false,
-				message: 'Email is required',
-			});
+			logBreak(traceId, 'send-single-link', 2, 'Email missing');
+			return sendStepFailure(res, 400, traceId, 'send-single-link', 2, 'Email is required');
 		}
 
 		// Validate email format
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
-			return res.status(400).json({
-				success: false,
-				message: 'Invalid email format',
-			});
+			logBreak(traceId, 'send-single-link', 3, 'Invalid email format', { email });
+			return sendStepFailure(res, 400, traceId, 'send-single-link', 3, 'Invalid email format');
 		}
 
 		// Check if user already exists
+		logStep(traceId, 'send-single-link', 4, { email, message: 'Checking existing user' });
 		const existingUser = await User.findOne({ email: email.toLowerCase() });
 		if (existingUser) {
-			return res.status(400).json({
-				success: false,
-				message: 'User already registered with this email',
-			});
+			logBreak(traceId, 'send-single-link', 4, 'User already exists', { email });
+			return sendStepFailure(res, 400, traceId, 'send-single-link', 4, 'User already registered with this email');
 		}
 
 		// Check if there's an existing unused token for this email
+		logStep(traceId, 'send-single-link', 5, { email, message: 'Checking existing active token' });
 		const existingToken = await RegistrationToken.findOne({
 			email: email.toLowerCase(),
 			isUsed: false,
@@ -184,15 +263,27 @@ export const sendSingleRegistrationLink = async (req, res) => {
 		});
 
 		if (existingToken) {
-			return res.status(400).json({
-				success: false,
-				message: 'Registration link already sent to this email. Please check inbox.',
-			});
+			logBreak(traceId, 'send-single-link', 5, 'Active token already exists', { email });
+			return sendStepFailure(
+				res,
+				400,
+				traceId,
+				'send-single-link',
+				5,
+				'Registration link already sent to this email. Please check inbox.'
+			);
 		}
 
 		// Create new token (2-day expiry)
+		logStep(traceId, 'send-single-link', 6, { email, message: 'Creating token' });
 		const tokenRecord = await RegistrationToken.createToken(email.toLowerCase());
+		logStep(traceId, 'send-single-link', 7, {
+			email,
+			tokenPrefix: tokenRecord.token?.slice(0, 8),
+			expiresAt: tokenRecord.expiresAt,
+		});
 
+		logStep(traceId, 'send-single-link', 8, { message: 'Creating transporter' });
 		const transporter = createTransporter();
 		const portalBaseUrl = process.env.PORTAL_URL || 'http://localhost:5173';
 
@@ -239,22 +330,35 @@ export const sendSingleRegistrationLink = async (req, res) => {
 		`;
 
 		// Send email
-		await transporter.sendMail({
+		logStep(traceId, 'send-single-link', 9, { email, registrationUrl, message: 'Sending email' });
+		const mailInfo = await transporter.sendMail({
 			from: `"Alumni Portal" <${process.env.EMAIL_USER}>`,
 			to: email,
 			subject: 'Complete Your Alumni Portal Registration',
 			html: emailHtml,
 		});
+		logStep(traceId, 'send-single-link', 10, {
+			email,
+			messageId: mailInfo?.messageId,
+		});
 
 		res.status(200).json({
 			success: true,
 			message: `Registration link sent successfully to ${email}`,
+			traceId,
+			flow: 'send-single-link',
+			step: 10,
 		});
 	} catch (error) {
-		console.error('Error sending registration link:', error);
+		const debug = getErrorDebugInfo(error);
+		console.error(`[RegistrationMail:${traceId}][send-single-link][BREAK at Step 11] Error sending registration link`, debug);
 		res.status(500).json({
 			success: false,
-			message: 'Server error',
+			message: debug.message || 'Server error',
+			traceId,
+			flow: 'send-single-link',
+			step: 11,
+			debug,
 		});
 	}
 };
@@ -264,42 +368,45 @@ export const sendSingleRegistrationLink = async (req, res) => {
  * POST /api/registration/send-prefilled-link
  */
 export const sendPrefilledRegistrationLink = async (req, res) => {
+	const traceId = createTraceId();
 	try {
 		const { email, prefilledData } = req.body;
+		logStep(traceId, 'send-prefilled-link', 1, {
+			email,
+			hasPrefilledData: Boolean(prefilledData),
+			hasAuthHeader: Boolean(req.headers.authorization),
+			hasEmailUser: Boolean(process.env.EMAIL_USER),
+			hasEmailAppPassword: Boolean(process.env.EMAIL_APP_PASSWORD),
+			portalUrl: process.env.PORTAL_URL || 'http://localhost:5173',
+		});
 
 		if (!email) {
-			return res.status(400).json({
-				success: false,
-				message: 'Email is required',
-			});
+			logBreak(traceId, 'send-prefilled-link', 2, 'Email missing');
+			return sendStepFailure(res, 400, traceId, 'send-prefilled-link', 2, 'Email is required');
 		}
 
 		if (!prefilledData) {
-			return res.status(400).json({
-				success: false,
-				message: 'Pre-filled data is required',
-			});
+			logBreak(traceId, 'send-prefilled-link', 3, 'Pre-filled data missing', { email });
+			return sendStepFailure(res, 400, traceId, 'send-prefilled-link', 3, 'Pre-filled data is required');
 		}
 
 		// Validate email format
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
-			return res.status(400).json({
-				success: false,
-				message: 'Invalid email format',
-			});
+			logBreak(traceId, 'send-prefilled-link', 4, 'Invalid email format', { email });
+			return sendStepFailure(res, 400, traceId, 'send-prefilled-link', 4, 'Invalid email format');
 		}
 
 		// Check if user already exists
+		logStep(traceId, 'send-prefilled-link', 5, { email, message: 'Checking existing user' });
 		const existingUser = await User.findOne({ email: email.toLowerCase() });
 		if (existingUser) {
-			return res.status(400).json({
-				success: false,
-				message: 'User already registered with this email',
-			});
+			logBreak(traceId, 'send-prefilled-link', 5, 'User already exists', { email });
+			return sendStepFailure(res, 400, traceId, 'send-prefilled-link', 5, 'User already registered with this email');
 		}
 
 		// Check if there's an existing unused token for this email
+		logStep(traceId, 'send-prefilled-link', 6, { email, message: 'Checking existing active token' });
 		const existingToken = await RegistrationToken.findOne({
 			email: email.toLowerCase(),
 			isUsed: false,
@@ -307,15 +414,27 @@ export const sendPrefilledRegistrationLink = async (req, res) => {
 		});
 
 		if (existingToken) {
-			return res.status(400).json({
-				success: false,
-				message: 'Registration link already sent to this email. Please check inbox.',
-			});
+			logBreak(traceId, 'send-prefilled-link', 6, 'Active token already exists', { email });
+			return sendStepFailure(
+				res,
+				400,
+				traceId,
+				'send-prefilled-link',
+				6,
+				'Registration link already sent to this email. Please check inbox.'
+			);
 		}
 
 		// Create new token with pre-filled data (2-day expiry)
+		logStep(traceId, 'send-prefilled-link', 7, { email, message: 'Creating token' });
 		const tokenRecord = await RegistrationToken.createToken(email.toLowerCase(), prefilledData);
+		logStep(traceId, 'send-prefilled-link', 8, {
+			email,
+			tokenPrefix: tokenRecord.token?.slice(0, 8),
+			expiresAt: tokenRecord.expiresAt,
+		});
 
+		logStep(traceId, 'send-prefilled-link', 9, { message: 'Creating transporter' });
 		const transporter = createTransporter();
 		const portalBaseUrl = process.env.PORTAL_URL || 'http://localhost:5173';
 
@@ -362,22 +481,35 @@ export const sendPrefilledRegistrationLink = async (req, res) => {
 		`;
 
 		// Send email
-		await transporter.sendMail({
+		logStep(traceId, 'send-prefilled-link', 10, { email, registrationUrl, message: 'Sending email' });
+		const mailInfo = await transporter.sendMail({
 			from: `"Alumni Portal" <${process.env.EMAIL_USER}>`,
 			to: email,
 			subject: 'Complete Your Alumni Portal Registration',
 			html: emailHtml,
 		});
+		logStep(traceId, 'send-prefilled-link', 11, {
+			email,
+			messageId: mailInfo?.messageId,
+		});
 
 		res.status(200).json({
 			success: true,
 			message: `Registration link with pre-filled data sent successfully to ${email}`,
+			traceId,
+			flow: 'send-prefilled-link',
+			step: 11,
 		});
 	} catch (error) {
-		console.error('Error sending pre-filled registration link:', error);
+		const debug = getErrorDebugInfo(error);
+		console.error(`[RegistrationMail:${traceId}][send-prefilled-link][BREAK at Step 12] Error sending pre-filled registration link`, debug);
 		res.status(500).json({
 			success: false,
-			message: 'Server error',
+			message: debug.message || 'Server error',
+			traceId,
+			flow: 'send-prefilled-link',
+			step: 12,
+			debug,
 		});
 	}
 };
