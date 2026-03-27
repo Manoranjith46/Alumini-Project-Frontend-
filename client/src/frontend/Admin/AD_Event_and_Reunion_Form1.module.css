@@ -61,7 +61,7 @@
 
 /* Back Button */
 .backButton {
-  margin: 10px 0px 0px 10px;
+  margin: 10px 0px 10px 10px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -328,4 +328,57 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin: 0;
+}
+
+/* Row Group for side-by-side inputs */
+.rowGroup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .rowGroup {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Form Select */
+.formSelect {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.formSelect:disabled {
+  background-color: var(--bg-light);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Multi-select styling */
+.multiSelect {
+  min-height: 120px;
+  background-image: none;
+  padding-right: 1.25rem;
+}
+
+.multiSelect option {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.multiSelect option:checked {
+  background: linear-gradient(0deg, var(--primary) 0%, var(--primary) 100%);
+  color: white;
+}
+
+/* Helper Text */
+.helperText {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-style: italic;
 }

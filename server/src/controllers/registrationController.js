@@ -96,6 +96,7 @@ export const sendRegistrationLinks = async (req, res) => {
 				// Check if there's an existing unused token for this email
 				const existingToken = await RegistrationToken.findOne({
 					email: email.toLowerCase(),
+					status: 'pending',
 					isUsed: false,
 					expiresAt: { $gt: new Date() },
 				});
@@ -177,6 +178,7 @@ export const sendRegistrationLinks = async (req, res) => {
 					token,
 					email: email.toLowerCase(),
 					expiresAt,
+					status: 'pending',
 				});
 				logStep(traceId, 'send-links', 10.1, {
 					index,
@@ -277,6 +279,7 @@ export const sendSingleRegistrationLink = async (req, res) => {
 		logStep(traceId, 'send-single-link', 5, { email, message: 'Checking existing active token' });
 		const existingToken = await RegistrationToken.findOne({
 			email: email.toLowerCase(),
+			status: 'pending',
 			isUsed: false,
 			expiresAt: { $gt: new Date() },
 		});
@@ -367,6 +370,7 @@ export const sendSingleRegistrationLink = async (req, res) => {
 			token,
 			email: email.toLowerCase(),
 			expiresAt,
+			status: 'pending',
 		});
 		logStep(traceId, 'send-single-link', 11, {
 			email,
@@ -441,6 +445,7 @@ export const sendPrefilledRegistrationLink = async (req, res) => {
 		logStep(traceId, 'send-prefilled-link', 6, { email, message: 'Checking existing active token' });
 		const existingToken = await RegistrationToken.findOne({
 			email: email.toLowerCase(),
+			status: 'pending',
 			isUsed: false,
 			expiresAt: { $gt: new Date() },
 		});
@@ -532,6 +537,7 @@ export const sendPrefilledRegistrationLink = async (req, res) => {
 			email: email.toLowerCase(),
 			expiresAt,
 			prefilledData,
+			status: 'pending',
 		});
 		logStep(traceId, 'send-prefilled-link', 12, {
 			email,

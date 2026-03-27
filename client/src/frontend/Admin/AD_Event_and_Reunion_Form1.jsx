@@ -1,29 +1,86 @@
 import Sidebar from './Components/Sidebar/Sidebar';
 import styles from './AD_Event_and_Reunion_Form1.module.css';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/authContext/authContext';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Admin_Event_and_Reunion_Form1 = ( { onLogout } ) => {
 
   const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [eventName, setEventName] = useState('');
-  const [alumniName, setAlumniName] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventDay, setEventDay] = useState('');
+  const [eventTime, setEventTime] = useState('');
+  const [venue, setVenue] = useState('');
+  const [organizer, setOrganizer] = useState('');
+  const [coOrganizer, setCoOrganizer] = useState('');
+  const [departments, setDepartments] = useState([]);
   const [errors, setErrors] = useState({});
+
+  // Fetch departments
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/departments`, {
+          headers: { Authorization: `Bearer ${user?.token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setDepartments(data.departments);
+        }
+      } catch (err) {
+        console.error('Failed to fetch departments:', err);
+      }
+    };
+    if (user?.token) fetchDepartments();
+  }, [user?.token]);
+
+  // Calculate day when date changes
+  useEffect(() => {
+    if (eventDate) {
+      const date = new Date(eventDate);
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      setEventDay(days[date.getDay()]);
+    } else {
+      setEventDay('');
+    }
+  }, [eventDate]);
+
+  // Filter out organizer from co-organizer options
+  const coOrganizerOptions = departments.filter(dept => dept._id !== organizer);
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
     if (!eventName.trim()) newErrors.eventName = 'Event name is required';
-    if (!alumniName.trim()) newErrors.alumniName = 'Alumni name is required';
+    if (!eventDate) newErrors.eventDate = 'Event date is required';
+    if (!eventTime) newErrors.eventTime = 'Event time is required';
+    if (!venue.trim()) newErrors.venue = 'Venue is required';
+    if (!organizer) newErrors.organizer = 'Organizer is required';
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
+
+    const organizerDept = departments.find(d => d._id === organizer);
+    const coOrganizerDept = coOrganizer ? departments.find(d => d._id === coOrganizer) : null;
+
     setErrors({});
     navigate('/admin/event_and_reunion_form2', {
-      state: { eventName: eventName.trim(), alumniName: alumniName.trim() }
+      state: {
+        eventName: eventName.trim(),
+        eventDate,
+        eventDay,
+        eventTime,
+        venue: venue.trim(),
+        organizer: organizerDept,
+        coOrganizer: coOrganizerDept
+      }
     });
   };
 
@@ -44,26 +101,6 @@ const Admin_Event_and_Reunion_Form1 = ( { onLogout } ) => {
               <span className="material-symbols-outlined">arrow_back</span>
               <span>Back</span>
           </div>
-        
-        {/* Header */}
-        <header className={styles.pageHeader}>
-          <div>
-            <h2 className={styles.pageTitle}>Invitation Creator</h2>
-            <p className={styles.pageSubtitle}>Design and issue professional event invitations for alumni.</p>
-          </div>
-          
-          <div className={styles.headerActions}>
-            <button className={styles.notificationBtn}>
-              <span className="material-symbols-outlined">notifications</span>
-              <span className={styles.notificationDot}></span>
-            </button>
-            <button className={styles.profileBtn}>
-              <div className={styles.profileAvatar}>
-                <span className="material-symbols-outlined">person</span>
-              </div>
-            </button>
-          </div>
-        </header>
 
         {/* Form Container */}
         <div className={styles.contentWrapper}>
@@ -80,37 +117,113 @@ const Admin_Event_and_Reunion_Form1 = ( { onLogout } ) => {
 
             {/* Form */}
             <form className={styles.form} onSubmit={handleFormSubmit}>
-              
+
+              {/* Event Name */}
               <div className={styles.inputGroup}>
-                <label htmlFor="event-name" className={styles.formLabel}>Event Name</label>
-                <input 
-                  id="event-name" 
-                  name="event-name" 
-                  placeholder="e.g. Annual Networking Gala" 
+                <label className={styles.formLabel}>Event Name</label>
+                <input
+                  type="text"
                   className={`${styles.formInput} ${errors.eventName ? styles.inputError : ''}`}
+                  placeholder="Enter event name"
                   value={eventName}
-                  onChange={(e) => { setEventName(e.target.value); setErrors(prev => ({ ...prev, eventName: '' })); }}
+                  onChange={(e) => setEventName(e.target.value)}
                 />
                 {errors.eventName && <span className={styles.errorText}>{errors.eventName}</span>}
               </div>
 
-              <div className={styles.inputGroup}>
-                <label htmlFor="alumni-name" className={styles.formLabel}>Alumni Name</label>
-                <input 
-                  type="text" 
-                  id="alumni-name" 
-                  name="alumni-name" 
-                  placeholder="e.g. John Doe" 
-                  className={`${styles.formInput} ${errors.alumniName ? styles.inputError : ''}`}
-                  value={alumniName}
-                  onChange={(e) => { setAlumniName(e.target.value); setErrors(prev => ({ ...prev, alumniName: '' })); }}
-                />
-                {errors.alumniName && <span className={styles.errorText}>{errors.alumniName}</span>}
+              {/* Event Date and Day */}
+              <div className={styles.rowGroup}>
+                <div className={styles.inputGroup}>
+                  <label className={styles.formLabel}>Event Date</label>
+                  <input
+                    type="date"
+                    className={`${styles.formInput} ${errors.eventDate ? styles.inputError : ''}`}
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                  />
+                  {errors.eventDate && <span className={styles.errorText}>{errors.eventDate}</span>}
+                </div>
+                <div className={styles.inputGroup}>
+                  <label className={styles.formLabel}>Day</label>
+                  <input
+                    type="text"
+                    className={styles.formInput}
+                    value={eventDay}
+                    placeholder="Auto-calculated"
+                    readOnly
+                  />
+                </div>
               </div>
 
+              {/* Event Time */}
+              <div className={styles.inputGroup}>
+                <label className={styles.formLabel}>Event Time</label>
+                <input
+                  type="time"
+                  className={`${styles.formInput} ${errors.eventTime ? styles.inputError : ''}`}
+                  value={eventTime}
+                  onChange={(e) => setEventTime(e.target.value)}
+                />
+                {errors.eventTime && <span className={styles.errorText}>{errors.eventTime}</span>}
+              </div>
+
+              {/* Venue */}
+              <div className={styles.inputGroup}>
+                <label className={styles.formLabel}>Venue</label>
+                <input
+                  type="text"
+                  className={`${styles.formInput} ${errors.venue ? styles.inputError : ''}`}
+                  placeholder="Enter event venue"
+                  value={venue}
+                  onChange={(e) => setVenue(e.target.value)}
+                />
+                {errors.venue && <span className={styles.errorText}>{errors.venue}</span>}
+              </div>
+
+              {/* Organizer */}
+              <div className={styles.inputGroup}>
+                <label className={styles.formLabel}>Organizer (Department)</label>
+                <select
+                  className={`${styles.formInput} ${styles.formSelect} ${errors.organizer ? styles.inputError : ''}`}
+                  value={organizer}
+                  onChange={(e) => {
+                    setOrganizer(e.target.value);
+                    setCoOrganizer('');
+                  }}
+                >
+                  <option value="">Select organizing department</option>
+                  {departments.map((dept) => (
+                    <option key={dept._id} value={dept._id}>
+                      {dept.branch} ({dept.deptCode})
+                    </option>
+                  ))}
+                </select>
+                {errors.organizer && <span className={styles.errorText}>{errors.organizer}</span>}
+              </div>
+
+              {/* Co-Organizer */}
+              <div className={styles.inputGroup}>
+                <label className={styles.formLabel}>Co-Organizer (Optional)</label>
+                <select
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  value={coOrganizer}
+                  onChange={(e) => setCoOrganizer(e.target.value)}
+                  disabled={!organizer}
+                >
+                  <option value="">Select co-organizing department</option>
+                  {coOrganizerOptions.map((dept) => (
+                    <option key={dept._id} value={dept._id}>
+                      {dept.branch} ({dept.deptCode})
+                    </option>
+                  ))}
+                </select>
+                {!organizer && <span className={styles.helperText}>Select an organizer first</span>}
+              </div>
+
+              {/* Submit Button */}
               <div className={styles.submitWrapper}>
                 <button type="submit" className={styles.submitBtn}>
-                  Create Invitation
+                  Create Event
                 </button>
               </div>
 
