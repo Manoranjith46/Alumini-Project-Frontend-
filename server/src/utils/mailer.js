@@ -1,8 +1,11 @@
 import { google } from 'googleapis';
-import nodemailer from 'nodemailer';
 
 const OAuth2 = google.auth.OAuth2;
 
+/**
+ * Creates an email transporter using Gmail REST API (not SMTP).
+ * This bypasses SMTP port restrictions on platforms like Render.
+ */
 const createTransporter = async () => {
     const oauth2Client = new OAuth2(
         process.env.GOOGLE_CLIENT_ID,
@@ -14,22 +17,47 @@ const createTransporter = async () => {
         refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
     });
 
-    const accessToken = await oauth2Client.getAccessToken();
+    // Verify credentials by getting access token
+    await oauth2Client.getAccessToken();
     console.log('OAuth2 access token fetched successfully');
 
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            type: 'OAuth2',
-            user: process.env.EMAIL_USER,
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-            accessToken: accessToken.token,
-        },
-    });
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
-    return transporter;
+    // Return an object that mimics nodemailer's transporter interface
+    return {
+        sendMail: async (mailOptions) => {
+            const { from, to, subject, html, text } = mailOptions;
+
+            // Build RFC 2822 formatted email
+            const messageParts = [
+                `From: ${from}`,
+                `To: ${to}`,
+                `Subject: ${subject}`,
+                'MIME-Version: 1.0',
+                'Content-Type: text/html; charset=utf-8',
+                '',
+                html || text || '',
+            ];
+            const message = messageParts.join('\n');
+
+            // Encode to base64url format
+            const encodedMessage = Buffer.from(message)
+                .toString('base64')
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+
+            const result = await gmail.users.messages.send({
+                userId: 'me',
+                requestBody: {
+                    raw: encodedMessage,
+                },
+            });
+
+            console.log('Email sent via Gmail API, messageId:', result.data.id);
+            return { messageId: result.data.id };
+        },
+    };
 };
 
 export default createTransporter;
