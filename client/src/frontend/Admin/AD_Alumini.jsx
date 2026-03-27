@@ -5,7 +5,11 @@ import Sidebar from './Components/Sidebar/Sidebar';
 import { Search, UserPlus, Eye, Send, X, Plus, Trash2, Mail } from 'lucide-react';
 import { useAuth } from '../../context/authContext/authContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
+
+if (!import.meta.env.VITE_API_URL) {
+  console.warn('[Config] VITE_API_URL not set, falling back to window.location.origin. API calls may fail if frontend and backend are on different origins.');
+}
 
 const createClientTraceId = () => `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
 
