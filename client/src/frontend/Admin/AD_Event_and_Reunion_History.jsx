@@ -58,8 +58,8 @@ const Admin_Event_and_Reunion_History = ({ onLogout }) => {
 
         const data = await response.json();
 
-        if (data.success && data.events) {
-          const formattedData = data.events.map((event) => ({
+        if (data.success && data.data) {
+          const formattedData = data.data.map((event) => ({
             id: event._id,
             title: event.eventName,
             organizer: event.organizer?.branch || 'N/A',

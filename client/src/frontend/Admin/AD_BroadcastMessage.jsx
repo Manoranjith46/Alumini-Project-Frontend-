@@ -91,7 +91,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
         });
         const data = await response.json();
         if (data.success) {
-          setEvents(data.events || []);
+          setEvents(data.data || []);
         }
       } catch (error) {
         console.error('Error fetching events:', error);

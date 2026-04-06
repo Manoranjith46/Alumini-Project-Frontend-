@@ -1,9 +1,28 @@
+import { useState, useEffect } from "react";
 import styles from "./Sidebar.module.css";
-import collegeLogo from '../../../../assets/KSR_College_Logo.svg'
+import collegeLogo from '../../../../assets/KSR_College_Logo.svg';
 import { useNavigate } from 'react-router-dom';
+
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function Sidebar({ onLogout, currentView }) {
   const navigate = useNavigate();
+  const [logoUrl, setLogoUrl] = useState(null);
+
+  useEffect(() => {
+    const fetchBranding = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/branding`);
+        const data = await res.json();
+        if (data.success && data.data?.logo) {
+          setLogoUrl(`${API_BASE}${data.data.logo}`);
+        }
+      } catch (err) {
+        console.error('Failed to fetch branding:', err);
+      }
+    };
+    fetchBranding();
+  }, []);
 
   const handleLogout = (e) => {
     e.preventDefault();
@@ -21,9 +40,9 @@ export default function Sidebar({ onLogout, currentView }) {
   return (
     <aside id="sidebar" className={styles.sidebar}>
       <div className={styles.sidebarHeader}>
-        <img 
-          src={collegeLogo} 
-          alt="KSRCE Logo" 
+        <img
+          src={logoUrl || collegeLogo}
+          alt="KSRCE Logo"
           className={styles.sidebarLogo}
         />
         <span className={styles.sidebarTitle}>

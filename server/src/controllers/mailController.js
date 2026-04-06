@@ -516,9 +516,62 @@ export const getMailById = async (req, res) => {
             });
         }
 
+        // Fetch alumni profile data for all recipients
+        const { default: Alumni } = await import('../models/alumni.js');
+
+        const recipients = await Promise.all(
+            mail.recipientEmails.map(async (email) => {
+                try {
+                    const alumni = await Alumni.findOne({
+                        email: email.toLowerCase()
+                    }).select('profilePhoto name email branch yearFrom yearTo');
+
+                    if (alumni && alumni.profilePhoto) {
+                        // Convert GridFS ID to URL
+                        const photoUrl = alumni.profilePhoto.startsWith('http')
+                            ? alumni.profilePhoto
+                            : alumni.profilePhoto.startsWith('/api')
+                                ? alumni.profilePhoto
+                                : `/api/images/${alumni.profilePhoto}`;
+
+                        return {
+                            name: alumni.name || email.split('@')[0],
+                            email: email,
+                            profilePhoto: photoUrl,
+                            branch: alumni.branch,
+                            batch: alumni.yearFrom && alumni.yearTo ? `${alumni.yearFrom}-${alumni.yearTo}` : null
+                        };
+                    }
+
+                    // Return basic info even if no alumni record found
+                    return {
+                        name: alumni?.name || email.split('@')[0],
+                        email: email,
+                        profilePhoto: '',
+                        branch: alumni?.branch || null,
+                        batch: null
+                    };
+                } catch (err) {
+                    console.error('Error fetching alumni profile:', err);
+                    return {
+                        name: email.split('@')[0],
+                        email: email,
+                        profilePhoto: '',
+                        branch: null,
+                        batch: null
+                    };
+                }
+            })
+        );
+
+        const mailWithRecipients = {
+            ...mail.toObject(),
+            recipients
+        };
+
         return res.status(200).json({
             success: true,
-            mail,
+            mail: mailWithRecipients,
         });
     } catch (error) {
         logEmailError('N/A', error);

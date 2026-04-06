@@ -68,22 +68,37 @@ export const login = async (req, res) => {
 
 export const googleLogin = async (req, res) => {
   try {
-    const { access_token } = req.body;
+    const { access_token, credential } = req.body;
+    let email;
 
-    // Fetch user info from Google using access token
-    const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
+    if (credential) {
+      // Handle credential (JWT) from GoogleLogin component
+      // Decode the JWT to get user info (the JWT is already verified by Google)
+      const payload = JSON.parse(
+        Buffer.from(credential.split('.')[1], 'base64').toString()
+      );
+      email = payload.email;
+    } else if (access_token) {
+      // Handle access_token from useGoogleLogin hook (legacy)
+      const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${access_token}` },
+      });
 
-    if (!googleRes.ok) {
-      return res.status(401).json({
+      if (!googleRes.ok) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid Google token',
+        });
+      }
+
+      const googleUser = await googleRes.json();
+      email = googleUser.email;
+    } else {
+      return res.status(400).json({
         success: false,
-        message: 'Invalid Google token',
+        message: 'No token provided',
       });
     }
-
-    const googleUser = await googleRes.json();
-    const email = googleUser.email;
 
     // Check if user exists in the database
     const user = await User.findOne({ email });
@@ -113,7 +128,7 @@ export const googleLogin = async (req, res) => {
         const { default: Coordinator } = await import('../models/coordinator.js');
         const coordinator = await Coordinator.findOne({ userId: user._id });
         if (coordinator) {
-          userResponse.department = coordinator.department; // Full branch name e.g., "Computer Science and Engineering"
+          userResponse.department = coordinator.department;
           userResponse.designation = coordinator.designation;
           userResponse.staffId = coordinator.staffId;
         }

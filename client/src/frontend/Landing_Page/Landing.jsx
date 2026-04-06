@@ -1,11 +1,30 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Landing.module.css';
 import NavBar from '../../components/Navbar/NavBar';
 import collegeLogoSvg from '../../assets/KSR_College_Banner.svg';
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
 export default function Landing() {
 
   const navigate = useNavigate();
+  const [bannerUrl, setBannerUrl] = useState(null);
+
+  useEffect(() => {
+    const fetchBranding = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/branding`);
+        const data = await res.json();
+        if (data.success && data.data?.banner) {
+          setBannerUrl(`${API_BASE}${data.data.banner}`);
+        }
+      } catch (err) {
+        console.error('Failed to fetch branding:', err);
+      }
+    };
+    fetchBranding();
+  }, []);
 
   return (
     <div className={styles.body}>
@@ -273,7 +292,7 @@ export default function Landing() {
               <img
                 alt="Logo"
                 className={styles.footerLogo}
-                src={collegeLogoSvg}
+                src={bannerUrl || collegeLogoSvg}
               />
               <p className={styles.footerDescription}>
                 Building a bridge between our glorious past and an innovative future. K.S.R. College of Engineering Alumni Association.

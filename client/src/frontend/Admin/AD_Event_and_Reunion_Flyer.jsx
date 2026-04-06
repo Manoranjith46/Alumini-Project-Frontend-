@@ -62,11 +62,29 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   const [geminiError, setGeminiError] = useState(null);
   const [events, setEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [showEventSuggestions, setShowEventSuggestions] = useState(false);
+
+  // Filter events based on typed event name
+  const filteredEvents = events.filter(event =>
+    event.eventName?.toLowerCase().includes(geminiEventName.toLowerCase())
+  );
 
   // Initialize guests from mail data on mount
   useEffect(() => {
     // Fetch events for dropdown
     fetchEvents();
+
+    // Helper to format date to YYYY-MM-DD
+    const formatDateForInput = (dateValue) => {
+      if (!dateValue) return new Date().toISOString().split('T')[0];
+      try {
+        const date = new Date(dateValue);
+        if (isNaN(date.getTime())) return new Date().toISOString().split('T')[0];
+        return date.toISOString().split('T')[0];
+      } catch {
+        return new Date().toISOString().split('T')[0];
+      }
+    };
 
     if (recipients && recipients.length > 0) {
       setGuests(recipients);
@@ -77,12 +95,12 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
         // Single guest: Auto-populate from mail
         const singleGuest = recipients[0];
         setGeminiEventName(initialEventName);
-        setGeminiDate(initialEventDate || new Date().toISOString().split('T')[0]);
+        setGeminiDate(formatDateForInput(initialEventDate));
         setGeminiVenue(initialEventLocation);
         setGeminiGuestName(singleGuest?.name || '');
-        // Format guest image URL properly
+        // Format guest image URL properly - always prepend API_BASE for relative paths
         if (singleGuest?.profilePhoto) {
-          const photoUrl = singleGuest.profilePhoto.startsWith('http') || singleGuest.profilePhoto.startsWith('/api')
+          const photoUrl = singleGuest.profilePhoto.startsWith('http')
             ? singleGuest.profilePhoto
             : `${API_BASE}${singleGuest.profilePhoto}`;
           setGeminiGuestImage(photoUrl);
@@ -92,7 +110,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       // Legacy single guest from alumniName
       setGuests([{ name: alumniName, email: recipientEmails[0] || '' }]);
       setGeminiEventName(initialEventName);
-      setGeminiDate(initialEventDate || new Date().toISOString().split('T')[0]);
+      setGeminiDate(formatDateForInput(initialEventDate));
       setGeminiVenue(initialEventLocation);
       setGeminiGuestName(alumniName);
     }
@@ -132,6 +150,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       if (selectedEvent.eventTime) {
         setGeminiHostedBy(selectedEvent.organizer?.name || 'K.S.R. College of Engineering');
       }
+      setShowEventSuggestions(false);
     }
   };
 
@@ -148,41 +167,6 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       reader.onload = (ev) => setBannerPreview(ev.target.result);
       reader.readAsDataURL(file);
     }
-  };
-
-  // Format time for display on flyer
-  const formatTimeForFlyer = (timeStr) => {
-    if (!timeStr) return '';
-    const [h, m] = timeStr.split(':').map(Number);
-    const period = h >= 12 ? 'PM' : 'AM';
-    const displayH = h % 12 || 12;
-    return `${displayH}:${String(m).padStart(2, '0')} ${period}`;
-  };
-
-  // Format date for display on flyer
-  const formatDateForFlyer = (dateStr) => {
-    if (!dateStr) return '';
-    const [year, month, day] = dateStr.split('-').map(Number);
-    const d = new Date(year, month - 1, day);
-    return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  };
-
-  // Text wrapping helper
-  const wrapText = (ctx, text, maxWidth, fontSize) => {
-    const words = text.split(' ');
-    const lines = [];
-    let currentLine = '';
-    for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      if (ctx.measureText(testLine).width > maxWidth && currentLine) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = testLine;
-      }
-    }
-    if (currentLine) lines.push(currentLine);
-    return lines;
   };
 
   // Handle "Generate via Description" form submit — enhance text using Ollama
@@ -272,28 +256,6 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
     }
   };
 
-  // Auto-populate Gemini form from canvas form
-  const handlePopulateFromCanvas = () => {
-    // Only auto-populate if single guest
-    if (guests.length > 1) {
-      setGeminiError('For multiple guests, please enter details manually or select from Events dropdown');
-      return;
-    }
-
-    setGeminiEventName(eventName);
-    setGeminiDate(eventDate);
-    setGeminiVenue(eventLocation);
-    if (bannerFile) {
-      setGeminiTemplate(bannerFile);
-      setGeminiTemplatePreview(bannerPreview);
-    }
-    // Populate with current guest
-    if (guests.length > 0) {
-      const currentGuest = guests[currentGuestIndex] || guests[0];
-      setGeminiGuestName(currentGuest.name || '');
-      setGeminiGuestImage(currentGuest.profilePhoto || '');
-    }
-  };
 
   // Handle guest creation mode selection
   const handleGuestModeSelection = (mode) => {
@@ -302,9 +264,9 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
     if (mode === 'single' && guests.length > 0) {
       const firstGuest = guests[0];
       setGeminiGuestName(firstGuest.name || '');
-      // Format guest image URL properly
+      // Format guest image URL properly - always prepend API_BASE for relative paths
       if (firstGuest.profilePhoto) {
-        const photoUrl = firstGuest.profilePhoto.startsWith('http') || firstGuest.profilePhoto.startsWith('/api')
+        const photoUrl = firstGuest.profilePhoto.startsWith('http')
           ? firstGuest.profilePhoto
           : `${API_BASE}${firstGuest.profilePhoto}`;
         setGeminiGuestImage(photoUrl);
@@ -474,18 +436,6 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
             <h2 className={styles.pageTitle}>Invitation Creator</h2>
             <p className={styles.pageSubtitle}>Generate professional event flyers for alumni engagement.</p>
           </div>
-          
-          <div className={styles.headerActions}>
-            <button className={styles.notificationBtn}>
-              <span className="material-symbols-outlined">notifications</span>
-              <span className={styles.notificationDot}></span>
-            </button>
-            <button className={styles.profileBtn}>
-              <div className={styles.profileAvatar}>
-                <span className="material-symbols-outlined">person</span>
-              </div>
-            </button>
-          </div>
         </header>
 
 
@@ -598,9 +548,9 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
                             onClick={() => {
                               setCurrentGuestIndex(idx);
                               setGeminiGuestName(guest.name || '');
-                              // Format guest image URL properly
+                              // Format guest image URL properly - always prepend API_BASE for relative paths
                               if (guest.profilePhoto) {
-                                const photoUrl = guest.profilePhoto.startsWith('http') || guest.profilePhoto.startsWith('/api')
+                                const photoUrl = guest.profilePhoto.startsWith('http')
                                   ? guest.profilePhoto
                                   : `${API_BASE}${guest.profilePhoto}`;
                                 setGeminiGuestImage(photoUrl);
@@ -629,49 +579,60 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
                     </div>
                   )}
 
-                  <div style={{ marginBottom: '1rem' }}>
-                    <button
-                      type="button"
-                      onClick={handlePopulateFromCanvas}
-                      className={styles.generateBtn}
-                      style={{ backgroundColor: '#16A34A', fontSize: '0.875rem' }}
-                    >
-                      <span className="material-symbols-outlined">content_paste</span>
-                      <span>Populate from Canvas Form</span>
-                    </button>
-                  </div>
-
                   <div className={styles.detailsGrid}>
-                    <div className={styles.fullWidth}>
-                      <label htmlFor="gemini-event-name" className={styles.inputLabel}>Event Name (Select or Enter)</label>
-                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <select
-                          id="gemini-event-name"
-                          className={styles.inputCustom}
-                          value={geminiEventName}
-                          onChange={(e) => handleEventSelect(e.target.value)}
-                          style={{ flex: 1 }}
-                        >
-                          <option value="">-- Select from Events --</option>
-                          {eventsLoading ? (
-                            <option disabled>Loading events...</option>
-                          ) : (
-                            events.map((event) => (
-                              <option key={event._id} value={event._id}>
-                                {event.eventName}
-                              </option>
-                            ))
-                          )}
-                        </select>
-                      </div>
+                    <div className={styles.fullWidth} style={{ position: 'relative' }}>
+                      <label htmlFor="gemini-event-name" className={styles.inputLabel}>Event Name</label>
                       <input
                         type="text"
                         className={styles.inputCustom}
-                        placeholder="Or enter event name manually"
+                        placeholder="Start typing to search events..."
                         value={geminiEventName}
-                        onChange={(e) => setGeminiEventName(e.target.value)}
+                        onChange={(e) => {
+                          setGeminiEventName(e.target.value);
+                          setShowEventSuggestions(true);
+                        }}
+                        onFocus={() => setShowEventSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowEventSuggestions(false), 200)}
                         style={{ marginTop: '0.5rem' }}
                       />
+                      {showEventSuggestions && geminiEventName && filteredEvents.length > 0 && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: 0,
+                          right: 0,
+                          backgroundColor: '#fff',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: '0.5rem',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                          maxHeight: '200px',
+                          overflowY: 'auto',
+                          zIndex: 100
+                        }}>
+                          {filteredEvents.map(event => (
+                            <div
+                              key={event._id}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleEventSelect(event._id);
+                              }}
+                              style={{
+                                padding: '0.75rem 1rem',
+                                cursor: 'pointer',
+                                borderBottom: '1px solid #F3F4F6',
+                                fontSize: '0.875rem'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F3F4F6'}
+                              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+                            >
+                              <div style={{ fontWeight: 500, color: '#1F2937' }}>{event.eventName}</div>
+                              <div style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '2px' }}>
+                                {new Date(event.eventDate).toLocaleDateString()} • {event.venue}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className={styles.fullWidth}>
                       <label htmlFor="gemini-guest-name" className={styles.inputLabel}>Chief Guest / Honoree</label>

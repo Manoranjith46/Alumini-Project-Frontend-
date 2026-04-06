@@ -1,10 +1,29 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './NavBar.module.css';
 import ksrLogo from '../../assets/KSR_College_Logo.svg';
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
 export default function NavBar( { isLanding } ) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [logoUrl, setLogoUrl] = useState(null);
+
+  useEffect(() => {
+    const fetchBranding = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/branding`);
+        const data = await res.json();
+        if (data.success && data.data?.logo) {
+          setLogoUrl(`${API_BASE}${data.data.logo}`);
+        }
+      } catch (err) {
+        console.error('Failed to fetch branding:', err);
+      }
+    };
+    fetchBranding();
+  }, []);
 
   const handlenavlinks = (sectionId) => {
     // If we're already on the landing page, scroll to the section
@@ -32,7 +51,7 @@ export default function NavBar( { isLanding } ) {
       <div className={styles.container}>
         {/* Logo Section */}
         <div className={styles.logoSection}>
-          <img src={ksrLogo} alt="KSRCE Logo" className={styles.logo} />
+          <img src={logoUrl || ksrLogo} alt="KSRCE Logo" className={styles.logo} />
           <span className={styles.brandName}>
             KSRCE <span className={styles.brandHighlight}>ALUMNI</span>
           </span>

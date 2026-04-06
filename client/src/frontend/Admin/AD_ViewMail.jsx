@@ -2,7 +2,7 @@ import styles from './AD_ViewMail.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FileImage } from 'lucide-react';
+import { Image, X } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -11,22 +11,26 @@ const Admin_ViewMail = ({ onLogout }) => {
   const [responses, setResponses] = useState([]);
   const [responseStats, setResponseStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showAlumniModal, setShowAlumniModal] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const mailId = location.state?.mailId;
   const passedMailData = location.state?.mailData;
 
   useEffect(() => {
-    if (passedMailData) {
+    // Always fetch fresh mail details to get recipients with photos
+    if (mailId) {
+      fetchMailDetails();
+    } else if (passedMailData) {
+      // Fallback if no mailId but have passed data
       setMail(passedMailData);
       setResponseStats(passedMailData.responseStats);
       fetchMailResponses();
-    } else if (mailId) {
-      fetchMailDetails();
+      setLoading(false);
     } else {
       setLoading(false);
     }
-  }, [mailId, passedMailData]);
+  }, [mailId]);
 
   const fetchMailDetails = async () => {
     try {
@@ -106,6 +110,56 @@ const Admin_ViewMail = ({ onLogout }) => {
    */
   const hasAcceptedResponses = () => {
     return responses.some(response => response.action === 'accept');
+  };
+
+  /**
+   * Get all accepted responses with profile data
+   */
+  const getAcceptedResponses = () => {
+    return responses.filter(r => r.action === 'accept' && r.responseData);
+  };
+
+  /**
+   * Navigate to flyer page with single recipient
+   */
+  const navigateToFlyerSingle = (recipient) => {
+    setShowAlumniModal(false);
+    navigate('/admin/mail/flyer', {
+      state: {
+        mailId,
+        mailData: mail,
+        recipients: [recipient],
+        recipientEmails: [recipient.email],
+        eventName: mail.eventDetails?.eventName || mail.title || '',
+        eventDate: mail.eventDetails?.eventDate || '',
+        eventTime: mail.eventDetails?.eventTime || '',
+        eventLocation: mail.eventDetails?.eventVenue || ''
+      }
+    });
+  };
+
+  /**
+   * Navigate to flyer page with all accepted recipients
+   */
+  const navigateToFlyerAll = () => {
+    const acceptedRecipients = getAcceptedResponses().map(r => ({
+      name: r.responseData.fullName || r.recipientEmail,
+      email: r.recipientEmail,
+      profilePhoto: r.profilePhoto || ''
+    }));
+
+    navigate('/admin/mail/flyer', {
+      state: {
+        mailId,
+        mailData: mail,
+        recipients: acceptedRecipients,
+        recipientEmails: acceptedRecipients.map(r => r.email),
+        eventName: mail.eventDetails?.eventName || mail.title || '',
+        eventDate: mail.eventDetails?.eventDate || '',
+        eventTime: mail.eventDetails?.eventTime || '',
+        eventLocation: mail.eventDetails?.eventVenue || ''
+      }
+    });
   };
 
   if (loading) {
@@ -222,37 +276,45 @@ const Admin_ViewMail = ({ onLogout }) => {
               <div className={styles.eventCard}>
                 <div className={styles.eventHeader}>
                   <h3>Individual Responses ({responses.length})</h3>
-                  {/* Create Flyer Button - only show if there are accepted responses */}
                   {hasAcceptedResponses() && (
-                    <button
-                      className={styles.createFlyerButton}
-                      onClick={() => {
-                        // Build recipients array from accepted responses
-                        const recipients = responses
-                          .filter(r => r.action === 'accept' && r.responseData)
-                          .map(r => ({
-                            name: r.responseData.fullName || r.recipientEmail,
-                            email: r.recipientEmail,
-                            profilePhoto: r.profilePhoto || ''
-                          }));
-
-                        navigate('/admin/mail/flyer', {
-                          state: {
-                            mailId,
-                            mailData: mail,
-                            recipients,
-                            recipientEmails: recipients.map(r => r.email),
-                            eventName: mail.eventName || '',
-                            eventDate: mail.eventDate || '',
-                            eventTime: mail.eventTime || '',
-                            eventLocation: mail.eventLocation || ''
-                          }
-                        });
-                      }}
-                    >
-                      <FileImage size={18} />
-                      Create Flyer
-                    </button>
+                    <div className={styles.flyerButtonGroup}>
+                      {/* Single accepted: Show only "Create Flyer" */}
+                      {getAcceptedResponses().length === 1 ? (
+                        <button
+                          className={styles.createFlyerButton}
+                          onClick={() => {
+                            const accepted = getAcceptedResponses()[0];
+                            navigateToFlyerSingle({
+                              name: accepted.responseData.fullName || accepted.recipientEmail,
+                              email: accepted.recipientEmail,
+                              profilePhoto: accepted.profilePhoto || ''
+                            });
+                          }}
+                        >
+                          <Image size={18} />
+                          Create Flyer
+                        </button>
+                      ) : (
+                        <>
+                          {/* Multiple accepted: Show "Create Flyer" (opens modal) */}
+                          <button
+                            className={styles.createFlyerButton}
+                            onClick={() => setShowAlumniModal(true)}
+                          >
+                            <Image size={18} />
+                            Create Flyer
+                          </button>
+                          {/* Multiple accepted: Show "Create Flyer (All Accepted)" */}
+                          <button
+                            className={styles.createFlyerButtonSecondary}
+                            onClick={navigateToFlyerAll}
+                          >
+                            <Image size={18} />
+                            Create Flyer (All Accepted)
+                          </button>
+                        </>
+                      )}
+                    </div>
                   )}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginTop: '20px' }}>
@@ -440,6 +502,59 @@ const Admin_ViewMail = ({ onLogout }) => {
               </div>
             </div>
           </section>
+        )}
+
+        {/* Alumni Selection Modal */}
+        {showAlumniModal && (
+          <div className={styles.modalOverlay} onClick={() => setShowAlumniModal(false)}>
+            <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h3>Select Alumni for Flyer</h3>
+                <button className={styles.modalClose} onClick={() => setShowAlumniModal(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div className={styles.modalBody}>
+                <p className={styles.modalSubtitle}>Click on an alumni to create a flyer for them</p>
+                <div className={styles.alumniList}>
+                  {getAcceptedResponses().map((response, index) => (
+                    <div
+                      key={index}
+                      className={styles.alumniCard}
+                      onClick={() => navigateToFlyerSingle({
+                        name: response.responseData.fullName || response.recipientEmail,
+                        email: response.recipientEmail,
+                        profilePhoto: response.profilePhoto || ''
+                      })}
+                    >
+                      <div className={styles.alumniAvatar}>
+                        {response.profilePhoto ? (
+                          <img
+                            src={response.profilePhoto.startsWith('http')
+                              ? response.profilePhoto
+                              : `${API_BASE_URL}${response.profilePhoto}`}
+                            alt={response.responseData.fullName}
+                          />
+                        ) : (
+                          <span>{(response.responseData.fullName || response.recipientEmail).charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div className={styles.alumniInfo}>
+                        <span className={styles.alumniName}>
+                          {response.responseData.fullName || response.recipientEmail}
+                        </span>
+                        <span className={styles.alumniEmail}>{response.recipientEmail}</span>
+                        {response.responseData.designation && (
+                          <span className={styles.alumniDesignation}>{response.responseData.designation}</span>
+                        )}
+                      </div>
+                      <span className="material-symbols-outlined" style={{ color: '#228B22' }}>arrow_forward</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>
