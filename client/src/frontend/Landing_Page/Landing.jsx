@@ -2,27 +2,16 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Landing.module.css';
 import NavBar from '../../components/Navbar/NavBar';
-
-const API_BASE = import.meta.env.VITE_API_URL;
+import { useAdminContext } from '../../context/adminContext/adminContext';
 
 export default function Landing() {
 
   const navigate = useNavigate();
-  const [bannerUrl, setBannerUrl] = useState(null);
+  const { adminBranding, fetchAdminBranding } = useAdminContext();
 
   useEffect(() => {
-    const fetchBranding = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/admin/branding`);
-        const data = await res.json();
-        if (data.success && data.data?.banner) {
-          setBannerUrl(`${API_BASE}${data.data.banner}`);
-        }
-      } catch (err) {
-        console.error('Failed to fetch branding:', err);
-      }
-    };
-    fetchBranding();
+    // Fetch branding on mount (works for public pages without auth)
+    fetchAdminBranding();
   }, []);
 
   return (
@@ -291,7 +280,7 @@ export default function Landing() {
               <img
                 alt="Logo"
                 className={styles.footerLogo}
-                src={bannerUrl}
+                src={adminBranding.banner}
               />
               <p className={styles.footerDescription}>
                 Building a bridge between our glorious past and an innovative future. K.S.R. College of Engineering Alumni Association.

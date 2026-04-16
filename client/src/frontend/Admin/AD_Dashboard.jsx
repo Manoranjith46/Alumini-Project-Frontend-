@@ -156,7 +156,10 @@ const Admin_Dashboard = ( { onLogout } ) => {
           <div className={styles.cardsRow}>
             <div className={`${styles.card} ${styles.overlapColumn}`}>
               <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>Mail</h2>
+                <div className={styles.cardHeader1}>
+                  <div className={styles.cardIcon}>📬</div>
+                  <h2 className={styles.cardTitle}>Mail</h2>
+                </div>
                 <span className={styles.cardBadge}>{cards?.mail?.newCount || 0} New</span>
               </div>
               <div className={styles.cardBody}>
@@ -193,7 +196,10 @@ const Admin_Dashboard = ( { onLogout } ) => {
             </div>
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <div className={styles.cardIcon}>💸</div>
+                <div className={styles.cardHeader1}>
+                  <div className={styles.cardIcon}>💸</div>
+                  <div className={styles.cardTitle}>Donation History</div>
+                </div>
                 <span className={styles.cardStatusGreen}>Scholarship Goal</span>
               </div>
               <div className={styles.cardBody}>
@@ -218,8 +224,11 @@ const Admin_Dashboard = ( { onLogout } ) => {
           <div className={styles.cardsRow}>
             <div className={`${styles.card} ${styles.overlapColumn}`}>
               <div className={styles.cardHeader}>
+                <div className={styles.cardHeader1}>
+                  <div className={styles.cardIcon}>📅</div>
+                  <h2 className={styles.cardTitle}>Events & Reunions</h2>
+                </div>
                 <span className={styles.cardUpcoming}>Upcoming</span>
-                <span className={styles.cardIcon}>📅</span>
               </div>
               <div className={styles.cardBody}>
                 {cards?.event ? (

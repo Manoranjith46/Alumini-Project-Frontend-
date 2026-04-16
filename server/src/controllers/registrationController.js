@@ -20,11 +20,11 @@ const getErrorDebugInfo = (error) => ({
 });
 
 const logStep = (traceId, flow, step, details = {}) => {
-	console.log(`[RegistrationMail:${traceId}][${flow}][Step ${step}]`, details);
+	// Disabled in production
 };
 
 const logBreak = (traceId, flow, step, reason, details = {}) => {
-	console.warn(`[RegistrationMail:${traceId}][${flow}][BREAK at Step ${step}] ${reason}`, details);
+	// Disabled in production
 };
 
 const sendStepFailure = (res, status, traceId, flow, step, message, extra = {}) => {
@@ -204,15 +204,16 @@ export const sendRegistrationLinks = async (req, res) => {
 		});
 
 		if (sent.length === 0 && failed.length > 0) {
-			return res.status(400).json({
+			const allAlreadySent = failed.every(f => f.reason === 'Registration link already sent');
+			return res.status(allAlreadySent ? 409 : 400).json({
 				success: false,
-				message: 'No registration links were sent. Please check failed details.',
+				message: 'Registration links already sent to these email addresses.',
 				sent: 0,
 				failed,
 				traceId,
 				flow: 'send-links',
 				step: 11,
-				errorCode: 'ALL_SENDS_FAILED',
+				errorCode: allAlreadySent ? 'ALREADY_SENT' : 'ALL_SENDS_FAILED',
 			});
 		}
 

@@ -708,11 +708,9 @@ export const getInstituteBranding = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('[AdminController] getInstituteBranding error:', error);
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch institute branding',
-      error: error.message,
     });
   }
 };

@@ -14,11 +14,11 @@ if (!import.meta.env.VITE_API_URL) {
 const createClientTraceId = () => `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
 
 const logClientStep = (traceId, flow, step, details = {}) => {
-  console.log(`[RegistrationMailClient:${traceId}][${flow}][Step ${step}]`, details);
+  // Disabled in production
 };
 
 const logClientBreak = (traceId, flow, step, reason, details = {}) => {
-  console.warn(`[RegistrationMailClient:${traceId}][${flow}][BREAK at Step ${step}] ${reason}`, details);
+  // Disabled in production
 };
 
 // Helper function to format address object to string
@@ -163,6 +163,10 @@ const Admin_Alumini = ( { onLogout } ) => {
         setShowEmailPopup(false);
         setEmailList([]);
         setEmailInput('');
+      } else if (response.status === 409) {
+        // 409 Conflict: All emails already have active registration links
+        const emails = data?.failed?.map(f => f.email).join(', ') || 'these addresses';
+        setEmailError(`Mail already sent to: ${emails}`);
       } else {
         logClientBreak(clientTraceId, 'send-links', 6, 'API returned non-OK status', {
           status: response.status,
@@ -171,7 +175,18 @@ const Admin_Alumini = ( { onLogout } ) => {
           serverFlow: data?.flow,
           serverStep: data?.step,
         });
-        setEmailError(data?.message || 'Failed to send links');
+
+        // Check if all failures are due to existing tokens
+        const allAlreadySent = data?.failed?.length > 0 &&
+          data.failed.every(f => f.reason === 'Registration link already sent');
+
+        let errorMsg = data?.message;
+        if (allAlreadySent) {
+          const emails = data.failed.map(f => f.email).join(', ');
+          errorMsg = `Mail already sent to: ${emails}`;
+        }
+
+        setEmailError(errorMsg || 'Failed to send links');
       }
     } catch (error) {
       setEmailError('Failed to send registration links. Please try again.');

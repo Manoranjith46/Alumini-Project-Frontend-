@@ -4,6 +4,7 @@ import { DateInput, TimeInput } from '../../components/Calendar';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext/authContext';
+import { useAdminContext } from '../../context/adminContext/adminContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -11,6 +12,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { adminBranding } = useAdminContext();
   const canvasRef = useRef(null);
 
   // Receive data from navigation state (mail data)
@@ -40,6 +42,8 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   const [eventDesc, setEventDesc] = useState('');
   const [bannerFile, setBannerFile] = useState(null);
   const [bannerPreview, setBannerPreview] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
 
   // Canvas Flyer Preview state
   const [flyerGenerated, setFlyerGenerated] = useState(false);
@@ -49,8 +53,8 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   const [enhancing, setEnhancing] = useState(false);
 
   // Gemini Flyer state
-  const [geminiTemplate, setGeminiTemplate] = useState(null);
-  const [geminiTemplatePreview, setGeminiTemplatePreview] = useState(null);
+  const [geminiTemplates, setGeminiTemplates] = useState([]);
+  const [currentTemplateIndex, setCurrentTemplateIndex] = useState(0);
   const [geminiEventName, setGeminiEventName] = useState('');
   const [geminiGuestName, setGeminiGuestName] = useState('');
   const [geminiGuestImage, setGeminiGuestImage] = useState('');
@@ -116,6 +120,16 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
     }
   }, []);
 
+  // Load logo and banner from adminBranding on component mount
+  useEffect(() => {
+    if (adminBranding?.banner && !bannerPreview) {
+      setBannerPreview(adminBranding.banner);
+    }
+    if (adminBranding?.logo && !logoPreview) {
+      setLogoPreview(adminBranding.logo);
+    }
+  }, [adminBranding]);
+
   // Fetch events from collection
   const fetchEvents = async () => {
     try {
@@ -165,6 +179,21 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       setBannerFile(file);
       const reader = new FileReader();
       reader.onload = (ev) => setBannerPreview(ev.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle logo upload
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size should be less than 5MB');
+        return;
+      }
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onload = (ev) => setLogoPreview(ev.target.result);
       reader.readAsDataURL(file);
     }
   };
@@ -242,19 +271,53 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
 
   // Gemini Flyer Handlers
   const handleGeminiTemplateChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Process each file
+    const newTemplates = files.map((file) => {
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size should be less than 5MB');
-        return;
+        alert(`File ${file.name} is larger than 5MB. Skipping.`);
+        return null;
       }
-      setGeminiTemplate(file);
+
+      let base64Data = null;
       const reader = new FileReader();
-      reader.onload = (ev) => setGeminiTemplatePreview(ev.target.result);
+      reader.onload = (ev) => {
+        base64Data = ev.target.result;
+      };
       reader.readAsDataURL(file);
-      setGeminiError(null);
-    }
+
+      return {
+        file,
+        name: file.name,
+        preview: null,
+      };
+    }).filter(t => t !== null);
+
+    // Update preview after file is read
+    setTimeout(() => {
+      const templatesWithPreview = newTemplates.map((t, idx) => {
+        const reader = new FileReader();
+        return new Promise((resolve) => {
+          reader.onload = (ev) => {
+            resolve({
+              ...t,
+              preview: ev.target.result,
+            });
+          };
+          reader.readAsDataURL(t.file);
+        });
+      });
+
+      Promise.all(templatesWithPreview).then((updated) => {
+        setGeminiTemplates(prev => [...prev, ...updated]);
+        setCurrentTemplateIndex(0);
+        setGeminiError(null);
+      });
+    }, 10);
   };
+
 
 
   // Handle guest creation mode selection
@@ -285,7 +348,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       setGeminiError('Guest name is required');
       return;
     }
-    if (!geminiTemplate) {
+    if (geminiTemplates.length === 0) {
       setGeminiError('Please upload a template image');
       return;
     }
@@ -295,7 +358,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
 
     try {
       const formData = new FormData();
-      formData.append('template', geminiTemplate);
+      formData.append('template', geminiTemplates[currentTemplateIndex].file);
       formData.append('eventName', geminiEventName.trim());
       formData.append('guestName', geminiGuestName.trim());
       formData.append('guestImage', geminiGuestImage.trim());
@@ -446,27 +509,102 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
             
             {/* Left Column: Form Controls (Scrollable) */}
             <div className={styles.controlsCol}>
-              {/* Upload Banner Section */}
+              {/* Logo and Banner Upload Section */}
               <section className={styles.card}>
                 <div className={styles.cardHeader}>
-                  <span className="material-symbols-outlined">upload_file</span>
-                  <h3>College Banner / Header</h3>
+                  <span className="material-symbols-outlined">image</span>
+                  <h3>College Logo & Banner</h3>
                 </div>
-                <div className={styles.uploadArea}>
-                  <input type="file" accept="image/*" className={styles.hiddenFileInput} id="banner-upload" onChange={handleBannerChange} />
-                  <div className={styles.uploadBox}>
-                    {bannerPreview ? (
-                      <img src={bannerPreview} alt="Banner" style={{ maxWidth: '100%', maxHeight: '150px', borderRadius: '8px' }} />
-                    ) : (
-                      <>
-                        <div className={styles.uploadIconWrapper}>
-                          <span className="material-symbols-outlined">cloud_upload</span>
-                        </div>
-                        <p className={styles.uploadTitle}>Click to Upload or Drag & Drop</p>
-                        <p className={styles.uploadSubtitle}>PNG, JPG or JPEG (Max 5MB)</p>
-                        <p className={styles.uploadHint}>High-resolution banner recommended</p>
-                      </>
-                    )}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  {/* Logo Upload */}
+                  <div>
+                    <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem', display: 'block' }}>Logo</label>
+                    <div className={styles.uploadArea}>
+                      <input type="file" accept="image/*" className={styles.hiddenFileInput} id="logo-upload" onChange={handleLogoChange} />
+                      <div className={styles.uploadBox} style={{ minHeight: '160px' }}>
+                        {logoPreview ? (
+                          <>
+                            <img src={logoPreview} alt="Logo" style={{ maxWidth: '100%', maxHeight: '120px', borderRadius: '8px', objectFit: 'contain' }} />
+                            <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                              <button
+                                type="button"
+                                onClick={() => document.getElementById('logo-upload').click()}
+                                style={{
+                                  width: '100%',
+                                  padding: '0.5rem 1rem',
+                                  backgroundColor: '#2E6F40',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '0.5rem',
+                                  cursor: 'pointer',
+                                  fontSize: '0.875rem',
+                                  fontWeight: 500
+                                }}
+                              >
+                                Click Here to Upload New
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <div
+                            onClick={() => document.getElementById('logo-upload').click()}
+                            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}
+                          >
+                            <div className={styles.uploadIconWrapper}>
+                              <span className="material-symbols-outlined">upload_file</span>
+                            </div>
+                            <p className={styles.uploadTitle}>Click to Upload</p>
+                            <p className={styles.uploadSubtitle} style={{ fontSize: '0.75rem' }}>PNG, JPG or JPEG</p>
+                            <p className={styles.uploadHint} style={{ fontSize: '0.7rem' }}>Square format recommended</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Banner Upload */}
+                  <div>
+                    <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem', display: 'block' }}>Banner</label>
+                    <div className={styles.uploadArea}>
+                      <input type="file" accept="image/*" className={styles.hiddenFileInput} id="banner-upload" onChange={handleBannerChange} />
+                      <div className={styles.uploadBox} style={{ minHeight: '160px' }}>
+                        {bannerPreview ? (
+                          <>
+                            <img src={bannerPreview} alt="Banner" style={{ maxWidth: '100%', maxHeight: '120px', borderRadius: '8px', objectFit: 'cover', width: '100%' }} />
+                            <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                              <button
+                                type="button"
+                                onClick={() => document.getElementById('banner-upload').click()}
+                                style={{
+                                  width: '100%',
+                                  padding: '0.5rem 1rem',
+                                  backgroundColor: '#2E6F40',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '0.5rem',
+                                  cursor: 'pointer',
+                                  fontSize: '0.875rem',
+                                  fontWeight: 500
+                                }}
+                              >
+                                Click Here Upload New                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <div
+                            onClick={() => document.getElementById('banner-upload').click()}
+                            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}
+                          >
+                            <div className={styles.uploadIconWrapper}>
+                              <span className="material-symbols-outlined">cloud_upload</span>
+                            </div>
+                            <p className={styles.uploadTitle}>Click to Upload</p>
+                            <p className={styles.uploadSubtitle} style={{ fontSize: '0.75rem' }}>PNG, JPG or JPEG</p>
+                            <p className={styles.uploadHint} style={{ fontSize: '0.7rem' }}>Wide format recommended</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -500,7 +638,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
               <section className={styles.card}>
                 <div className={styles.cardHeader}>
                   <span className="material-symbols-outlined">auto_awesome</span>
-                  <h3>Generate from Template (Gemini)</h3>
+                  <h3>Generate from Template</h3>
                 </div>
 
                 {/* Template Upload */}
@@ -508,26 +646,40 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
                   <input
                     type="file"
                     accept="image/*"
+                    multiple
                     className={styles.hiddenFileInput}
                     id="gemini-template-upload"
                     onChange={handleGeminiTemplateChange}
                   />
                   <div className={styles.uploadBox}>
-                    {geminiTemplatePreview ? (
-                      <img
-                        src={geminiTemplatePreview}
-                        alt="Template"
-                        style={{ maxWidth: '100%', maxHeight: '120px', borderRadius: '8px' }}
-                      />
-                    ) : (
+                    {geminiTemplates.length > 0 ? (
                       <>
+                        {/* All Templates Horizontal Scroll */}
+                        <div className={styles.templatesScrollContainer}>
+                          {geminiTemplates.map((template, idx) => (
+                            <div
+                              key={idx}
+                              className={`${styles.templateThumbnail} ${currentTemplateIndex === idx ? styles.selected : ''}`}
+                              onClick={() => setCurrentTemplateIndex(idx)}
+                            >
+                              <img src={template.preview} />
+                            </div>
+                          ))}
+                        </div>
+
+                      </>
+                    ) : (
+                      <div
+                        onClick={() => document.getElementById('gemini-template-upload').click()}
+                        style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}
+                      >
                         <div className={styles.uploadIconWrapper}>
                           <span className="material-symbols-outlined">image</span>
                         </div>
-                        <p className={styles.uploadTitle}>Upload Flyer Template</p>
-                        <p className={styles.uploadSubtitle}>PNG, JPG or JPEG (Max 5MB)</p>
-                        <p className={styles.uploadHint}>This template will be used as visual reference for AI</p>
-                      </>
+                        <p className={styles.uploadTitle}>Upload Flyer Templates</p>
+                        <p className={styles.uploadSubtitle}>PNG, JPG or JPEG (Max 5MB each)</p>
+                        <p className={styles.uploadHint}>Multiple templates supported. Click or drag & drop</p>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -769,7 +921,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
 
             {/* Right Column: Flyer Preview */}
             <div className={styles.previewCol}>
-              
+
               <div className={styles.previewBox}>
                 {flyerGenerated && flyerPreviewUrl ? (
                   <img src={flyerPreviewUrl} alt="Flyer Preview" className={styles.flyerImage} />

@@ -24,7 +24,6 @@ const createTransporter = async () => {
 
         // Verify credentials by getting access token
         await oauth2Client.getAccessToken();
-        console.log('✓ Gmail OAuth2 access token fetched successfully');
 
         const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 

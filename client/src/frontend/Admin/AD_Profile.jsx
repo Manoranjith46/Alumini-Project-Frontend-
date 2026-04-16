@@ -3,6 +3,7 @@ import { User, Lock, Eye, EyeOff, ChevronDown, ChevronUp, Camera, Building2, Upl
 import styles from './AD_Profile.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 import { useAuth } from '../../context/authContext/authContext';
+import { useAdminContext } from '../../context/adminContext/adminContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -47,6 +48,13 @@ const Admin_Profile = ({ onLogout }) => {
 
   // Track previous image IDs for deletion of replaced images
   const [previousImages, setPreviousImages] = useState({
+    profilePhoto: null,
+    logo: null,
+    banner: null
+  });
+
+  // Pending files - selected but not yet uploaded to GridFS
+  const [pendingFiles, setPendingFiles] = useState({
     profilePhoto: null,
     logo: null,
     banner: null
@@ -104,6 +112,7 @@ const Admin_Profile = ({ onLogout }) => {
 
   // Get user from auth context (stored in cookies)
   const { user, loading: authLoading } = useAuth();
+  const { fetchAdminBranding } = useAdminContext();
 
   // Fetch profile data when user is available
   useEffect(() => {
@@ -235,8 +244,53 @@ const Admin_Profile = ({ onLogout }) => {
         return;
       }
 
+      // Step 0: Upload pending files to GridFS
+      let updatedProfileData = { ...profileData };
+
+      if (pendingFiles.profilePhoto) {
+        const photoId = await handleImageUpload(pendingFiles.profilePhoto, 'profilePhoto');
+        if (photoId) {
+          updatedProfileData.profilePhoto = photoId;
+        } else {
+          showMessage('error', 'Failed to upload profile photo');
+          return;
+        }
+      }
+
+      if (pendingFiles.logo) {
+        const logoId = await handleImageUpload(pendingFiles.logo, 'instituteLogo');
+        if (logoId) {
+          updatedProfileData.instituteDetails = {
+            ...updatedProfileData.instituteDetails,
+            logo: logoId
+          };
+        } else {
+          showMessage('error', 'Failed to upload logo');
+          return;
+        }
+      }
+
+      if (pendingFiles.banner) {
+        const bannerId = await handleImageUpload(pendingFiles.banner, 'instituteBanner');
+        if (bannerId) {
+          updatedProfileData.instituteDetails = {
+            ...updatedProfileData.instituteDetails,
+            banner: bannerId
+          };
+        } else {
+          showMessage('error', 'Failed to upload banner');
+          return;
+        }
+      }
+
+      // Clear pending files after upload
+      setPendingFiles({ profilePhoto: null, logo: null, banner: null });
+
+      // Update profile data with uploaded image IDs
+      setProfileData(updatedProfileData);
+
       // Step 1: Delete old images that were replaced
-      await deleteReplacedImages();
+      await deleteReplacedImages(updatedProfileData);
 
       // Step 2: Save profile with new image IDs
       const response = await fetch(`${API_BASE_URL}/api/admin/profile`, {
@@ -245,7 +299,7 @@ const Admin_Profile = ({ onLogout }) => {
           'Authorization': `Bearer ${user?.token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(profileData)
+        body: JSON.stringify(updatedProfileData)
       });
 
       const data = await response.json();
@@ -260,18 +314,16 @@ const Admin_Profile = ({ onLogout }) => {
       if (data.success) {
         // Step 3: Update previousImages to reflect newly saved state
         setPreviousImages({
-          profilePhoto: profileData.profilePhoto,
-          logo: profileData.instituteDetails?.logo,
-          banner: profileData.instituteDetails?.banner
+          profilePhoto: updatedProfileData.profilePhoto,
+          logo: updatedProfileData.instituteDetails?.logo,
+          banner: updatedProfileData.instituteDetails?.banner
         });
+
+        // Step 4: Update global admin context so all components reflect changes instantly
+        await fetchAdminBranding(user?.token);
 
         showMessage('success', 'Profile updated successfully');
         setIsEditing(false);
-
-        // Reload page after 1 second to refresh all data and images
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
       } else {
         showMessage('error', data.message || 'Failed to update profile');
       }
@@ -478,21 +530,21 @@ const Admin_Profile = ({ onLogout }) => {
   };
 
   // Delete images that were replaced with new ones
-  const deleteReplacedImages = async () => {
+  const deleteReplacedImages = async (newProfileData) => {
     const imagesToDelete = [];
 
     // Check profilePhoto
-    if (previousImages.profilePhoto && previousImages.profilePhoto !== profileData.profilePhoto) {
+    if (previousImages.profilePhoto && previousImages.profilePhoto !== newProfileData.profilePhoto) {
       imagesToDelete.push(previousImages.profilePhoto);
     }
 
     // Check logo
-    if (previousImages.logo && previousImages.logo !== profileData.instituteDetails?.logo) {
+    if (previousImages.logo && previousImages.logo !== newProfileData.instituteDetails?.logo) {
       imagesToDelete.push(previousImages.logo);
     }
 
     // Check banner
-    if (previousImages.banner && previousImages.banner !== profileData.instituteDetails?.banner) {
+    if (previousImages.banner && previousImages.banner !== newProfileData.instituteDetails?.banner) {
       imagesToDelete.push(previousImages.banner);
     }
 
@@ -508,86 +560,51 @@ const Admin_Profile = ({ onLogout }) => {
       }
     }
   };
-  const handleProfilePhotoChange = async (e) => {
+  const handleProfilePhotoChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Show preview immediately
+    // Store file as pending (will upload on save)
+    setPendingFiles(prev => ({ ...prev, profilePhoto: file }));
+
+    // Show preview immediately (base64)
     const reader = new FileReader();
     reader.onload = (e) => setProfilePhotoPreview(e.target.result);
     reader.readAsDataURL(file);
-
-    // Upload and get ID
-    const imageId = await handleImageUpload(file, 'profilePhoto');
-    if (imageId) {
-      setProfileData(prev => ({ ...prev, profilePhoto: imageId }));
-      showMessage('success', 'Profile photo uploaded');
-    }
   };
 
   // Handle logo change
-  const handleLogoChange = async (e) => {
+  const handleLogoChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Store file as pending (will upload on save)
+    setPendingFiles(prev => ({ ...prev, logo: file }));
 
     const reader = new FileReader();
     reader.onload = (e) => setLogoPreview(e.target.result);
     reader.readAsDataURL(file);
-
-    const imageId = await handleImageUpload(file, 'instituteLogo');
-    if (imageId) {
-      setProfileData(prev => ({
-        ...prev,
-        instituteDetails: { ...prev.instituteDetails, logo: imageId }
-      }));
-      showMessage('success', 'Logo uploaded');
-    }
   };
 
   // Handle banner change
-  const handleBannerChange = async (e) => {
+  const handleBannerChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Store file as pending (will upload on save)
+    setPendingFiles(prev => ({ ...prev, banner: file }));
 
     const reader = new FileReader();
     reader.onload = (e) => setBannerPreview(e.target.result);
     reader.readAsDataURL(file);
-
-    const imageId = await handleImageUpload(file, 'instituteBanner');
-    if (imageId) {
-      setProfileData(prev => ({
-        ...prev,
-        instituteDetails: { ...prev.instituteDetails, banner: imageId }
-      }));
-      showMessage('success', 'Banner uploaded');
-    }
   };
 
   // Remove image
-  const handleRemoveImage = async (type) => {
-    let imageId = null;
+  const handleRemoveImage = (type) => {
+    // First, clear any pending file for this type
+    setPendingFiles(prev => ({ ...prev, [type]: null }));
 
-    if (type === 'profilePhoto') {
-      imageId = profileData.profilePhoto;
-    } else if (type === 'logo') {
-      imageId = profileData.instituteDetails?.logo;
-    } else if (type === 'banner') {
-      imageId = profileData.instituteDetails?.banner;
-    }
-
-    // Delete from GridFS if exists
-    if (imageId) {
-      try {
-        await fetch(`${API_BASE_URL}/api/images/${imageId}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${user?.token}` }
-        });
-      } catch (error) {
-        console.error(`Error deleting image:`, error);
-      }
-    }
-
-    // Then clear from state
+    // Then clear the preview and state
     if (type === 'profilePhoto') {
       setProfilePhotoPreview(null);
       setProfileData(prev => ({ ...prev, profilePhoto: null }));
@@ -661,12 +678,14 @@ const Admin_Profile = ({ onLogout }) => {
                   <User className={styles.primaryText} size={20} />
                   <h3 className={styles.cardTitle}>Personal Information</h3>
                 </div>
-                <button
-                  className={styles.editBtn}
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  {isEditing ? 'Cancel' : 'Edit Profile'}
-                </button>
+                {!isEditing && (
+                  <button
+                    className={styles.editBtn}
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    Edit Profile
+                  </button>
+                )}
               </div>
               <div className={styles.cardBody}>
                 {/* Profile Photo Section */}
