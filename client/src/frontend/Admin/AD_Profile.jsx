@@ -407,7 +407,7 @@ const Admin_Profile = ({ onLogout }) => {
           'Authorization': `Bearer ${user?.token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ otp: resetData.otp })
+        body: JSON.stringify({ code: resetData.otp })
       });
 
       const data = await response.json();
@@ -1107,6 +1107,27 @@ const Admin_Profile = ({ onLogout }) => {
                   </div>
                 </div>
               </div>
+              {/* Save Profile Button */}
+              {isEditing && (
+                <div className={styles.actionRow}>
+                  <button
+                    className={styles.discardBtn}
+                    onClick={() => {
+                      setIsEditing(false);
+                      fetchProfile(); // Reset to original data
+                    }}
+                  >
+                    Discard
+                  </button>
+                  <button
+                    className={styles.saveBtn}
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                  >
+                    {saving ? 'Saving...' : 'Save Profile'}
+                  </button>
+                </div>
+              )}
             </section>
 
             {/* Password Management */}
@@ -1325,28 +1346,6 @@ const Admin_Profile = ({ onLogout }) => {
                 </div>
               </div>
             </section>
-
-            {/* Save Profile Button */}
-            {isEditing && (
-              <div className={styles.actionRow}>
-                <button
-                  className={styles.discardBtn}
-                  onClick={() => {
-                    setIsEditing(false);
-                    fetchProfile(); // Reset to original data
-                  }}
-                >
-                  Discard
-                </button>
-                <button
-                  className={styles.saveBtn}
-                  onClick={handleSaveProfile}
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Profile'}
-                </button>
-              </div>
-            )}
 
           </div>
         </div>

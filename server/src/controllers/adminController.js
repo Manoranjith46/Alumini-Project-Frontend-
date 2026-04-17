@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 import User from '../models/user.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { sendSmsOtp, verifySmsOtp } from '../utils/messanger.js';
 
 /**
  * Get dashboard statistics for admin panel
@@ -392,6 +393,13 @@ export const updateAdminProfile = async (req, res) => {
  */
 export const updateAdminPassword = async (req, res) => {
   try {
+    console.log('[updateAdminPassword] Request received:', {
+      userId: req.user?.id,
+      role: req.user?.role,
+      bodyKeys: Object.keys(req.body),
+      body: req.body
+    });
+
     if (req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
@@ -422,7 +430,20 @@ export const updateAdminPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findById(req.user.id);
+    // Fetch user with password field (need it for comparison)
+    const userId = req.user._id || req.user.id;
+    console.log('[updateAdminPassword] Fetching user:', {
+      userId,
+      userKeys: Object.keys(req.user)
+    });
+
+    const user = await User.findById(userId);
+    console.log('[updateAdminPassword] User fetch result:', {
+      found: !!user,
+      hasPassword: !!user?.password,
+      passwordLength: user?.password?.length
+    });
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -430,7 +451,10 @@ export const updateAdminPassword = async (req, res) => {
       });
     }
 
+    console.log('[updateAdminPassword] Comparing passwords...');
     const isMatch = await bcrypt.compare(oldPassword, user.password);
+    console.log('[updateAdminPassword] Password match result:', isMatch);
+
     if (!isMatch) {
       return res.status(400).json({
         success: false,
@@ -463,6 +487,13 @@ export const updateAdminPassword = async (req, res) => {
  */
 export const sendResetOtp = async (req, res) => {
   try {
+    console.log('[sendResetOtp] Request received:', {
+      bodyKeys: Object.keys(req.body),
+      body: req.body,
+      userId: req.user?.id,
+      role: req.user?.role,
+    });
+
     if (req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
@@ -473,6 +504,7 @@ export const sendResetOtp = async (req, res) => {
     const { mobile } = req.body;
 
     if (!mobile) {
+      console.log('[sendResetOtp] Mobile not provided in request body');
       return res.status(400).json({
         success: false,
         message: 'Mobile number is required',
@@ -480,7 +512,14 @@ export const sendResetOtp = async (req, res) => {
     }
 
     const admin = await Admin.findOne({ userId: req.user.id });
+    console.log('[sendResetOtp] Admin fetch result:', {
+      found: !!admin,
+      adminId: admin?._id,
+      hasStoredMobile: !!admin?.mobile,
+    });
+
     if (!admin) {
+      console.log('[sendResetOtp] Admin profile not found for userId:', req.user.id);
       return res.status(404).json({
         success: false,
         message: 'Admin profile not found',
@@ -488,33 +527,61 @@ export const sendResetOtp = async (req, res) => {
     }
 
     // Verify mobile matches
+    console.log('[sendResetOtp] Comparing mobile numbers:', {
+      incomingMobile: mobile,
+      storedMobile: admin.mobile,
+    });
+
     const cleanMobile = mobile.replace(/\s+/g, '').replace(/^\+91/, '');
     const storedMobile = admin.mobile.replace(/\s+/g, '').replace(/^\+91/, '');
 
+    console.log('[sendResetOtp] After cleanup:', {
+      cleanIncoming: cleanMobile,
+      cleanStored: storedMobile,
+      match: cleanMobile === storedMobile,
+    });
+
     if (cleanMobile !== storedMobile) {
+      console.log('[sendResetOtp] Mobile number mismatch');
       return res.status(400).json({
         success: false,
         message: 'Mobile number does not match our records',
       });
     }
 
-    // Generate 6-digit OTP
-    const otp = crypto.randomInt(100000, 999999).toString();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    // Convert mobile to E.164 format for Twilio
+    const phoneForTwilio = mobile.startsWith('+') ? mobile : `+91${cleanMobile}`;
+    console.log('[sendResetOtp] Sending OTP via Twilio to:', phoneForTwilio);
 
-    admin.resetOtp = otp;
-    admin.resetOtpExpiry = otpExpiry;
+    // Send OTP via Twilio Verify API (Twilio generates and sends the OTP)
+    const smsResult = await sendSmsOtp(phoneForTwilio);
+    console.log('[sendResetOtp] Twilio result:', smsResult);
+
+    if (!smsResult.success) {
+      console.error('[sendResetOtp] Failed to send OTP:', smsResult.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP via SMS: ' + smsResult.message,
+      });
+    }
+
+    // Store phone number and verification SID for verification step
+    admin.resetPhoneNumber = phoneForTwilio;
+    admin.twilioVerificationSid = smsResult.verificationSid;
     await admin.save();
 
-    // In production, send OTP via SMS service
+    console.log('[sendResetOtp] Verification SID stored:', smsResult.verificationSid);
+
     return res.status(200).json({
       success: true,
-      message: 'OTP sent successfully',
-      // Remove this in production
-      ...(process.env.NODE_ENV !== 'production' && { otp }),
+      message: 'OTP sent successfully to your registered mobile number',
     });
   } catch (error) {
-    console.error('[AdminController] sendResetOtp error:', error);
+    console.error('[AdminController] sendResetOtp error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
     return res.status(500).json({
       success: false,
       message: 'Failed to send OTP',
@@ -530,6 +597,11 @@ export const sendResetOtp = async (req, res) => {
  */
 export const verifyResetOtp = async (req, res) => {
   try {
+    console.log('[verifyResetOtp] Request received:', {
+      bodyKeys: Object.keys(req.body),
+      code: req.body.code,
+    });
+
     if (req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
@@ -537,16 +609,22 @@ export const verifyResetOtp = async (req, res) => {
       });
     }
 
-    const { otp } = req.body;
+    const { code } = req.body;
 
-    if (!otp) {
+    if (!code) {
+      console.log('[verifyResetOtp] OTP code not provided');
       return res.status(400).json({
         success: false,
-        message: 'OTP is required',
+        message: 'OTP code is required',
       });
     }
 
     const admin = await Admin.findOne({ userId: req.user.id });
+    console.log('[verifyResetOtp] Admin lookup:', {
+      found: !!admin,
+      hasPhoneNumber: !!admin?.resetPhoneNumber,
+    });
+
     if (!admin) {
       return res.status(404).json({
         success: false,
@@ -554,37 +632,48 @@ export const verifyResetOtp = async (req, res) => {
       });
     }
 
-    if (!admin.resetOtp || !admin.resetOtpExpiry) {
+    if (!admin.resetPhoneNumber) {
+      console.log('[verifyResetOtp] No pending OTP verification');
       return res.status(400).json({
         success: false,
         message: 'No OTP request found. Please request a new OTP.',
       });
     }
 
-    if (new Date() > admin.resetOtpExpiry) {
-      admin.resetOtp = undefined;
-      admin.resetOtpExpiry = undefined;
-      await admin.save();
+    console.log('[verifyResetOtp] Verifying with Twilio:', {
+      phoneNumber: admin.resetPhoneNumber,
+      code,
+    });
+
+    // Verify code with Twilio
+    const verifyResult = await verifySmsOtp(admin.resetPhoneNumber, code);
+    console.log('[verifyResetOtp] Twilio verification result:', verifyResult);
+
+    if (!verifyResult.success) {
+      console.log('[verifyResetOtp] OTP verification failed:', verifyResult.message);
       return res.status(400).json({
         success: false,
-        message: 'OTP has expired. Please request a new one.',
+        message: verifyResult.message,
       });
     }
 
-    if (otp !== admin.resetOtp) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid OTP',
-      });
-    }
+    // OTP verified - set a flag for password reset step
+    admin.resetOtpVerifiedAt = new Date();
+    admin.resetPhoneNumber = undefined;
+    admin.twilioVerificationSid = undefined;
+    await admin.save();
 
-    // OTP verified - keep it for password reset step
+    console.log('[verifyResetOtp] OTP verified successfully');
+
     return res.status(200).json({
       success: true,
       message: 'OTP verified successfully',
     });
   } catch (error) {
-    console.error('[AdminController] verifyResetOtp error:', error);
+    console.error('[AdminController] verifyResetOtp error:', {
+      message: error.message,
+      stack: error.stack,
+    });
     return res.status(500).json({
       success: false,
       message: 'Failed to verify OTP',
@@ -600,6 +689,12 @@ export const verifyResetOtp = async (req, res) => {
  */
 export const resetPassword = async (req, res) => {
   try {
+    console.log('[resetPassword] Request received:', {
+      userId: req.user?.id,
+      role: req.user?.role,
+      bodyKeys: Object.keys(req.body),
+    });
+
     if (req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
@@ -631,14 +726,34 @@ export const resetPassword = async (req, res) => {
     }
 
     const admin = await Admin.findOne({ userId: req.user.id });
-    if (!admin || !admin.resetOtp) {
+    if (!admin || !admin.resetOtpVerifiedAt) {
       return res.status(400).json({
         success: false,
         message: 'Please verify OTP first',
       });
     }
 
+    // Check if OTP verification is still valid (within 10 minutes)
+    const verificationTime = new Date(admin.resetOtpVerifiedAt);
+    const now = new Date();
+    const timeDiff = now - verificationTime;
+    const tenMinutesMs = 10 * 60 * 1000;
+
+    if (timeDiff > tenMinutesMs) {
+      admin.resetOtpVerifiedAt = undefined;
+      await admin.save();
+      return res.status(400).json({
+        success: false,
+        message: 'OTP verification expired. Please request a new OTP.',
+      });
+    }
+
     const user = await User.findById(req.user.id);
+    console.log('[resetPassword] User lookup:', {
+      found: !!user,
+      userId: req.user.id,
+    });
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -646,21 +761,27 @@ export const resetPassword = async (req, res) => {
       });
     }
 
+    console.log('[resetPassword] Hashing new password');
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
+    console.log('[resetPassword] Password updated successfully');
 
-    // Clear OTP
-    admin.resetOtp = undefined;
-    admin.resetOtpExpiry = undefined;
+    // Clear OTP verification state
+    admin.resetOtpVerifiedAt = undefined;
     await admin.save();
+
+    console.log('[resetPassword] OTP state cleared');
 
     return res.status(200).json({
       success: true,
       message: 'Password reset successfully',
     });
   } catch (error) {
-    console.error('[AdminController] resetPassword error:', error);
+    console.error('[AdminController] resetPassword error:', {
+      message: error.message,
+      stack: error.stack,
+    });
     return res.status(500).json({
       success: false,
       message: 'Failed to reset password',
