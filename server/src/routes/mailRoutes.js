@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { sendMail, getSentMails, getMailById, getDepartmentMails, getAlumniMails, getMailResponses, getMailResponsesByDepartment } from '../controllers/mailController.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -27,22 +28,22 @@ const upload = multer({
 router.post('/send-mail', upload.single('photo'), sendMail);
 
 // GET - Get all sent mails for admin (both routes work)
-router.get('/all', getSentMails);
-router.get('/sent/:senderId', getSentMails);
+router.get('/all', authenticate, getSentMails);
+router.get('/sent/:senderId', authenticate, getSentMails);
 
 // GET - Get department mails for coordinators
-router.get('/department/:department', getDepartmentMails);
+router.get('/department/:department', authenticate, getDepartmentMails);
 
 // GET - Get alumni mails by email
 router.get('/alumni/:email', getAlumniMails);
 
 // GET - Get all responses for a specific mail filtered by department (coordinator view)
-router.get('/:mailId/responses/department/:department', getMailResponsesByDepartment);
+router.get('/:mailId/responses/department/:department', authenticate, getMailResponsesByDepartment);
 
 // GET - Get all responses for a specific mail (admin view)
-router.get('/:mailId/responses', getMailResponses);
+router.get('/:mailId/responses', authenticate, getMailResponses);
 
 // GET - Get single mail by ID
-router.get('/:mailId', getMailById);
+router.get('/:mailId', authenticate, getMailById);
 
 export default router;

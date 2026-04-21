@@ -1,17 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-:root {
-  --primary: #228B22;
-  --background-light: #F8FAFC;
-  --text-dark: #1e293b;
-  --text-muted: #64748b;
-  --border-light: #e2e8f0;
-}
-
 .pageLayout {
   display: flex;
   min-height: 100vh;
-  background-color: var(--background-light);
+  background-color: var(--bg-light);
   font-family: 'Inter', sans-serif;
   color: #0f172a;
   overflow: hidden;

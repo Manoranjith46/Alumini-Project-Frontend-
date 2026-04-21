@@ -1,25 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap');
 
-/* Color Variables */
-:root {
-  --brand-green: #228B22;
-  --brand-green-hover: #1c711c;
-  --brand-green-light: #F0FFF0;
-  --brand-dark: #1e293b;
-  
-  --bg-main: #f9fafb; /* gray-50 */
-  --bg-white: #ffffff;
-  
-  --text-dark: #111827;     /* gray-900 */
-  --text-primary: #374151;  /* gray-700 */
-  --text-secondary: #4b5563;/* gray-600 */
-  --text-muted: #6b7280;    /* gray-500 */
-  
-  --border-light: #f3f4f6;  /* gray-100 */
-  --border-color: #e5e7eb;  /* gray-200 */
-}
-
 /* Base Layout */
 .pageLayout {
   display: flex;
@@ -219,7 +200,7 @@
 .profileAvatar svg {
   height: 1.5rem;
   width: 1.5rem;
-  color: var(--brand-green);
+  color: var(--dark-green-button);
 }
 
 .formCard {
@@ -257,7 +238,7 @@
 }
 
 .programName {
-  color: var(--brand-green);
+  color: var(--dark-green-button);
   font-weight: 700;
   font-size: 1.125rem;
   margin: 0 0 2rem 0;
@@ -329,7 +310,7 @@
 .refSection h4 {
   font-size: 0.875rem;
   font-weight: 700;
-  color: var(--brand-green);
+  color: var(--dark-green-button);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   border-bottom: 1px solid #dcfce7; /* green-100 */
@@ -366,7 +347,7 @@
 
 .listNum, .boldGreen {
   font-weight: 700;
-  color: var(--brand-green);
+  color: var(--dark-green-button);
   margin-right: 0.5rem;
 }
 
@@ -418,7 +399,7 @@
 .radioInput {
   width: 1.25rem;
   height: 1.25rem;
-  color: var(--brand-green);
+  color: var(--dark-green-button);
   border-color: #d1d5db; /* gray-300 */
   accent-color: var(--brand-green); /* Fallback for native styling */
 }
@@ -503,7 +484,7 @@
 }
 
 .downloadBtn {
-  background-color: var(--brand-green);
+  background-color: var(--dark-green-button);
   color: white;
   font-weight: 700;
   padding: 0.75rem 2.5rem; /* py-3 px-10 */
@@ -518,7 +499,7 @@
 }
 
 .downloadBtn:hover {
-  background-color: var(--brand-green-hover);
+  background-color: var(--dark-green-hover);
 }
 
 /* ================== STATES ================== */

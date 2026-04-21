@@ -1,19 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Color Variables */
-:root {
-  --primary: #2E6F40;
-  --primary-hover: #245832;
-  --bg-light: #F9FAFB;
-  --bg-white: #FFFFFF;
-  --text-dark: #111827;     /* slate-900 */
-  --text-primary: #374151;  /* slate-700 */
-  --text-secondary: #6B7280;/* slate-500 */
-  --text-light: #9CA3AF;    /* slate-400 */
-  --border-color: #E2E8F0;  /* slate-200 */
-  --border-light: #F1F5F9;  /* slate-100 */
-}
-
 .pageContainer {
   display: flex;
   min-height: 100vh;

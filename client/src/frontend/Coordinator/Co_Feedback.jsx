@@ -27,7 +27,7 @@ const CoordinatorFeedbackHistory = ({ onLogout }) => {
       }
 
       try {
-        const response = await fetch(`${API_BASE}/api/feedback/all`, {
+        const response = await fetch(`${API_BASE}/api/feedback/department/all`, {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },

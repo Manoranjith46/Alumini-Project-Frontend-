@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import Mail from '../models/mail.js';
 import MailToken from '../models/mailToken.js';
 import createTransporter from '../utils/mailer.js';
+import { findCoordinatorForUser } from '../utils/coordinatorResolver.js';
 
 let transporter = null;
 
@@ -50,6 +51,169 @@ const logEmailError = (email, error) => {
         errorMessage: error?.message || 'No error message available',
         statusCode: error?.responseCode || error?.code || null,
     });
+};
+
+const getRequestDepartment = async (req, requestedDepartment = '') => {
+    if (req.user?.role !== 'coordinator') {
+        return requestedDepartment;
+    }
+
+    const coordinator = await findCoordinatorForUser(req.user);
+
+    return coordinator?.department || '';
+};
+
+const getDepartmentRecipients = async (recipientEmails = [], department = '') => {
+    if (!department || !Array.isArray(recipientEmails) || recipientEmails.length === 0) {
+        return [];
+    }
+
+    const { default: Alumni } = await import('../models/alumni.js');
+    const departmentRecipients = [];
+    const normalizedDepartment = (department || '').trim().toLowerCase();
+
+    for (const recipientEmail of recipientEmails) {
+        try {
+            const alumni = await Alumni.findOne({
+                email: recipientEmail.toLowerCase(),
+            }).select('branch');
+
+            const normalizedBranch = (alumni?.branch || '').trim().toLowerCase();
+
+            if (normalizedBranch === normalizedDepartment) {
+                departmentRecipients.push(recipientEmail);
+            }
+        } catch {
+            continue;
+        }
+    }
+
+    return departmentRecipients;
+};
+
+const getHODEmailsForRecipients = async (recipientEmails) => {
+    try {
+        const { default: Alumni } = await import('../models/alumni.js');
+        const { default: Coordinator } = await import('../models/coordinator.js');
+
+        // Step 1: Get all unique departments from recipient emails
+        const uniqueDepartments = new Set();
+
+        for (const email of recipientEmails) {
+            try {
+                const alumni = await Alumni.findOne({ email: email.toLowerCase() }).select('branch');
+                if (alumni && alumni.branch) {
+                    uniqueDepartments.add(alumni.branch);
+                }
+            } catch (err) {
+                console.error(`Error fetching alumni for email ${email}:`, err.message);
+            }
+        }
+
+        if (uniqueDepartments.size === 0) {
+            return [];
+        }
+
+        // Step 2: Find HOD coordinators for each department
+        const hodEmails = new Set();
+
+        for (const department of uniqueDepartments) {
+            try {
+                const hods = await Coordinator.find({
+                    department: department,
+                    roles: { $in: ['hod'] },
+                    isActive: true
+                }).select('email');
+
+                for (const hod of hods) {
+                    if (hod.email) {
+                        hodEmails.add(hod.email.toLowerCase());
+                    }
+                }
+            } catch (err) {
+                console.error(`Error finding HODs for department ${department}:`, err.message);
+            }
+        }
+
+        return Array.from(hodEmails);
+    } catch (error) {
+        console.error('Error in getHODEmailsForRecipients:', error.message);
+        return [];
+    }
+};
+
+const sendHODCopies = async (hodEmails, title, message, adminName, collegeName, departments) => {
+    if (!hodEmails || hodEmails.length === 0) {
+        return { sent: [], failed: [] };
+    }
+
+    const sent = [];
+    const failed = [];
+
+    const safeAdminName = escapeHtml(adminName);
+    const safeCollegeName = escapeHtml(collegeName);
+    const safeMessage = escapeHtml(message);
+    const safeDepartments = Array.from(departments).map(d => escapeHtml(d)).join(', ');
+
+    // Create HOD-specific email HTML with FYI banner
+    const hodHtmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; padding: 20px; background-color: #f7f9fc;">
+            <div style="background: #ffffff; border: 1px solid #e5e9f2; border-radius: 10px; padding: 22px;">
+                <!-- FYI Banner for HOD -->
+                <div style="background: #e3f2fd; border-left: 4px solid #1976d2; padding: 12px 16px; margin-bottom: 16px; border-radius: 4px;">
+                    <div style="font-size: 13px; color: #1565c0; font-weight: 600;">
+                        📋 FYI: Alumni Email Copy
+                    </div>
+                    <div style="font-size: 12px; color: #1976d2; margin-top: 4px;">
+                        This email was sent to alumni from: ${safeDepartments}
+                    </div>
+                </div>
+
+                <h2 style="margin: 0 0 16px 0; font-size: 20px; color: #1f2937;">${escapeHtml(title || 'Alumni Communication')}</h2>
+
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">From</div>
+                    <div style="font-size: 15px; color: #111827; font-weight: 600;">${safeAdminName}</div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">College</div>
+                    <div style="font-size: 15px; color: #111827; font-weight: 600;">${safeCollegeName}</div>
+                </div>
+
+                <div style="margin-bottom: 18px;">
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Message</div>
+                    <div style="font-size: 15px; color: #111827; line-height: 1.6; white-space: pre-wrap; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px;">${safeMessage}</div>
+                </div>
+
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 16px; margin-top: 16px;">
+                    <div style="font-size: 13px; color: #6b7280; text-align: center;">
+                        This email was sent from the Alumni Portal of ${safeCollegeName}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    for (const hodEmail of hodEmails) {
+        try {
+            await sendSingleEmail(
+                hodEmail,
+                `[FYI] ${title || 'Alumni Communication'} - Alumni Portal`,
+                hodHtmlContent
+            );
+            sent.push(hodEmail);
+        } catch (emailError) {
+            logEmailError(hodEmail, emailError);
+            failed.push({
+                email: hodEmail,
+                reason: emailError?.message || 'Unknown error',
+                providerCode: emailError?.responseCode || emailError?.code || null,
+            });
+        }
+    }
+
+    return { sent, failed };
 };
 
 const sendSingleEmail = async (to, subject, html) => {
@@ -326,8 +490,55 @@ export const sendMail = async (req, res) => {
             }
         }
 
+        // Send HOD coordinator copies
+        let hodEmailsSent = [];
+        let hodEmailsFailed = [];
+
+        if (emailsSentCount > 0) {
+            try {
+                const hodEmails = await getHODEmailsForRecipients(recipientEmails.filter((e) => !failedEmails.includes(e)));
+
+                if (hodEmails.length > 0) {
+                    // Get unique departments from recipient emails for HOD notification
+                    const { default: Alumni } = await import('../models/alumni.js');
+                    const departments = new Set();
+
+                    for (const email of recipientEmails) {
+                        if (!failedEmails.includes(email)) {
+                            try {
+                                const alumni = await Alumni.findOne({ email: email.toLowerCase() }).select('branch');
+                                if (alumni && alumni.branch) {
+                                    departments.add(alumni.branch);
+                                }
+                            } catch {
+                                continue;
+                            }
+                        }
+                    }
+
+                    // Send HOD copies
+                    const hodResult = await sendHODCopies(hodEmails, title, message, adminName, collegeName, departments);
+                    hodEmailsSent = hodResult.sent;
+                    hodEmailsFailed = hodResult.failed;
+
+                    // Log HOD send summary
+                    if (hodEmailsSent.length > 0) {
+                        console.log(`HOD emails sent: ${hodEmailsSent.length} to coordinators`);
+                    }
+                    if (hodEmailsFailed.length > 0) {
+                        console.log(`HOD email failures: ${hodEmailsFailed.length}`);
+                    }
+                }
+            } catch (hodError) {
+                console.error('Error sending HOD coordinator copies:', hodError.message);
+                // Don't block the main email sending if HOD logic fails
+            }
+        }
+
         savedMail.recipientCount = emailsSentCount;
         savedMail.recipientEmails = recipientEmails.filter((e) => !failedEmails.includes(e));
+        savedMail.ccEmails = hodEmailsSent;
+        savedMail.ccEmailsSent = hodEmailsSent.length;
         savedMail.hasTokens = isEventInvitation && emailsSentCount > 0;
         savedMail.tokenGeneratedAt = isEventInvitation && emailsSentCount > 0 ? new Date() : null;
         // Mark non-event mails as completed immediately after successful send
@@ -516,11 +727,25 @@ export const getMailById = async (req, res) => {
             });
         }
 
+        const department = await getRequestDepartment(req);
+        const visibleRecipientEmails =
+            req.user?.role === 'coordinator'
+                ? await getDepartmentRecipients(mail.recipientEmails, department)
+                : mail.recipientEmails;
+
+        if (req.user?.role === 'coordinator' && visibleRecipientEmails.length === 0) {
+            console.log(`[MAIL ACCESS DENIED] Coordinator: ${req.user?.email} | Department: ${department} | Mail recipients: ${mail.recipientEmails?.join(', ')}`);
+            return res.status(403).json({
+                success: false,
+                message: 'You do not have access to this mail',
+            });
+        }
+
         // Fetch alumni profile data for all recipients
         const { default: Alumni } = await import('../models/alumni.js');
 
         const recipients = await Promise.all(
-            mail.recipientEmails.map(async (email) => {
+            visibleRecipientEmails.map(async (email) => {
                 try {
                     const alumni = await Alumni.findOne({
                         email: email.toLowerCase()
@@ -566,6 +791,8 @@ export const getMailById = async (req, res) => {
 
         const mailWithRecipients = {
             ...mail.toObject(),
+            recipientEmails: visibleRecipientEmails,
+            recipientCount: visibleRecipientEmails.length,
             recipients
         };
 
@@ -585,7 +812,7 @@ export const getMailById = async (req, res) => {
 
 export const getDepartmentMails = async (req, res) => {
     try {
-        const { department } = req.params;
+        const department = await getRequestDepartment(req, req.params.department);
 
         if (!department) {
             return res.status(400).json({
@@ -601,14 +828,27 @@ export const getDepartmentMails = async (req, res) => {
             );
 
         const { default: MailResponse } = await import('../models/mailResponse.js');
-        const { default: Alumni } = await import('../models/alumni.js');
 
         const mailsWithStats = await Promise.all(
             mails.map(async (mail) => {
+                const departmentRecipientEmails = await getDepartmentRecipients(
+                    mail.recipientEmails,
+                    department
+                );
+                const departmentRecipientEmailSet = new Set(
+                    departmentRecipientEmails.map((email) => email.toLowerCase())
+                );
+
+                if (departmentRecipientEmails.length === 0) {
+                    return null;
+                }
+
                 // For non-event mails (status='completed'), skip response stats calculation
                 if (mail.status === 'completed' || !mail.isEventInvitation) {
                     return {
                         ...mail.toObject(),
+                        recipientEmails: departmentRecipientEmails,
+                        recipientCount: departmentRecipientEmails.length,
                         responseStats: {
                             total: 0,
                             accepted: 0,
@@ -616,7 +856,7 @@ export const getDepartmentMails = async (req, res) => {
                             pending: 0,
                         },
                         dominantStatus: 'completed',
-                        departmentRecipientCount: 0,
+                        departmentRecipientCount: departmentRecipientEmails.length,
                     };
                 }
 
@@ -626,31 +866,12 @@ export const getDepartmentMails = async (req, res) => {
                 const departmentResponses = [];
 
                 for (const response of allResponses) {
-                    try {
-                        const alumni = await Alumni.findOne({
-                            email: response.recipientEmail.toLowerCase(),
-                        });
-                        if (alumni && alumni.branch === department) {
-                            departmentResponses.push(response);
-                        }
-                    } catch {
-                        continue;
+                    if (departmentRecipientEmailSet.has(response.recipientEmail.toLowerCase())) {
+                        departmentResponses.push(response);
                     }
                 }
 
-                let departmentRecipientCount = 0;
-                for (const recipientEmail of mail.recipientEmails || []) {
-                    try {
-                        const alumni = await Alumni.findOne({
-                            email: recipientEmail.toLowerCase(),
-                        });
-                        if (alumni && alumni.branch === department) {
-                            departmentRecipientCount++;
-                        }
-                    } catch {
-                        continue;
-                    }
-                }
+                const departmentRecipientCount = departmentRecipientEmails.length;
 
                 const stats = {
                     total: departmentResponses.length,
@@ -670,6 +891,8 @@ export const getDepartmentMails = async (req, res) => {
 
                 return {
                     ...mail.toObject(),
+                    recipientEmails: departmentRecipientEmails,
+                    recipientCount: departmentRecipientCount,
                     responseStats: stats,
                     dominantStatus,
                     departmentRecipientCount,
@@ -677,10 +900,12 @@ export const getDepartmentMails = async (req, res) => {
             })
         );
 
+        const filteredMails = mailsWithStats.filter(Boolean);
+
         return res.status(200).json({
             success: true,
-            mails: mailsWithStats,
-            total: mailsWithStats.length,
+            mails: filteredMails,
+            total: filteredMails.length,
             department,
             message: `Showing mail statistics for ${department} department only`,
         });
@@ -814,7 +1039,8 @@ export const sendAdminNotification = async (responseData, mailData, action) => {
 
 export const getMailResponsesByDepartment = async (req, res) => {
     try {
-        const { mailId, department } = req.params;
+        const { mailId } = req.params;
+        const department = await getRequestDepartment(req, req.params.department);
 
         const mail = await Mail.findById(mailId);
         if (!mail) {
@@ -825,7 +1051,17 @@ export const getMailResponsesByDepartment = async (req, res) => {
         }
 
         const { default: MailResponse } = await import('../models/mailResponse.js');
-        const { default: Alumni } = await import('../models/alumni.js');
+        const departmentRecipientEmails = await getDepartmentRecipients(mail.recipientEmails, department);
+        const departmentRecipientEmailSet = new Set(
+            departmentRecipientEmails.map((email) => email.toLowerCase())
+        );
+
+        if (req.user?.role === 'coordinator' && departmentRecipientEmails.length === 0) {
+            return res.status(403).json({
+                success: false,
+                message: 'You do not have access to this mail',
+            });
+        }
 
         const allResponses = await MailResponse.find({ mailId })
             .sort({ submittedAt: -1 })
@@ -834,16 +1070,8 @@ export const getMailResponsesByDepartment = async (req, res) => {
         const departmentFilteredResponses = [];
 
         for (const response of allResponses) {
-            try {
-                const alumni = await Alumni.findOne({
-                    email: response.recipientEmail.toLowerCase(),
-                });
-
-                if (alumni && alumni.branch === department) {
-                    departmentFilteredResponses.push(response);
-                }
-            } catch {
-                continue;
+            if (departmentRecipientEmailSet.has(response.recipientEmail.toLowerCase())) {
+                departmentFilteredResponses.push(response);
             }
         }
 
@@ -853,18 +1081,7 @@ export const getMailResponsesByDepartment = async (req, res) => {
             rejected: departmentFilteredResponses.filter((r) => r.action === 'reject').length,
         };
 
-        const departmentAlumniCount = await Promise.all(
-            mail.recipientEmails.map(async (recipientEmail) => {
-                try {
-                    const alumni = await Alumni.findOne({ email: recipientEmail.toLowerCase() });
-                    return alumni && alumni.branch === department ? 1 : 0;
-                } catch {
-                    return 0;
-                }
-            })
-        );
-
-        const totalDepartmentRecipients = departmentAlumniCount.reduce((sum, count) => sum + count, 0);
+        const totalDepartmentRecipients = departmentRecipientEmails.length;
         departmentStats.pending = totalDepartmentRecipients - departmentStats.total;
 
         return res.status(200).json({

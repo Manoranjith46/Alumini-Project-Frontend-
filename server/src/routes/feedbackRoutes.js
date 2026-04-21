@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { authenticate } from '../middleware/auth.js';
-import { submitFeedback, getMyFeedbacks, getAllFeedbacks, getFeedbackById, getSignatureImage } from '../controllers/feedbackController.js';
+import { submitFeedback, getMyFeedbacks, getAllFeedbacks, getDepartmentFeedbacks, getFeedbackById, getSignatureImage } from '../controllers/feedbackController.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -11,6 +11,9 @@ router.post('/', authenticate, upload.single('signature'), submitFeedback);
 
 // Alumni gets their own feedbacks
 router.get('/my', authenticate, getMyFeedbacks);
+
+// Coordinator/Admin gets department feedbacks
+router.get('/department/all', authenticate, getDepartmentFeedbacks);
 
 // Admin/Coordinator gets all feedbacks
 router.get('/all', authenticate, getAllFeedbacks);

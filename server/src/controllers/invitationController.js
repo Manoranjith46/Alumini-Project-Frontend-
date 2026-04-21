@@ -2,6 +2,7 @@ import { Readable } from 'stream';
 import mongoose from 'mongoose';
 import Invitation from '../models/invitation.js';
 import { getGridFSBucket } from '../config/db.js';
+import { findCoordinatorForUser } from '../utils/coordinatorResolver.js';
 
 // Upload buffer to GridFS and return the file ID
 const uploadToGridFS = (buffer, filename, mimetype) => {
@@ -116,6 +117,63 @@ export const getFlyerImage = async (req, res) => {
 		const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(id));
 		downloadStream.pipe(res);
 	} catch {
+		res.status(500).json({ success: false, message: 'Server error' });
+	}
+};
+
+export const getDepartmentInvitations = async (req, res) => {
+	try {
+		// Get coordinator's department
+		if (req.user?.role !== 'coordinator') {
+			return getAllInvitations(req, res);
+		}
+
+		const coordinator = await findCoordinatorForUser(req.user);
+		const department = coordinator?.department || '';
+
+		if (!department) {
+			return res.status(400).json({
+				success: false,
+				message: 'Coordinator department not found',
+			});
+		}
+
+		// Normalize department name for case-insensitive comparison
+		const normalizedDepartment = department.trim().toLowerCase();
+
+		const invitations = await Invitation.find()
+			.populate('createdBy', 'name email userId')
+			.sort({ createdAt: -1 });
+
+		// Import Coordinator model to check department
+		const { default: Coordinator } = await import('../models/coordinator.js');
+
+		// Filter by coordinator's department
+		const departmentInvitations = [];
+		for (const invitation of invitations) {
+			try {
+				const invCreator = await Coordinator.findOne({
+					userId: invitation.createdBy._id,
+					isActive: true,
+				}).select('department');
+
+				const normalizedCreatorDept = (invCreator?.department || '').trim().toLowerCase();
+				if (normalizedCreatorDept === normalizedDepartment) {
+					departmentInvitations.push(invitation);
+				}
+			} catch (err) {
+				console.error('Error checking invitation creator department:', err);
+			}
+		}
+
+		res.status(200).json({
+			success: true,
+			invitations: departmentInvitations,
+			total: departmentInvitations.length,
+			department,
+		});
+	} catch (error) {
+		console.error('Error fetching department invitations:', error);
 		res.status(500).json({ success: false, message: 'Server error' });
 	}
 };

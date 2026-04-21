@@ -43,8 +43,8 @@ export const getDashboardStats = async (req, res) => {
       latestDonation,
       upcomingEvent,
     ] = await Promise.all([
-      // 1. Total active alumni
-      Alumni.countDocuments({ isActive: true }),
+      // 1. Total alumni
+      Alumni.countDocuments({}),
 
       // 2. Active coordinators (status='Active' AND isActive=true)
       Coordinator.countDocuments({ status: 'Active', isActive: true }),

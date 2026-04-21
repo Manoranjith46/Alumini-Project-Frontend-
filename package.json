@@ -10,5 +10,3 @@
     "start:server": "npm --prefix server run dev"
   }
 }
-
-

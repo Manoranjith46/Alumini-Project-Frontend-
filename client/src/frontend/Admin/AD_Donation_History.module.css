@@ -1,20 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-/* Color Palette & Variables */
 :root {
-  --primary: #228B22;
-  --primary-hover: #1e7a1e;
-  --bg-light: #F8FAFC;
-  --bg-white: #FFFFFF;
-  
-  --text-dark: #0f172a;    /* slate-900 */
-  --text-primary: #1e293b; /* slate-800 */
-  --text-muted: #64748b;   /* slate-500 */
-  --text-light: #94a3b8;   /* slate-400 */
-  
-  --border-color: #e2e8f0; /* slate-200 */
-  --border-light: #f1f5f9; /* slate-100 */
-  --bg-surface: #f8fafc;   /* slate-50 */
+  --border-light: #f1f5f9;
+  --bg-surface: #f8fafc;
 }
 
 .pageContainer {
@@ -105,7 +92,7 @@
 }
 
 .exportBtn {
-  background-color: var(--primary);
+  background-color: var(--dark-green-button);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
@@ -372,7 +359,7 @@
 }
 
 .activePageBtn {
-  background-color: var(--primary);
+  background-color: var(--dark-green-button);
   color: white;
   border-color: var(--primary);
 }

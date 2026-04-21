@@ -1,18 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Color Variables */
-:root {
-  --primary-green: #228B22;
-  --primary-hover: #1a6b1a;
-  --primary-light: #EAF1EC;
-  --primary-danger: #EF4444;
-  --primary-danger-hover: #DC2626;
-  --bg-light: #F8FAFC;
-  --text-dark: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e5e7eb;
-}
-
 /* Base Layout */
 .dashboardWrapper {
   display: flex;

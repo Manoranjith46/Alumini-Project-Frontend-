@@ -1,19 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap');
-
-/* CSS Variables aligned with Tailwind config */
 :root {
-  --primary: #228B22;
-  --primary-hover: #1e7e1e;
-  --bg-light: #f8f6f6;
-  --bg-white: #ffffff;
-  
-  --text-dark: #0f172a; /* slate-900 */
-  --text-primary: #1e293b; /* slate-800 */
-  --text-muted: #475569; /* slate-600 */
-  --text-light: #64748b; /* slate-500 */
-  
-  --border-light: #e2e8f0; /* slate-200 */
-  --border-ultra-light: #f1f5f9; /* slate-100 */
+  --border-ultra-light: #f1f5f9;
 }
 
 .pageContainer {
@@ -371,7 +358,7 @@
 }
 
 .feedbackBtn {
-  background-color: var(--primary);
+  background-color: var(--dark-green-button);
   color: white;
   font-weight: 700;
   padding: 0.625rem 1.5rem;
@@ -386,7 +373,7 @@
 }
 
 .feedbackBtn:hover {
-  background-color: var(--primary-hover);
+  background-color: var(--dark-green-hover);
   transform: translateY(-2px);
 }
 
@@ -486,12 +473,12 @@
 }
 
 .editBtn {
-  background-color: var(--primary);
+  background-color: var(--dark-green-button);
   color: white;
 }
 
 .editBtn:hover {
-  background-color: var(--primary-hover);
+  background-color: var(--dark-green-hover);
 }
 
 .deleteBtn {
@@ -712,7 +699,7 @@
 }
 
 .checkboxOption input[type="checkbox"]:checked + .checkmark {
-  background-color: var(--primary);
+  background-color: var(--dark-green-button);
   border-color: var(--primary);
 }
 
@@ -795,12 +782,12 @@
 }
 
 .saveBtn {
-  background-color: var(--primary);
+  background-color: var(--dark-green-button);
   color: white;
 }
 
 .saveBtn:hover {
-  background-color: var(--primary-hover);
+  background-color: var(--dark-green-hover);
 }
 
 .saveBtn:disabled {
@@ -841,13 +828,13 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s;
-  background-color: var(--primary);
+  background-color: var(--dark-green-button);
   color: white;
   border: none;
 }
 
 .uploadBtn:hover {
-  background-color: var(--primary-hover);
+  background-color: var(--dark-green-hover);
 }
 
 .uploadBtn:disabled {

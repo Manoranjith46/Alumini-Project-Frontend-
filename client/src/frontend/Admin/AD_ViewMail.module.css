@@ -1,18 +1,5 @@
 /* Color Palette Variables based on tailwind config */
 :root {
-  --forest-green: #228B22;
-  --forest-green-hover: #1c731c;
-  --main-bg: #F8FAFC;
-  --sidebar-gray: #F9FAFB;
-  --slate-50: #f8fafc;
-  --slate-100: #f1f5f9;
-  --slate-200: #e2e8f0;
-  --slate-300: #cbd5e1;
-  --slate-400: #94a3b8;
-  --slate-600: #475569;
-  --slate-700: #334155;
-  --slate-800: #1e293b;
-  --slate-900: #0f172a;
   --red-50: #fef2f2;
   --red-600: #dc2626;
   --white: #ffffff;
@@ -61,7 +48,7 @@
 }
 
 .backButton:hover {
-  color: var(--forest-green);
+  color: var(--dark-green-button);
 }
 
 .backButton span {
@@ -176,7 +163,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   color: var(--white);
   border: none;
   border-radius: 0.5rem;
@@ -206,7 +193,7 @@
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
   background-color: var(--white);
-  color: var(--forest-green);
+  color: var(--dark-green-button);
   border: 2px solid var(--forest-green);
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -223,7 +210,7 @@
 }
 
 .createFlyerButtonSecondary:hover {
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   color: var(--white);
   transform: translateY(-1px);
 }
@@ -293,7 +280,7 @@
   padding: 0.625rem 2rem;
   background-color: var(--white);
   border: 2px solid var(--forest-green);
-  color: var(--forest-green);
+  color: var(--dark-green-button);
   font-weight: 600;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -306,7 +293,7 @@
 
 .submitBtn {
   padding: 0.625rem 2rem;
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   color: var(--white);
   border: none;
   font-weight: 600;
@@ -324,7 +311,7 @@
   display: flex;
   justify-self: end;
   padding: 0.625rem 2rem;
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   color: var(--white);
   border: none;
   font-weight: 600;
@@ -365,7 +352,7 @@
 
 .previewBtn {
   padding: 0.625rem 1.5rem;
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   color: var(--white);
   border: none;
   font-weight: 600;
@@ -399,7 +386,7 @@
 
 .editBtn {
   padding: 0.625rem 1.5rem;
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   color: var(--white);
   border: none;
   border-radius: 0.5rem;
@@ -464,7 +451,7 @@
 
 .formGroup input[type="date"].inputField::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  color: var(--forest-green);
+  color: var(--dark-green-button);
   filter: invert(38%) sepia(93%) saturate(1000%) hue-rotate(89deg);
 }
 
@@ -522,7 +509,7 @@
 .backBtn {
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -749,7 +736,7 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -796,6 +783,6 @@
 
 .alumniDesignation {
   font-size: 0.75rem;
-  color: var(--forest-green);
+  color: var(--dark-green-button);
   font-weight: 500;
 }

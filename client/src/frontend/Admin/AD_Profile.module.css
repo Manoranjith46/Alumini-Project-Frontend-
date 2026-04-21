@@ -1,26 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Color Variables */
-:root {
-  --primary: #2E6F40;
-  --primary-hover: #245832;
-
-  --primary-danger: #f12b2b;
-  --primary-danger-hover: #ff0000;
-
-  --bg-light: #F9FAFB;
-  --bg-white: #FFFFFF;
-  --bg-surface: #F8FAFC; /* slate-50 */
-
-  --text-dark: #111827;    /* slate-900 */
-  --text-primary: #1E293B; /* slate-800 */
-  --text-secondary: #64748B; /* slate-500 */
-  --text-muted: #94A3B8;   /* slate-400 */
-
-  --border-light: #F1F5F9; /* slate-100 */
-  --border-color: #E2E8F0; /* slate-200 */
-}
-
 /* Base Layout */
 .pageLayout {
   display: flex;
@@ -99,15 +78,15 @@
 }
 
 .message.success {
-  background-color: #dcfce7;
-  border: 1px solid #bbf7d0;
-  color: #166534;
+  background-color: var(--success-light);
+  border: 1px solid var(--success-border);
+  color: var(--success-dark);
 }
 
 .message.error {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
+  background-color: var(--error-light);
+  border: 1px solid var(--error-border);
+  color: var(--error-dark);
 }
 
 .loadingText {
@@ -161,7 +140,7 @@
 
 .editBtn {
   background-color: var(--primary);
-  color: white;
+  color: var(--bg-white);
   font-size: 0.875rem;
   font-weight: 600;
   padding: 0.5rem 1.5rem;
@@ -230,14 +209,14 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #e5e7eb;
-  border: 2px solid #d1d5db;
+  background-color: var(--border-color);
+  border: 2px solid var(--border-gray);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-disabled);
   transition: all 0.3s ease;
 }
 
@@ -251,22 +230,22 @@
 }
 
 .stepDot.active {
-  background: linear-gradient(135deg, var(--primary) 0%, #24663e 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--dark-green-darker) 100%);
   border-color: var(--primary);
-  color: white;
+  color: var(--bg-white);
   box-shadow: 0 4px 12px rgba(46, 111, 64, 0.3);
 }
 
 .stepDot.completed {
-  background-color: #10b981;
-  border-color: #059669;
-  color: white;
+  background-color: var(--secondary-green);
+  border-color: var(--secondary-green-dark);
+  color: var(--bg-white);
 }
 
 .stepConnector {
   width: 2px;
   height: 16px;
-  background-color: #d1d5db;
+  background-color: var(--border-gray);
   transition: background-color 0.3s ease;
 }
 
@@ -301,14 +280,14 @@
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 4px rgba(46, 111, 64, 0.15);
-  background-color: #fafbfc;
+  background-color: var(--bg-lighter);
 }
 
 .inputField:disabled {
-  background-color: #f3f4f6;
+  background-color: var(--bg-surface);
   color: var(--text-muted);
   cursor: not-allowed;
-  border-color: #e5e7eb;
+  border-color: var(--border-color);
 }
 
 .inputField::placeholder {
@@ -427,7 +406,7 @@
 .passwordForm {
   margin-top: 1rem;
   padding: 2.5rem;
-  background: linear-gradient(to bottom, #FFFFFF 0%, #FAFBFC 100%);
+  background: linear-gradient(to bottom, var(--bg-white) 0%, var(--bg-lighter) 100%);
   border: 2px solid var(--border-light);
   border-radius: 1rem;
   display: flex;
@@ -489,7 +468,7 @@
 
 .backButton:hover {
   background-color: var(--primary);
-  color: white;
+  color: var(--bg-white);
   transform: translateX(-2px);
   box-shadow: 0 4px 12px rgba(46, 111, 64, 0.2);
 }
@@ -498,8 +477,8 @@
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  border: 1px solid #d1d5db;
+  background: linear-gradient(135deg, var(--bg-surface) 0%, var(--border-color) 100%);
+  border: 1px solid var(--border-gray);
   cursor: pointer;
   color: var(--text-primary);
   padding: 0.5rem;
@@ -515,7 +494,7 @@
 
 .closeBtn:hover {
   background: linear-gradient(135deg, var(--primary-danger) 0%, #ff4757 100%);
-  color: white;
+  color: var(--bg-white);
   box-shadow: 0 4px 12px rgba(241, 43, 43, 0.2);
 }
 
@@ -586,8 +565,8 @@
 
 /* Buttons */
 .primary {
-  background: linear-gradient(135deg, var(--primary) 0%, #24663e 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--dark-green-darker) 100%);
+  color: var(--bg-white);
   font-weight: 600;
   padding: 0.875rem 1.75rem;
   border-radius: 0.75rem;

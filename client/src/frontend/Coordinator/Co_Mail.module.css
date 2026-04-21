@@ -13,7 +13,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.1rem 1.25rem 1.5rem 0.1rem;
-    border-bottom: 0px solid #f1f5f9;
+    border-bottom: 0px solid var(--bg-surface);
     overflow: hidden;
     white-space: nowrap;
     justify-content: flex-start;
@@ -34,7 +34,7 @@
     width: 100%;
     flex: none;
     background-color: white;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-light);
     padding: 0.600rem 0.5rem;
     display: flex;
     align-items: center;
@@ -50,7 +50,7 @@
 }
 
 .collegeName {
-    color: #001E2B;
+    color: var(--text-title);
     font-family: 'Inter', sans-serif;
     font-weight: 700;
     font-size: 1.8rem;
@@ -65,26 +65,26 @@
 }
 
 .mainScrollable::-webkit-scrollbar-track {
-    background-color: #E5E7EB;
+    background-color: var(--border-color);
     border-radius: 100px;
     margin: 8px 0;
 }
 
 .mainScrollable::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #FF3D00, #E63600);
+    background: linear-gradient(to bottom, var(--primary-green), var(--primary-hover));
     border-radius: 100px;
-    border: 2px solid #E5E7EB;
+    border: 2px solid var(--border-color);
     box-shadow: inset 0 0 6px rgba(255, 61, 0, 0.3);
 }
 
 .mainScrollable::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, #E63600, #CC3000);
-    border-color: #FF3D00;
+    background: linear-gradient(to bottom, var(--primary-hover), var(--primary-dark));
+    border-color: var(--primary-green);
     box-shadow: inset 0 0 8px rgba(255, 61, 0, 0.5), 0 0 4px rgba(255, 61, 0, 0.4);
 }
 
 .mainScrollable::-webkit-scrollbar-thumb:active {
-    background: linear-gradient(to bottom, #CC3000, #B32A00);
+    background: linear-gradient(to bottom, var(--primary-dark), var(--primary-dark));
     box-shadow: inset 0 0 10px rgba(255, 61, 0, 0.7);
 }
 
@@ -116,7 +116,7 @@
 }
 
 .mailCard:hover {
-    background-color: #f8fafc;
+    background-color: var(--bg-light);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -137,27 +137,27 @@
 
 .btnViewGreySolid {
     background-color: transparent;
-    color: #6B7280;
-    border: 2px solid #6B7280;
+    color: var(--text-disabled);
+    border: 2px solid var(--text-disabled);
 }
 
 .btnViewGreySolid:hover {
-    background-color: #6B7280;
+    background-color: var(--text-disabled);
     color: white;
-    border-color: #6B7280;
+    border-color: var(--text-disabled);
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(107, 114, 128, 0.2);
 }
 
 .btnViewGreyOutline {
     background-color: transparent;
-    border: 2px solid #6B7280;
-    color: #6B7280;
+    border: 2px solid var(--text-disabled);
+    color: var(--text-disabled);
 }
 
 .btnViewGreyOutline:hover,
 .btnViewGreyOutline:active {
-    background-color: #6B7280;
+    background-color: var(--text-disabled);
     color: white;
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(107, 114, 128, 0.2);
@@ -165,27 +165,27 @@
 
 .btnViewGreenSolid {
     background-color: transparent;
-    color: #22c55e;
-    border: 2px solid #22c55e;
+    color: var(--success-color);
+    border: 2px solid var(--success-color);
 }
 
 .btnViewGreenSolid:hover {
-    background-color: #22c55e;
+    background-color: var(--success-color);
     color: white;
-    border-color: #22c55e;
+    border-color: var(--success-color);
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(34, 197, 94, 0.2);
 }
 
 .btnViewGreenOutline {
     background-color: transparent;
-    border: 2px solid #22c55e;
-    color: #22c55e;
+    border: 2px solid var(--success-color);
+    color: var(--success-color);
 }
 
 .btnViewGreenOutline:hover,
 .btnViewGreenOutline:active {
-    background-color: #22c55e;
+    background-color: var(--success-color);
     color: white;
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(34, 197, 94, 0.2);
@@ -193,27 +193,27 @@
 
 .btnViewRedSolid {
     background-color: transparent;
-    color: #ef4444;
-    border: 2px solid #ef4444;
+    color: var(--error-color);
+    border: 2px solid var(--error-color);
 }
 
 .btnViewRedSolid:hover {
-    background-color: #ef4444;
+    background-color: var(--error-color);
     color: white;
-    border-color: #ef4444;
+    border-color: var(--error-color);
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
 }
 
 .btnViewRedOutline {
     background-color: transparent;
-    border: 2px solid #ef4444;
-    color: #ef4444;
+    border: 2px solid var(--error-color);
+    color: var(--error-color);
 }
 
 .btnViewRedOutline:hover,
 .btnViewRedOutline:active {
-    background-color: #ef4444;
+    background-color: var(--error-color);
     color: white;
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
@@ -221,15 +221,15 @@
 
 /* Border classes for status colors */
 .borderGrey {
-    border-color: #d1d5db !important;
+    border-color: var(--border-gray) !important;
 }
 
 .borderGreen {
-    border-color: #22c55e !important;
+    border-color: var(--success-color) !important;
 }
 
 .borderRed {
-    border-color: #ef4444 !important;
+    border-color: var(--error-color) !important;
 }
 
 /* Responsive Design */

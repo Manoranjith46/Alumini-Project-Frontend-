@@ -1,19 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Variables aligned with tailwind config */
-:root {
-  --primary: #2E6F40;
-  --primary-hover: #245832;
-  --bg-light: #F9FAFB;
-  --bg-white: #FFFFFF;
-  --text-dark: #111827;     /* slate-900 */
-  --text-primary: #334155;  /* slate-700 */
-  --text-secondary: #64748B;/* slate-500 */
-  --text-light: #9CA3AF;    /* slate-400 */
-  --border-light: #E2E8F0;  /* slate-200 */
-  --border-ultra: #F1F5F9;  /* slate-100 */
-}
-
 /* Base Layout */
 .pageContainer {
   display: flex;

@@ -58,6 +58,13 @@ const mailSchema = new Schema(
       enum: ['pending', 'completed'],
       default: 'pending',
     },
+    ccEmails: [{
+      type: String,
+    }],
+    ccEmailsSent: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

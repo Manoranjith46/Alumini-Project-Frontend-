@@ -11,45 +11,41 @@ const CoordinatorMail = ({ onLogout }) => {
     const [mailHistory, setMailHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
+    const [resolvedDepartment, setResolvedDepartment] = useState("");
     const { user } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log('User object:', user); // Debug log
-        // Always fetch mails, regardless of user state
-        fetchDepartmentMails();
-    }, []);
+        if (user?.token) {
+            fetchDepartmentMails();
+        } else {
+            setLoading(false);
+        }
+    }, [user?.token]);
 
     const fetchDepartmentMails = async () => {
         try {
             setLoading(true);
+            setMailHistory([]);
+            setResolvedDepartment("");
 
-            let apiUrl;
-            if (user?.department) {
-                console.log('Fetching mails for department:', user.department); // Debug log
-                apiUrl = `${API_BASE_URL}/api/mail/department/${encodeURIComponent(user.department)}`;
-            } else {
-                console.log('No department found, fetching all mails'); // Debug log
-                apiUrl = `${API_BASE_URL}/api/mail/all`;
+            if (!user?.token || !user?.department) {
+                setMailHistory([]);
+                return;
             }
 
-            console.log('API URL:', apiUrl); // Debug log
-
             // Fetch mails for coordinator's department or all mails
-            const response = await fetch(apiUrl, {
+            const response = await fetch(`${API_BASE_URL}/api/mail/department/${encodeURIComponent(user.department)}`, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${user.token}`
                 }
             });
 
-            console.log('Response status:', response.status); // Debug log
-            console.log('Response ok:', response.ok); // Debug log
-
             const data = await response.json();
-            console.log('Response data:', data); // Debug log
 
             if (data.success) {
-                // Transform backend data to match original structure
+                setResolvedDepartment(data.department || "");
                 const transformedMails = data.mails.map((mail, index) => ({
                     id: mail._id,
                     sender: mail.senderName,
@@ -62,12 +58,13 @@ const CoordinatorMail = ({ onLogout }) => {
                     mailData: mail // Keep original data for navigation
                 }));
 
-                console.log('Transformed mails:', transformedMails); // Debug log
                 setMailHistory(transformedMails);
             } else {
+                setMailHistory([]);
                 console.error('API returned success: false', data);
             }
         } catch (err) {
+            setMailHistory([]);
             console.error('Error fetching department mails:', err);
         } finally {
             setLoading(false);
@@ -152,12 +149,12 @@ const CoordinatorMail = ({ onLogout }) => {
                             <div>
                                 <h2 className="text-3xl font-bold text-[#001E2B]">Mail History</h2>
                                 <div className="flex items-center gap-2 mt-1">
-                                    {user?.department && (
-                                        <p className="text-sm text-slate-500">Department: {user.department}</p>
+                                    {(resolvedDepartment || user?.department) && (
+                                        <p className="text-sm text-slate-500">Department: {resolvedDepartment || user.department}</p>
                                     )}
-                                    {user?.department && (
+                                    {(resolvedDepartment || user?.department) && (
                                         <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
-                                            Showing {user.department} responses only
+                                            Showing only {(resolvedDepartment || user.department)} alumni mails
                                         </span>
                                     )}
                                 </div>

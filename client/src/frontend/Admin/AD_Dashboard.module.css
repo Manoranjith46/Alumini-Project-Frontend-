@@ -1,5 +1,5 @@
 .dashboardContent {
-  scrollbar-color: linear-gradient(to bottom, #007BFF, #0069D9) #E5E7EB;
+  scrollbar-color: linear-gradient(to bottom, var(--info-color), var(--info-darker)) var(--border-color);
   scrollbar-width: auto;
 }
 
@@ -8,19 +8,19 @@
   width: 10px;
 }
 .dashboardContent::-webkit-scrollbar-track {
-  background-color: #E5E7EB;
+  background-color: var(--border-color);
   border-radius: 10px;
   margin: 8px 0;
 }
 .dashboardContent::-webkit-scrollbar-thumb {
-  background-color: #2E6F40;
+  background-color: var(--primary-green);
   border-radius: 10px;
   transition: all 0.3s ease;
-  border: 2px solid #E5E7EB;
-  box-shadow: inset 0 0 6px rgba(46, 111, 64, 0.3);
+  border: 2px solid var(--border-color);
+  box-shadow: inset 0 0 6px var(--shadow-primary-light);
 }
-.dashboardContent::-webkit-scrollbar-thumb:hover {  
-  background-color: #256032;
+.dashboardContent::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-hover);
 }
 .dashboardContent::-webkit-scrollbar-thumb:active {
   box-shadow: inset 0 0 10px rgba(0, 123, 255, 0.7);
@@ -35,21 +35,21 @@
   padding-right: 1rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: var(--bg-lighter);
+  border: 1px solid var(--border-light);
   border-radius: 0.5rem;
   font-size: 0.875rem;
   outline: none;
 }
 .searchInput:focus {
-  box-shadow: 0 0 0 2px #0284c7;
+  box-shadow: 0 0 0 2px var(--info-color);
   border-color: transparent;
 }
 .searchIcon {
   position: absolute;
   left: 0.75rem;
   top: 0.625rem;
-  color: #94a3b8;
+  color: var(--text-light);
   font-size: 1.25rem;
 }
 /* --- Copied from Alumni Dashboard Top Bar --- */
@@ -68,7 +68,7 @@
   gap: 0.75rem;
 }
 .collegeName {
-  color: #001E2B;
+  color: var(--text-title);
   font-weight: 700;
   font-size: 1.8rem;
   text-transform: uppercase;
@@ -86,7 +86,7 @@
 .notificationBtn {
   position: relative;
   padding: 0.5rem;
-  color: #64748b;
+  color: var(--text-muted);
   border-radius: 9999px;
   transition: background-color 0.2s;
   background: none;
@@ -94,7 +94,7 @@
   cursor: pointer;
 }
 .notificationBtn:hover {
-  background-color: #f8fafc;
+  background-color: var(--bg-light);
 }
 .notificationDot {
   position: absolute;
@@ -102,14 +102,14 @@
   right: 0.5rem;
   width: 0.5rem;
   height: 0.5rem;
-  background-color: #ef4444;
+  background-color: var(--error-color);
   border-radius: 9999px;
-  border: 2px solid white;
+  border: 2px solid var(--bg-white);
 }
 .divider {
   height: 2rem;
   width: 1px;
-  background-color: #e2e8f0;
+  background-color: var(--border-light);
 }
 .userInfo {
   display: flex;
@@ -122,18 +122,18 @@
 .userName {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #001E2B;
+  color: var(--text-title);
 }
 .userClass {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 .userAvatar {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 9999px;
-  background-color: #f1f5f9;
-  border: 2px solid #0284c7;
+  background-color: var(--bg-surface);
+  border: 2px solid var(--info-color);
   overflow: hidden;
 }
 .imageFullCover {
@@ -152,14 +152,14 @@
 .dashboardWrapper {
   display: flex;
   min-height: 100vh;
-  background: var(--background-light, #F8FAFC);
-  color: #222;
+  background: var(--bg-light);
+  color: var(--text-dark);
   font-family: 'Inter', sans-serif;
 }
 .sidebar {
   width: 260px;
-  background: #fff;
-  border-right: 1px solid #e5e7eb;
+  background: var(--bg-white);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -175,13 +175,13 @@
 .portalTitle {
   font-size: 1.3rem;
   font-weight: bold;
-  color: #222;
+  color: var(--text-dark);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 .iconSchool {
-  color: #2E6F40;
+  color: var(--primary-green);
   font-size: 1.5rem;
 }
 .sidebarNav {
@@ -196,35 +196,35 @@
   align-items: center;
   padding: 12px 16px;
   border-radius: 10px;
-  color: #64748b;
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
   transition: background 0.2s, color 0.2s;
 }
 .sidebarLink:hover {
-  background: #f1f5f9;
-  color: #2E6F40;
+  background: var(--bg-surface);
+  color: var(--primary-green);
 }
 .active {
   background: rgba(46, 111, 64, 0.1);
-  color: #2E6F40;
+  color: var(--primary-green);
 }
 .sidebarFooter {
   padding: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin-top: auto;
 }
 .logoutLink {
-  color: #ef4444;
+  color: var(--error-color);
   font-weight: 500;
 }
 .mainContent {
   width: 100%;
   min-height: 100vh;
-  background: var(--background-light, #F8FAFC);
+  background: var(--bg-light);
   transition: background 0.2s;
   overflow-x: hidden;
 }
@@ -235,8 +235,8 @@
   width: 100vw;
   margin-left: calc(-1 * (100vw - 100%)/2);
   margin-right: calc(-1 * (100vw - 100%)/2);
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-color);
   height: 64px;
   display: flex;
   align-items: center;
@@ -255,7 +255,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 1.3rem;
 }
 .notificationDot {
@@ -264,9 +264,9 @@
   right: 0;
   width: 8px;
   height: 8px;
-  background: #ef4444;
+  background: var(--error-color);
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: 2px solid var(--bg-white);
 }
 .profileInfo {
   display: flex;
@@ -290,7 +290,7 @@
 .profileName {
   font-size: 1.1.1rem;
   font-weight: 700;
-  color: #002c3e;
+  color: var(--text-title-secondary);
   margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -298,7 +298,7 @@
 }
 .profileClass {
   font-size: 0.95rem;
-  color: #94a3b8;
+  color: var(--text-light);
   margin-bottom: 0;
   font-weight: 500;
   white-space: nowrap;
@@ -315,9 +315,9 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 2.5px solid #2196f3;
+  border: 2.5px solid var(--info-color);
   object-fit: cover;
-  background: #fff;
+  background: var(--bg-white);
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.08);
 }
 .dashboardContent {
@@ -334,10 +334,10 @@
   margin-bottom: 16px;
 }
 .card {
-  background: #fff;
+  background: var(--bg-white);
   border-radius: 24px;
   box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--bg-surface);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -362,12 +362,12 @@
 .cardTitle {
   font-size: 1.1rem;
   font-weight: bold;
-  color: #222;
+  color: var(--text-dark);
   text-transform: uppercase;
 }
 .cardBadge {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--badge-red-bg);
+  color: var(--badge-red-text);
   font-size: 0.7rem;
   padding: 2px 8px;
   border-radius: 8px;
@@ -379,19 +379,19 @@
 }
 .cardStatus {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: var(--text-light);
   font-weight: bold;
   text-transform: uppercase;
 }
 .cardStatusGreen {
-  background: #d1fae5;
-  color: #2E6F40;
+  background: var(--success-light);
+  color: var(--primary-green);
   font-size: 0.7rem;
   padding: 2px 8px;
   border-radius: 8px;
   font-weight: bold;
   text-transform: uppercase;
-  border: 1px solid #bbf7d0;
+  border: 1px solid var(--success-border);
 }
 .cardBody {
   flex: 1;
@@ -400,12 +400,12 @@
   gap: 10px;
 }
 .mailPreview {
-  background: #f1f5f9;
+  background: var(--bg-surface);
   border-radius: 12px;
   padding: 12px;
   font-size: 0.95rem;
-  color: #64748b;
-  border: 1px solid #e5e7eb;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
 }
 .cardAction {
   margin-top: 16px;
@@ -413,7 +413,7 @@
   padding: 8px 0;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-muted);
   background: none;
   border: none;
   cursor: pointer;
@@ -421,13 +421,13 @@
   transition: color 0.2s;
 }
 .cardAction:hover {
-  color: #2E6F40;
+  color: var(--primary-green);
 }
 .cardActionOutline {
   margin-top: 16px;
   width: 100%;
-  border: 1px solid #2E6F40;
-  color: #2E6F40;
+  border: 1px solid var(--primary-green);
+  color: var(--primary-green);
   font-size: 0.95rem;
   font-weight: bold;
   padding: 8px 0;
@@ -437,13 +437,13 @@
   transition: background 0.2s;
 }
 .cardActionOutline:hover {
-  background: #e7f5ea;
+  background: var(--primary-light);
 }
 .cardActionPrimary {
   margin-top: 16px;
   width: 100%;
-  background: #2E6F40;
-  color: #fff;
+  background: var(--primary-green);
+  color: var(--bg-white);
   font-size: 1rem;
   font-weight: bold;
   padding: 12px 0;
@@ -454,7 +454,7 @@
   transition: background 0.2s;
 }
 .cardActionPrimary:hover {
-  background: #256032;
+  background: var(--dark-green-deeper);
 }
 .cardUpcoming {
   background: #ede9fe;
@@ -468,13 +468,13 @@
 .reunionTitle {
   font-size: 1.3rem;
   font-weight: bold;
-  color: #222;
+  color: var(--text-dark);
   margin-bottom: 8px;
   text-align: center;
 }
 .reunionDesc {
   font-size: 0.95rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin-bottom: 16px;
   text-align: center;
 }
@@ -485,18 +485,18 @@
   margin-bottom: 16px;
 }
 .reunionCountdown div {
-  background: #f1f5f9;
+  background: var(--bg-surface);
   border-radius: 12px;
   padding: 12px 16px;
   font-size: 1.1rem;
-  color: #222;
-  border: 1px solid #e5e7eb;
+  color: var(--text-dark);
+  border: 1px solid var(--border-color);
   text-align: center;
 }
 .reunionBtn {
   width: 100%;
-  background: #0F172A;
-  color: #fff;
+  background: var(--bg-overlay);
+  color: var(--bg-white);
   font-weight: bold;
   padding: 16px 0;
   border-radius: 12px;
@@ -506,13 +506,13 @@
   transition: background 0.2s;
 }
 .reunionBtn:hover {
-  background: #1e293b;
+  background: var(--text-dark);
 }
 .cardAchievements {
-  background: #fff;
+  background: var(--bg-white);
   border-radius: 24px;
   box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--bg-surface);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -529,10 +529,10 @@
 .achievementsTitle {
   font-size: 1.1rem;
   font-weight: bold;
-  color: #222;
+  color: var(--text-dark);
 }
 .achievementsViewAll {
-  color: #2E6F40;
+  color: var(--primary-green);
   font-size: 0.95rem;
   font-weight: 500;
   margin-left: auto;
@@ -548,31 +548,31 @@
   gap: 16px;
 }
 .achievementItem {
-  background: #f1f5f9;
+  background: var(--bg-surface);
   border-radius: 12px;
   padding: 16px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 .achievementDate {
   font-size: 0.7rem;
-  color: #dc2626;
+  color: var(--error-dark);
   font-weight: bold;
   text-transform: uppercase;
 }
 .achievementTitle {
   font-size: 1rem;
   font-weight: bold;
-  color: #222;
+  color: var(--text-dark);
 }
 .achievementDesc {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 .achievementReadMore {
-  color: #2E6F40;
+  color: var(--primary-green);
   font-size: 0.85rem;
   font-weight: 500;
   text-decoration: none;
@@ -584,37 +584,7 @@
 }
 
 /* ================== ANALYTICS KPI STYLES ================== */
-:root {
-  --ksrce-red: #228B22;
-  --ksrce-red-hover: #1e7b1e;
-  --ksrce-gray: #f9fafb;
-  --ksrce-border: #e5e7eb;
-
-  --text-dark: #1e293b;
-  --text-primary: #0f172a;
-  --text-muted: #475569;
-  --text-light: #64748b;
-
-  --bg-white: #ffffff;
-  --bg-surface: #f8fafc;
-
-  /* KPI Card Color Variants */
-  --kpi-green-bg: #dcfce7;
-  --kpi-green-text: #166534;
-  --kpi-green-icon: #22c55e;
-
-  --kpi-blue-bg: #dbeafe;
-  --kpi-blue-text: #1e40af;
-  --kpi-blue-icon: #3b82f6;
-
-  --kpi-orange-bg: #ffedd5;
-  --kpi-orange-text: #9a3412;
-  --kpi-orange-icon: #f97316;
-
-  --kpi-purple-bg: #f3e8ff;
-  --kpi-purple-text: #6b21a8;
-  --kpi-purple-icon: #a855f7;
-}
+/* Color variables are defined in AD_Global.css */
 
 /* ================== REFRESH BUTTON ================== */
 .refreshButton {
@@ -624,7 +594,7 @@
   width: 2.5rem;
   height: 2.5rem;
   background-color: var(--bg-white);
-  border: 1px solid var(--ksrce-border);
+  border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   cursor: pointer;
   color: var(--text-muted);
@@ -633,12 +603,12 @@
 
 .refreshButton:hover {
   background-color: var(--bg-surface);
-  color: var(--ksrce-red);
-  border-color: var(--ksrce-red);
+  color: var(--dark-green-button);
+  border-color: var(--dark-green-button);
 }
 
 .refreshButton:focus-visible {
-  outline: 2px solid var(--ksrce-red);
+  outline: 2px solid var(--dark-green-button);
   outline-offset: 2px;
 }
 
@@ -666,7 +636,7 @@
   background-color: var(--bg-white);
   padding: 1.5rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--ksrce-border);
+  border: 1px solid var(--border-color);
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
@@ -819,14 +789,14 @@
   padding: 3rem;
   background-color: var(--bg-white);
   border-radius: 0.75rem;
-  border: 1px solid var(--ksrce-border);
+  border: 1px solid var(--border-color);
   text-align: center;
   gap: 1rem;
 }
 
 .errorMessage {
   font-size: 1rem;
-  color: #dc2626;
+  color: var(--error-dark);
   margin: 0;
 }
 
@@ -835,7 +805,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  background-color: var(--ksrce-red);
+  background-color: var(--dark-green-button);
   color: var(--bg-white);
   border: none;
   border-radius: 0.5rem;
@@ -847,11 +817,11 @@
 }
 
 .retryButton:hover {
-  background-color: var(--ksrce-red-hover);
+  background-color: var(--dark-green-hover);
 }
 
 .retryButton:focus-visible {
-  outline: 2px solid var(--ksrce-red);
+  outline: 2px solid var(--dark-green-button);
   outline-offset: 2px;
 }
 
@@ -904,8 +874,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--success-color) 0%, var(--secondary-green-dark) 100%);
+  color: var(--bg-white);
   border: none;
   border-radius: 50px;
   font-size: 0.875rem;
@@ -920,11 +890,11 @@
 .floatingCreateButton:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 35px rgba(34, 197, 94, 0.4);
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  background: linear-gradient(135deg, var(--secondary-green-dark) 0%, var(--secondary-green-darker) 100%);
 }
 
 .floatingCreateButton:focus-visible {
-  outline: 2px solid #22c55e;
+  outline: 2px solid var(--success-color);
   outline-offset: 3px;
 }
 

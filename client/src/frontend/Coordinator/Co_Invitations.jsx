@@ -40,7 +40,7 @@ const CoordinatorInvitations = ({ onLogout }) => {
             }
 
             try {
-                const response = await fetch(`${API_BASE}/api/invitations/all`, {
+                const response = await fetch(`${API_BASE}/api/invitations/department/all`, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },

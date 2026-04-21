@@ -1,5 +1,6 @@
 import Payment from '../models/payment.js';
 import { getRazorpayClient, verifyRazorpaySignature } from '../utils/razorpay.js';
+import { findCoordinatorForUser } from '../utils/coordinatorResolver.js';
 
 export const createOrder = async (req, res) => {
 	try {
@@ -28,6 +29,8 @@ export const createOrder = async (req, res) => {
 		const shortUserId = String(req.user._id).slice(-8);
 		const receipt = `don_${Date.now()}_${shortUserId}`;
 
+		console.log('Creating Razorpay order:', { amount: amountInPaise, currency: 'INR', receipt });
+
 		const order = await razorpay.orders.create({
 			amount: amountInPaise,
 			currency: 'INR',
@@ -37,6 +40,8 @@ export const createOrder = async (req, res) => {
 				donationPurpose: trimmedPurpose,
 			},
 		});
+
+		console.log('Razorpay order created:', order.id);
 
 		await Payment.create({
 			user: req.user._id,
@@ -49,7 +54,11 @@ export const createOrder = async (req, res) => {
 
 		return res.status(201).json({
 			success: true,
-			order,
+			order: {
+				id: order.id,
+				amount: order.amount,
+				currency: order.currency || 'INR',
+			},
 			keyId: process.env.RAZORPAY_KEY_ID,
 			amount: numericAmount,
 			currency: 'INR',
@@ -77,11 +86,15 @@ export const verifyPayment = async (req, res) => {
 			razorpay_signature: signature,
 		} = req.body;
 
+		console.log('Verifying payment:', { orderId, paymentId, signature: signature ? 'present' : 'missing' });
+
 		if (!orderId || !paymentId || !signature) {
 			return res.status(400).json({ success: false, message: 'Missing payment verification fields' });
 		}
 
 		const isValid = verifyRazorpaySignature({ orderId, paymentId, signature });
+		console.log('Signature valid:', isValid);
+
 		if (!isValid) {
 			await Payment.findOneAndUpdate(
 				{ razorpayOrderId: orderId },
@@ -103,8 +116,11 @@ export const verifyPayment = async (req, res) => {
 			{ returnDocument: 'after' }
 		);
 
+		console.log('Payment updated successfully:', payment._id);
+
 		return res.status(200).json({ success: true, message: 'Payment verified', payment });
 	} catch (error) {
+		console.error('Payment verification error:', error);
 		return res.status(500).json({ success: false, message: error.message || 'Payment verification failed' });
 	}
 };
@@ -150,5 +166,104 @@ export const getPaymentById = async (req, res) => {
 		return res.status(200).json({ success: true, payment });
 	} catch {
 		return res.status(500).json({ success: false, message: 'Failed to fetch payment details' });
+	}
+};
+
+export const deletePayment = async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		const payment = await Payment.findById(id);
+
+		if (!payment) {
+			return res.status(404).json({ success: false, message: 'Payment not found' });
+		}
+
+		// Only allow deletion if payment status is 'created' (pending)
+		if (payment.status !== 'created') {
+			return res.status(400).json({
+				success: false,
+				message: 'Only pending donations can be deleted'
+			});
+		}
+
+		// Only allow users to delete their own payments
+		if (payment.user.toString() !== req.user._id.toString()) {
+			return res.status(403).json({
+				success: false,
+				message: 'You can only delete your own payments'
+			});
+		}
+
+		await Payment.findByIdAndDelete(id);
+
+		return res.status(200).json({
+			success: true,
+			message: 'Donation deleted successfully'
+		});
+	} catch (error) {
+		console.error('Error deleting payment:', error);
+		return res.status(500).json({ success: false, message: 'Failed to delete donation' });
+	}
+};
+
+export const getDepartmentPayments = async (req, res) => {
+	try {
+		if (!['coordinator', 'admin'].includes(req.user.role)) {
+			return res.status(403).json({ success: false, message: 'Access denied' });
+		}
+
+		// If admin, return all payments
+		if (req.user.role === 'admin') {
+			return getAllPayments(req, res);
+		}
+
+		// For coordinators, get department
+		const coordinator = await findCoordinatorForUser(req.user);
+		const department = coordinator?.department || '';
+
+		if (!department) {
+			return res.status(400).json({
+				success: false,
+				message: 'Coordinator department not found',
+			});
+		}
+
+		// Normalize department name for case-insensitive comparison
+		const normalizedDepartment = department.trim().toLowerCase();
+
+		const payments = await Payment.find()
+			.populate('user', 'name email userId')
+			.sort({ createdAt: -1 });
+
+		// Import Alumni model to check branch
+		const { default: Alumni } = await import('../models/alumni.js');
+
+		// Filter by coordinator's department
+		const departmentPayments = [];
+		for (const payment of payments) {
+			try {
+				const alumni = await Alumni.findOne({
+					email: payment.user?.email?.toLowerCase(),
+				}).select('branch');
+
+				const normalizedBranch = (alumni?.branch || '').trim().toLowerCase();
+				if (normalizedBranch === normalizedDepartment) {
+					departmentPayments.push(payment);
+				}
+			} catch (err) {
+				console.error('Error checking alumni for payment:', err);
+			}
+		}
+
+		res.status(200).json({
+			success: true,
+			payments: departmentPayments,
+			total: departmentPayments.length,
+			department,
+		});
+	} catch (error) {
+		console.error('Error fetching department payments:', error);
+		res.status(500).json({ success: false, message: 'Failed to fetch payments' });
 	}
 };

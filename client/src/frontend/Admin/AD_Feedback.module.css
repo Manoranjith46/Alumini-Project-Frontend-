@@ -1,23 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Public+Sans:wght@300;400;500;600;700;900&display=swap');
 
-/* Color Palette & Variables */
-:root {
-  --forest-green: #228B22;
-  --forest-green-light: rgba(34, 139, 34, 0.1); /* green-50/50 approx */
-  --bg-light: #f8f9fa;
-  --bg-white: #ffffff;
-  
-  --text-dark: #0f172a;    /* slate-900 */
-  --text-primary: #334155; /* slate-700 */
-  --text-muted: #475569;   /* slate-600 */
-  --text-light: #64748b;   /* slate-500 */
-  --icon-light: #94a3b8;   /* slate-400 */
-  
-  --border-color: #e2e8f0; /* slate-200 */
-  --border-light: #f1f5f9; /* slate-100 */
-  --bg-surface: #f8fafc;   /* slate-50 */
-}
-
 .pageContainer {
   display: flex;
   min-height: 100vh;
@@ -74,7 +56,7 @@
 .titleDivider {
   height: 0.25rem;
   width: 5rem;
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   margin-top: 0.5rem;
   border-radius: 9999px;
 }
@@ -153,7 +135,7 @@
 .viewBtn {
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--forest-green);
+  color: var(--dark-green-button);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   display: flex;

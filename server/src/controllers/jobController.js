@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import JobReference from '../models/jobReference.js';
+import { findCoordinatorForUser } from '../utils/coordinatorResolver.js';
 
 export const submitJobReference = async (req, res) => {
 	try {
@@ -106,6 +107,48 @@ export const deleteJobReference = async (req, res) => {
 			message: 'Job reference deleted successfully',
 		});
 	} catch (error) {
+		res.status(500).json({ success: false, message: 'Server error' });
+	}
+};
+
+export const getDepartmentJobReferences = async (req, res) => {
+	try {
+		// Get coordinator's department
+		if (req.user?.role !== 'coordinator') {
+			return getAllJobReferences(req, res);
+		}
+
+		const coordinator = await findCoordinatorForUser(req.user);
+		const department = coordinator?.department || '';
+
+		if (!department) {
+			return res.status(400).json({
+				success: false,
+				message: 'Coordinator department not found',
+			});
+		}
+
+		// Normalize department name for case-insensitive comparison
+		const normalizedDepartment = department.trim().toLowerCase();
+
+		const jobReferences = await JobReference.find()
+			.populate('submittedBy', 'name email userId')
+			.sort({ createdAt: -1 });
+
+		// Filter by department (case-insensitive)
+		const departmentJobs = jobReferences.filter(job => {
+			const normalizedBranch = (job.targetBranch || '').trim().toLowerCase();
+			return normalizedBranch === normalizedDepartment;
+		});
+
+		res.status(200).json({
+			success: true,
+			jobReferences: departmentJobs,
+			total: departmentJobs.length,
+			department,
+		});
+	} catch (error) {
+		console.error('Error fetching department job references:', error);
 		res.status(500).json({ success: false, message: 'Server error' });
 	}
 };

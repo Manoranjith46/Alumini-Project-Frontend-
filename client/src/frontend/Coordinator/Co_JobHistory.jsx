@@ -27,7 +27,7 @@ const CoordinatorJobHistory = ({ onLogout }) => {
             }
 
             try {
-                const response = await fetch(`${API_BASE}/api/jobs/all`, {
+                const response = await fetch(`${API_BASE}/api/jobs/department/all`, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },

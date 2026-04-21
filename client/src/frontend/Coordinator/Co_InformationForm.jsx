@@ -21,18 +21,24 @@ const Coordinator_ViewMail = ({ onLogout }) => {
             setMail(passedMailData);
             setResponseStats(passedMailData.responseStats);
             fetchMailResponses();
-        } else if (mailId) {
+        } else if (mailId && user?.token) {
             fetchMailDetails();
         } else {
             setLoading(false);
         }
-    }, [mailId, passedMailData]);
+    }, [mailId, passedMailData, user?.token]);
 
     const fetchMailDetails = async () => {
         try {
             setLoading(true);
+            setMail(null);
+            setResponses([]);
+            setResponseStats(null);
             const response = await fetch(`${API_BASE_URL}/api/mail/${mailId}`, {
-                headers: { 'Content-Type': 'application/json' }
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${user.token}`
+                }
             });
 
             const data = await response.json();
@@ -49,19 +55,26 @@ const Coordinator_ViewMail = ({ onLogout }) => {
 
     const fetchMailResponses = async () => {
         try {
+            if (!user?.token) {
+                return;
+            }
+
+            setResponses([]);
+
             // Use department-specific endpoint if coordinator has department
             let apiUrl;
             if (user?.department) {
                 apiUrl = `${API_BASE_URL}/api/mail/${mailId}/responses/department/${encodeURIComponent(user.department)}`;
-                console.log('Fetching department-filtered responses for:', user.department);
             } else {
                 // Fallback to general responses endpoint
                 apiUrl = `${API_BASE_URL}/api/mail/${mailId}/responses`;
-                console.log('No department found, using general responses endpoint');
             }
 
             const response = await fetch(apiUrl, {
-                headers: { 'Content-Type': 'application/json' }
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${user.token}`
+                }
             });
 
             const data = await response.json();
@@ -69,12 +82,6 @@ const Coordinator_ViewMail = ({ onLogout }) => {
                 setResponses(data.responses || []);
                 if (!passedMailData) {
                     setResponseStats(data.stats);
-                }
-                console.log('Fetched responses:', data.responses);
-
-                // Log department filtering info if available
-                if (data.message) {
-                    console.log('Department filter:', data.message);
                 }
             }
         } catch (err) {

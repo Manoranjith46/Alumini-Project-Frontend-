@@ -498,8 +498,21 @@ const Alumini_Profile = ({ onLogout }) => {
             <p>Loading profile...</p>
           </div>
         ) : error ? (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-            <p style={{ color: '#ef4444' }}>{error}</p>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', padding: '2rem' }}>
+            <div style={{
+              maxWidth: '500px',
+              textAlign: 'center',
+              padding: '2rem',
+              backgroundColor: '#fff5f5',
+              border: '1px solid #fca5a5',
+              borderRadius: '0.5rem',
+              color: '#d32f2f'
+            }}>
+              <p style={{ margin: 0, marginBottom: '0.5rem', fontWeight: 500 }}>
+                <span style={{ marginRight: '0.5rem' }}>ℹ️</span>
+                {error}
+              </p>
+            </div>
           </div>
         ) : (
           <>

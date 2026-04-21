@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.js';
-import { submitJobReference, getMyJobReferences, getAllJobReferences, getJobReferenceById, deleteJobReference } from '../controllers/jobController.js';
+import { submitJobReference, getMyJobReferences, getAllJobReferences, getDepartmentJobReferences, getJobReferenceById, deleteJobReference } from '../controllers/jobController.js';
 
 const router = Router();
 
@@ -9,6 +9,9 @@ router.post('/', authenticate, submitJobReference);
 
 // Alumni gets their own job references
 router.get('/my', authenticate, getMyJobReferences);
+
+// Coordinator/Admin gets department job references
+router.get('/department/all', authenticate, getDepartmentJobReferences);
 
 // Admin/Coordinator gets all job references
 router.get('/all', authenticate, getAllJobReferences);

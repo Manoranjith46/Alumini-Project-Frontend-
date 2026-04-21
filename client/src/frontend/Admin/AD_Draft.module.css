@@ -1,21 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Color Variables */
-:root {
-  --forest-green: #228B22;
-  --forest-green-light: #F0F9F0;
-  --forest-green-hover: #1e7e1e;
-  --text-dark: #111827;      /* gray-900 */
-  --text-primary: #374151;   /* gray-700 */
-  --text-secondary: #4B5563; /* gray-600 */
-  --text-muted: #6B7280;     /* gray-500 */
-  --text-light: #9CA3AF;     /* gray-400 */
-  --border-color: #E5E7EB;   /* gray-200 */
-  --border-light: #F3F4F6;   /* gray-100 */
-  --bg-main: #F8F9FA;
-  --bg-surface: #F9FAFB;     /* gray-50 */
-}
-
 /* Base Layout */
 .pageContainer {
   min-height: 100vh;
@@ -102,7 +86,7 @@
 }
 
 .editBtn {
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   color: #ffffff;
   padding: 0.75rem 1.5rem;
   border: none;
@@ -117,7 +101,7 @@
 }
 
 .editBtn:hover {
-  background-color: var(--forest-green-hover);
+  background-color: var(--dark-green-hover);
 }
 
 .deleteBtn {
@@ -278,7 +262,7 @@
 }
 
 .sendBtn {
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
   color: #ffffff;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
@@ -293,7 +277,7 @@
 }
 
 .sendBtn:hover {
-  background-color: var(--forest-green-hover);
+  background-color: var(--dark-green-hover);
 }
 
 .sendBtn:disabled {
@@ -675,7 +659,7 @@
 }
 
 .toggleSwitch input:checked + .toggleSlider {
-  background-color: var(--forest-green);
+  background-color: var(--dark-green-button);
 }
 
 .toggleSwitch input:checked + .toggleSlider:before {

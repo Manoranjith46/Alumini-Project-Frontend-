@@ -1,23 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-/* Color Variables */
 :root {
-  --primary: #2E6F40;
-  --primary-hover: #255833;
-  --primary-light: #EAF1EC;
-  
-  --bg-main: #F8FAFC;
-  --bg-white: #FFFFFF;
-  --bg-surface: #F8FAFC; /* slate-50 */
-  
-  --text-dark: #0F172A; /* slate-900 */
-  --text-primary: #334155; /* slate-700 */
-  --text-secondary: #475569; /* slate-600 */
-  --text-muted: #64748B; /* slate-500 */
-  --text-light: #94A3B8; /* slate-400 */
-  
-  --border-color: #E2E8F0; /* slate-200 */
-  --border-light: #F1F5F9; /* slate-100 */
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+  --border-color: #E2E8F0;
+  --border-light: #F1F5F9;
 }
 
 /* Base Layout */

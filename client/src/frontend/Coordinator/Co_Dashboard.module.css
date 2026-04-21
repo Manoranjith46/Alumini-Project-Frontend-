@@ -9,18 +9,18 @@
 }
 
 .mainContentScrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-left: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-light);
 }
 
 .mainContentScrollbar::-webkit-scrollbar-thumb {
-  background-color: #E53935;
+  background-color: var(--primary-dark);
   border-radius: 10px;
-  border: 3px solid #f1f5f9;
+  border: 3px solid var(--bg-surface);
 }
 
 .mainContentScrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #FF3D00;
+  background-color: var(--primary-green);
 }
 
 
@@ -34,7 +34,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.1rem 1.25rem 1.5rem 0.1rem;
-    border-bottom: 0px solid #f1f5f9;
+    border-bottom: 0px solid var(--bg-surface);
     overflow: hidden;
     white-space: nowrap;
     justify-content: flex-start;
@@ -55,7 +55,7 @@
     width: 100%;
     flex: none;
     background-color: white;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-light);
     padding: 0.600rem 0.5rem;
     display: flex;
     align-items: center;
@@ -71,7 +71,7 @@
 }
 
 .collegeName {
-    color: #001E2B;
+    color: var(--text-title);
     font-family: 'Inter', sans-serif;
     font-weight: 700;
     font-size: 1.8rem;

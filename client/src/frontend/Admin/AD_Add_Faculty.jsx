@@ -217,7 +217,7 @@ const Admin_Add_Faculty = ({ onLogout }) => {
             </button>
             <div className={styles.headerContent}>
               <h1 className={styles.pageTitle}>Add New Coordinator</h1>
-              <p className={styles.pageSubtitle}>Computer Science and Engineering Department</p>
+              <p className={styles.pageSubtitle}>{formData.department}</p>
             </div>
           </div>
 
@@ -363,10 +363,8 @@ const Admin_Add_Faculty = ({ onLogout }) => {
                     >
                       <option value="">Select Designation</option>
                       <option value="HOD">HOD</option>
-                      <option value="Professor">Professor</option>
                       <option value="Associate Professor">Associate Professor</option>
                       <option value="Assistant Professor">Assistant Professor</option>
-                      <option value="Lab Administrator">Lab Administrator</option>
                     </select>
                     {errors.designation && <span className={styles.errorText}>{errors.designation}</span>}
                   </div>

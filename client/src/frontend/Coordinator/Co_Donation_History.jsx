@@ -45,7 +45,7 @@ const CoordinatorDonationHistory = ({ onLogout }) => {
             }
 
             try {
-                const response = await fetch(`${API_BASE}/api/payments/all`, {
+                const response = await fetch(`${API_BASE}/api/payments/department/all`, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },

@@ -164,10 +164,6 @@ const alumniSchema = new Schema(
 			type: String,
 			default: null,
 		},
-		isActive: {
-			type: Boolean,
-			default: true,
-		},
 	},
 	{ timestamps: true }
 );

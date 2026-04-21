@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "./Components/Sidebar/Sidebar";
 import styles from "./AD_Mail.module.css";
 import { useState, useEffect } from "react";
+import { useAuth } from "../../context/authContext/authContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -11,6 +12,7 @@ export default function Admin_Mail({ onLogout }) {
   const [loading, setLoading] = useState(true);
   const [draftCount, setDraftCount] = useState(0);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Fetch sent messages and draft count from backend
   useEffect(() => {
@@ -24,7 +26,8 @@ export default function Admin_Mail({ onLogout }) {
 
       const response = await fetch(`${API_BASE_URL}/api/mail/all`, {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user?.token}`
         }
       });
 

@@ -1,6 +1,7 @@
 import { comparePassword } from '../security/bycrypt.js';
 import { generateToken } from '../security/jwt.js';
 import User from '../models/user.js';
+import { findCoordinatorForUser } from '../utils/coordinatorResolver.js';
 
 
 
@@ -43,8 +44,7 @@ export const login = async (req, res) => {
     // If coordinator, fetch department information
     if (user.role === 'coordinator') {
       try {
-        const { default: Coordinator } = await import('../models/coordinator.js');
-        const coordinator = await Coordinator.findOne({ userId: user._id });
+        const coordinator = await findCoordinatorForUser(user);
         if (coordinator) {
           userResponse.department = coordinator.department; // Full branch name e.g., "Computer Science and Engineering"
           userResponse.designation = coordinator.designation;
@@ -125,8 +125,7 @@ export const googleLogin = async (req, res) => {
     // If coordinator, fetch department information
     if (user.role === 'coordinator') {
       try {
-        const { default: Coordinator } = await import('../models/coordinator.js');
-        const coordinator = await Coordinator.findOne({ userId: user._id });
+        const coordinator = await findCoordinatorForUser(user);
         if (coordinator) {
           userResponse.department = coordinator.department;
           userResponse.designation = coordinator.designation;

@@ -155,7 +155,7 @@ export const createAlumni = async (req, res) => {
 export const getAllAlumni = async (req, res) => {
 	try {
 		const { branch, degree, yearFrom, yearTo } = req.query;
-		const filter = { isActive: true };
+		const filter = {};
 
 		if (branch) filter.branch = branch;
 		if (degree) filter.degree = degree;
@@ -202,7 +202,7 @@ export const getAlumniById = async (req, res) => {
 			return res.status(400).json({ success: false, message: 'Invalid alumni ID' });
 		}
 
-		const alumni = await Alumni.findOne({ _id: id, isActive: true }).populate(
+		const alumni = await Alumni.findOne({ _id: id }).populate(
 			'userId',
 			'userId name email role'
 		);
@@ -222,7 +222,7 @@ export const getAlumniByRegisterNumber = async (req, res) => {
 	try {
 		const { registerNumber } = req.params;
 
-		const alumni = await Alumni.findOne({ registerNumber, isActive: true }).populate(
+		const alumni = await Alumni.findOne({ registerNumber }).populate(
 			'userId',
 			'userId name email role'
 		);
@@ -241,10 +241,31 @@ export const getAlumniByRegisterNumber = async (req, res) => {
 export const updateMyProfile = async (req, res) => {
 	try {
 		// Find alumni by logged-in user's ID
-		const alumni = await Alumni.findOne({ userId: req.user._id, isActive: true });
+		let alumni = await Alumni.findOne({ userId: req.user._id });
 
+		// If alumni record doesn't exist, create one
 		if (!alumni) {
-			return res.status(404).json({ success: false, message: 'Alumni profile not found' });
+			const user = await User.findById(req.user._id);
+			if (!user) {
+				return res.status(401).json({
+					success: false,
+					message: 'User not found'
+				});
+			}
+
+			// Create a new Alumni record with default values
+			alumni = new Alumni({
+				userId: req.user._id,
+				name: user.name,
+				email: user.email,
+				registerNumber: user.userId || `TEMP_${Date.now()}`,
+				dob: new Date(),
+				yearFrom: new Date().getFullYear() - 4,
+				yearTo: new Date().getFullYear(),
+				degree: '',
+				branch: ''
+			});
+			await alumni.save();
 		}
 
 		// Fields that alumni can update themselves
@@ -340,8 +361,8 @@ export const deleteAlumni = async (req, res) => {
 			return res.status(404).json({ success: false, message: 'Alumni not found' });
 		}
 
-		// Deactivate the alumni
-		await Alumni.findByIdAndUpdate(id, { isActive: false }, { returnDocument: 'after' });
+		// Delete the alumni
+		await Alumni.findByIdAndDelete(id);
 
 		// Also delete the associated user
 		if (alumni.userId) {
@@ -372,8 +393,7 @@ export const searchAlumni = async (req, res) => {
 
 		// Search alumni by name (case-insensitive, partial match)
 		const alumni = await Alumni.find({
-			name: { $regex: name, $options: 'i' },
-			isActive: true
+			name: { $regex: name, $options: 'i' }
 		})
 			.select('name email branch yearFrom yearTo profilePhoto')
 			.limit(10)

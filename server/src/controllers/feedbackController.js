@@ -2,6 +2,7 @@ import { Readable } from 'stream';
 import mongoose from 'mongoose';
 import Feedback from '../models/feedback.js';
 import { getGridFSBucket } from '../config/db.js';
+import { findCoordinatorForUser } from '../utils/coordinatorResolver.js';
 
 // Upload buffer to GridFS and return the file ID
 const uploadToGridFS = (buffer, filename, mimetype) => {
@@ -132,6 +133,62 @@ export const getSignatureImage = async (req, res) => {
     const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(id));
     downloadStream.pipe(res);
   } catch {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const getDepartmentFeedbacks = async (req, res) => {
+  try {
+    // Get coordinator's department
+    if (req.user?.role !== 'coordinator') {
+      return getAllFeedbacks(req, res);
+    }
+
+    const coordinator = await findCoordinatorForUser(req.user);
+    const department = coordinator?.department || '';
+
+    if (!department) {
+      return res.status(400).json({
+        success: false,
+        message: 'Coordinator department not found',
+      });
+    }
+
+    // Normalize department name for case-insensitive comparison
+    const normalizedDepartment = department.trim().toLowerCase();
+
+    const feedbacks = await Feedback.find()
+      .populate('submittedBy', 'name email userId')
+      .sort({ createdAt: -1 });
+
+    // Import Alumni model to check branch
+    const { default: Alumni } = await import('../models/alumni.js');
+
+    // Filter by coordinator's department
+    const departmentFeedbacks = [];
+    for (const feedback of feedbacks) {
+      try {
+        const alumni = await Alumni.findOne({
+          email: feedback.submittedBy?.email?.toLowerCase(),
+        }).select('branch');
+
+        const normalizedBranch = (alumni?.branch || '').trim().toLowerCase();
+        if (normalizedBranch === normalizedDepartment) {
+          departmentFeedbacks.push(feedback);
+        }
+      } catch (err) {
+        console.error('Error checking alumni for feedback:', err);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      feedbacks: departmentFeedbacks,
+      total: departmentFeedbacks.length,
+      department,
+    });
+  } catch (error) {
+    console.error('Error fetching department feedbacks:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };

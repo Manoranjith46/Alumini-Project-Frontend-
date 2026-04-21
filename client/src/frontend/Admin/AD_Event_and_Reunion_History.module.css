@@ -1,18 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@100..900&display=swap');
 
-/* CSS Variables */
-:root {
-  --primary: #ec5b13; /* Orange */
-  --accent-green: #2E6F40;
-  --bg-light: #f8f6f6;
-  --bg-white: #ffffff;
-  --text-dark: #0f172a; /* slate-900 */
-  --text-muted: #475569; /* slate-600 */
-  --text-light: #94a3b8; /* slate-400 */
-  --border-color: #e2e8f0; /* slate-200 */
-  --border-card: #f1f5f9; /* slate-100 */
-}
-
 .pageContainer {
   display: flex;
   height: 100vh;
@@ -104,7 +91,7 @@
 }
 
 .hostBtn {
-  background-color: var(--accent-green);
+  background-color: var(--primary-green);
   color: white;
   display: flex;
   align-items: center;
@@ -188,7 +175,7 @@
 .eventSpeaker {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--accent-green);
+  color: var(--primary-green);
 }
 
 .eventDescription {
@@ -224,7 +211,7 @@
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 700;
-  background-color: var(--accent-green);
+  background-color: var(--primary-green);
   color: white;
   border: none;
   cursor: pointer;
@@ -285,7 +272,7 @@
 }
 
 .activePage {
-  background-color: var(--accent-green);
+  background-color: var(--primary-green);
   color: white;
   font-weight: 700;
 }
@@ -362,7 +349,7 @@
   gap: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--accent-green);
+  color: var(--primary-green);
 }
 
 .eventOrganizer span {

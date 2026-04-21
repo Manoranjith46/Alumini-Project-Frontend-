@@ -82,22 +82,31 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
 
             const orderData = await parseApiResponse(orderRes);
             if (!orderRes.ok || !orderData?.order?.id) {
+                console.error('Order creation failed:', orderData);
                 throw new Error(orderData.message || 'Unable to create order');
+            }
+
+            console.log('Order created successfully:', orderData);
+
+            if (!window.Razorpay) {
+                throw new Error('Razorpay SDK not loaded properly');
             }
 
             const options = {
                 key: orderData.keyId,
                 amount: orderData.order.amount,
-                currency: orderData.order.currency,
+                currency: orderData.order.currency || 'INR',
                 name: 'KSR Alumni Portal',
-                description: 'Donation',
+                description: trimmedPurpose,
                 order_id: orderData.order.id,
                 prefill: {
-                    name: user.name,
-                    email: user.email,
+                    name: user.name || '',
+                    email: user.email || '',
                 },
                 handler: async (response) => {
                     try {
+                        console.log('Payment response received:', response);
+
                         const verifyRes = await fetch(`${API_BASE}/api/payments/verify`, {
                             method: 'POST',
                             headers: {
@@ -108,6 +117,8 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
                         });
 
                         const verifyData = await parseApiResponse(verifyRes);
+                        console.log('Verification response:', verifyData);
+
                         if (!verifyRes.ok || !verifyData.success) {
                             throw new Error(verifyData.message || 'Payment verification failed');
                         }
@@ -115,6 +126,7 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
                         alert('Payment successful! Thank you for your donation.');
                         navigate('/alumini/donation_history');
                     } catch (error) {
+                        console.error('Verification error:', error);
                         alert(error.message || 'Payment verification failed');
                     } finally {
                         setIsPaying(false);
@@ -122,6 +134,7 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
                 },
                 modal: {
                     ondismiss: () => {
+                        console.log('Payment modal dismissed');
                         setIsPaying(false);
                     },
                 },
@@ -131,12 +144,14 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
             };
 
             const razorpayCheckout = new window.Razorpay(options);
-            razorpayCheckout.on('payment.failed', () => {
+            razorpayCheckout.on('payment.failed', (error) => {
+                console.error('Payment failed:', error);
                 setIsPaying(false);
-                alert('Payment failed or cancelled. Please try again.');
+                alert('Payment failed: ' + (error.reason || 'Please try again.'));
             });
             razorpayCheckout.open();
         } catch (error) {
+            console.error('Payment error:', error);
             setIsPaying(false);
             alert(error.message || 'Failed to start payment');
         }

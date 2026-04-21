@@ -63,8 +63,7 @@ export const getAllDepartments = async (_, res) => {
       departments.map(async (dept) => {
         const [alumniCount, coordinatorCount] = await Promise.all([
           Alumni.countDocuments({
-            branch: dept.branch,
-            isActive: true
+            branch: dept.branch
           }),
           Coordinator.countDocuments({
             department: dept.branch,
