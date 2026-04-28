@@ -68,6 +68,14 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   const [eventsLoading, setEventsLoading] = useState(true);
   const [showEventSuggestions, setShowEventSuggestions] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      if (flyerPreviewUrl && flyerPreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(flyerPreviewUrl);
+      }
+    };
+  }, [flyerPreviewUrl]);
+
   // Filter events based on typed event name
   const filteredEvents = events.filter(event =>
     event.eventName?.toLowerCase().includes(geminiEventName.toLowerCase())
@@ -355,6 +363,8 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
 
     setGeminiLoading(true);
     setGeminiError(null);
+    setFlyerGenerated(false);
+    setFlyerBlob(null);
 
     try {
       const formData = new FormData();
@@ -384,8 +394,32 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       // Use image URL from API endpoint
       const imageUrl = `${API_BASE}/api/flyers/image/${data.data.imageId}`;
       setGeminiPreviewUrl(imageUrl);
+
+      const imageRes = await fetch(imageUrl, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      if (!imageRes.ok) {
+        throw new Error('Flyer generated, but preview could not be loaded');
+      }
+
+      const generatedBlob = await imageRes.blob();
+      const previewObjectUrl = URL.createObjectURL(generatedBlob);
+
+      setFlyerBlob(generatedBlob);
+      setFlyerPreviewUrl((currentUrl) => {
+        if (currentUrl && currentUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(currentUrl);
+        }
+        return previewObjectUrl;
+      });
+      setFlyerGenerated(true);
     } catch (err) {
       setGeminiError(err.message);
+      setFlyerGenerated(false);
+      setFlyerBlob(null);
       console.error('Gemini flyer generation error:', err);
     } finally {
       setGeminiLoading(false);
@@ -888,32 +922,23 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
                   </button>
                 </form>
 
-                {/* Gemini Preview */}
                 {geminiPreviewUrl && (
-                  <div className={styles.geminiPreviewContainer}>
-                    <div className={styles.geminiPreviewImage}>
-                      <img
-                        src={geminiPreviewUrl}
-                        alt="Generated Flyer"
-                      />
-                    </div>
-                    <div className={styles.geminiButtonGroup}>
-                      <button
-                        onClick={handleDownloadGeminiFlyer}
-                        className={styles.generateBtn}
-                      >
-                        <span className="material-symbols-outlined">download</span>
-                        <span>Download</span>
-                      </button>
-                      <button
-                        onClick={handleRegenerateGeminiFlyer}
-                        className={styles.generateBtn}
-                        disabled={geminiLoading || enhancing}
-                      >
-                        <span className="material-symbols-outlined">refresh</span>
-                        <span>{geminiLoading ? 'Generating...' : 'Regenerate'}</span>
-                      </button>
-                    </div>
+                  <div className={styles.geminiButtonGroup}>
+                    <button
+                      onClick={handleDownloadGeminiFlyer}
+                      className={styles.generateBtn}
+                    >
+                      <span className="material-symbols-outlined">download</span>
+                      <span>Download</span>
+                    </button>
+                    <button
+                      onClick={handleRegenerateGeminiFlyer}
+                      className={styles.generateBtn}
+                      disabled={geminiLoading || enhancing}
+                    >
+                      <span className="material-symbols-outlined">refresh</span>
+                      <span>{geminiLoading ? 'Generating...' : 'Regenerate'}</span>
+                    </button>
                   </div>
                 )}
               </section>

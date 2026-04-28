@@ -170,14 +170,6 @@ export default function Admin_Mail({ onLogout }) {
                     <div className={styles.mailCardBody}>
                       <div className={styles.mailCardTop}>
                         <span className={styles.mailSender}>{mail.senderName}</span>
-                        {/* Response stats badge */}
-                        {mail.responseStats && (
-                          <div className={styles.statsContainer}>
-                            <span className={styles.statsBadge}>
-                              {mail.responseStats.accepted}A / {mail.responseStats.rejected}R / {mail.responseStats.pending}P
-                            </span>
-                          </div>
-                        )}
                       </div>
                       <p className={styles.mailMessage}>
                         {mail.content.length > 120

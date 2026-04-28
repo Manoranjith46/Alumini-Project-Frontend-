@@ -3,6 +3,7 @@ import Sidebar from './Components/Sidebar/Sidebar';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Image, X } from 'lucide-react';
+import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -14,6 +15,7 @@ const Admin_ViewMail = ({ onLogout }) => {
   const [showAlumniModal, setShowAlumniModal] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const mailId = location.state?.mailId;
   const passedMailData = location.state?.mailData;
 
@@ -30,13 +32,16 @@ const Admin_ViewMail = ({ onLogout }) => {
     } else {
       setLoading(false);
     }
-  }, [mailId]);
+  }, [mailId, user?.token]);
 
   const fetchMailDetails = async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/mail/${mailId}`, {
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user?.token}`,
+        }
       });
 
       const data = await response.json();
@@ -54,7 +59,10 @@ const Admin_ViewMail = ({ onLogout }) => {
   const fetchMailResponses = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/mail/${mailId}/responses`, {
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user?.token}`,
+        }
       });
 
       const data = await response.json();

@@ -5,32 +5,32 @@ import { generateFlyer, getFlyerImage } from '../controllers/flyerController.js'
 
 const router = Router();
 
-// Configure multer for memory storage
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 8 * 1024 * 1024,
   },
   fileFilter: (req, file, cb) => {
-    // Accept only image files
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'), false);
+      return;
     }
+
+    cb(new Error('Only image files are allowed'), false);
   },
 });
 
-// Generate flyer from template
-router.post(
-  '/generate',
-  authenticate,
-  upload.single('template'),
-  generateFlyer
-);
+const flyerUploads = upload.fields([
+  { name: 'guestPhoto', maxCount: 1 },
+  { name: 'logo', maxCount: 1 },
+  { name: 'background', maxCount: 1 },
+  { name: 'banner', maxCount: 1 },
+  { name: 'template', maxCount: 1 },
+]);
 
-// Get flyer image from GridFS
+router.post('/generate', authenticate, flyerUploads, generateFlyer);
+router.post('/generate-flyer', authenticate, flyerUploads, generateFlyer);
 router.get('/image/:id', getFlyerImage);
 
 export default router;
