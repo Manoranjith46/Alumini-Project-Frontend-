@@ -17,8 +17,10 @@ const formatAmount = (amount) => {
 
 const mapStatus = (status) => {
   switch (status) {
-    case 'paid': return 'Completed';
-    default: return 'Completed';
+    case 'paid': return 'Sent';
+    case 'created': return 'Pending';
+    case 'failed': return 'Failed';
+    default: return 'Pending';
   }
 };
 
@@ -27,8 +29,10 @@ const Alumini_Donation_History = ({ onLogout }) => {
   const navigate = useNavigate();
 
   const [donationData, setDonationData] = useState([]);
+  const [rawPayments, setRawPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null);
   const [viewModal, setViewModal] = useState({ isOpen: false, donation: null });
 
   // Summary statistics
@@ -61,20 +65,22 @@ const Alumini_Donation_History = ({ onLogout }) => {
             id: String(index + 1).padStart(2, '0'),
             cause: payment.purpose,
             type: 'Online',
-            txId: payment.razorpayPaymentId || 'N/A',
+            txId: payment.razorpayOrderId || 'N/A',
             amount: formatAmount(payment.amount),
-            date: formatDate(payment.paidAt || payment.createdAt),
-            status: 'Completed',
+            date: formatDate(payment.createdAt),
+            status: mapStatus(payment.status),
             paymentId: payment._id,
-            ...payment,
+            rawStatus: payment.status,
           }));
 
           setDonationData(formattedData);
+          setRawPayments(data.payments);
 
-          // Calculate summary stats (all are paid donations)
-          const total = data.payments.reduce((sum, p) => sum + p.amount, 0);
+          // Calculate summary stats
+          const paidPayments = data.payments.filter(p => p.status === 'paid');
+          const total = paidPayments.reduce((sum, p) => sum + p.amount, 0);
           setTotalDonated(total);
-          setCompletedCount(data.payments.length);
+          setCompletedCount(paidPayments.length);
         }
       } catch (err) {
         setError(err.message);
@@ -113,8 +119,154 @@ const Alumini_Donation_History = ({ onLogout }) => {
     setCurrentPage(pageNumber);
   };
 
+  const handleRetryPayment = async (row) => {
+    const payment = rawPayments.find(p => p._id === row.paymentId);
+    if (!payment) {
+      alert('Payment record not found');
+      return;
+    }
+
+    try {
+      setActionLoading(row.paymentId);
+
+      // Load Razorpay script
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        script.onload = () => {
+          openRazorpayCheckout(payment);
+        };
+        document.body.appendChild(script);
+      } else {
+        openRazorpayCheckout(payment);
+      }
+    } catch (error) {
+      console.error('Retry payment error:', error);
+      alert('Failed to start payment retry');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const openRazorpayCheckout = (payment) => {
+    const options = {
+      key: process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_SSwNZtauzpeLMb',
+      amount: Math.round(payment.amount * 100),
+      currency: payment.currency || 'INR',
+      name: 'KSR Alumni Portal',
+      description: payment.purpose,
+      order_id: payment.razorpayOrderId,
+      prefill: {
+        name: user.name || '',
+        email: user.email || '',
+      },
+      handler: async (response) => {
+        try {
+          const verifyRes = await fetch(`${API_BASE}/api/payments/verify`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: JSON.stringify(response),
+          });
+
+          const verifyData = await verifyRes.json();
+          if (!verifyRes.ok || !verifyData.success) {
+            throw new Error(verifyData.message || 'Payment verification failed');
+          }
+
+          alert('Payment successful! Your donation has been received.');
+          // Refresh the donation list
+          window.location.reload();
+        } catch (error) {
+          console.error('Verification error:', error);
+          alert(error.message || 'Payment verification failed');
+        }
+      },
+      modal: {
+        ondismiss: () => {
+          // User closed the modal
+        },
+      },
+      theme: {
+        color: '#0084D6',
+      },
+    };
+
+    const razorpayCheckout = new window.Razorpay(options);
+    razorpayCheckout.on('payment.failed', (error) => {
+      console.error('Payment failed:', error);
+      alert('Payment failed: ' + (error.reason || 'Please try again.'));
+    });
+    razorpayCheckout.open();
+  };
+
+  const handleDeletePayment = async (row) => {
+    if (!window.confirm('Are you sure you want to delete this pending donation?')) {
+      return;
+    }
+
+    try {
+      setActionLoading(row.paymentId);
+
+      const response = await fetch(`${API_BASE}/api/payments/${row.paymentId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to delete payment');
+      }
+
+      alert('Donation deleted successfully');
+      // Remove from local state immediately for better UX
+      setDonationData(prev => prev.filter(d => d.paymentId !== row.paymentId));
+      setRawPayments(prev => prev.filter(p => p._id !== row.paymentId));
+    } catch (error) {
+      console.error('Delete payment error:', error);
+      alert(error.message || 'Failed to delete donation');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const handleViewDonation = (row) => {
-    setViewModal({ isOpen: true, donation: row });
+    const payment = rawPayments.find(p => p._id === row.paymentId);
+    if (payment) {
+      setViewModal({ isOpen: true, donation: { ...row, ...payment } });
+    }
+  };
+
+  const handlePayFromModal = async () => {
+    if (!viewModal.donation) return;
+
+    try {
+      setActionLoading(viewModal.donation._id);
+
+      // Load Razorpay script
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        script.onload = () => {
+          openRazorpayCheckout(viewModal.donation);
+        };
+        document.body.appendChild(script);
+      } else {
+        openRazorpayCheckout(viewModal.donation);
+      }
+    } catch (error) {
+      console.error('Pay from modal error:', error);
+      alert('Failed to start payment');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   if (loading) {
@@ -323,29 +475,42 @@ const Alumini_Donation_History = ({ onLogout }) => {
                     {/* Date */}
                     <div className={styles.modalField}>
                       <p className={styles.modalFieldLabel}>DATE</p>
-                      <p className={styles.modalFieldValue}>{formatDate(viewModal.donation.paidAt || viewModal.donation.date)}</p>
+                      <p className={styles.modalFieldValue}>{formatDate(viewModal.donation.createdAt)}</p>
                     </div>
 
                     {/* Status */}
                     <div className={styles.modalField}>
                       <p className={styles.modalFieldLabel}>STATUS</p>
-                      <span className={`${styles.modalStatusBadge} ${styles.modalStatusPaid}`}>
+                      <span className={`${styles.modalStatusBadge} ${
+                        viewModal.donation.status === 'paid' ? styles.modalStatusPaid :
+                        viewModal.donation.status === 'created' ? styles.modalStatusPending :
+                        styles.modalStatusFailed
+                      }`}>
                         <span className={styles.modalStatusDot}></span>
-                        Completed
+                        {mapStatus(viewModal.donation.status)}
                       </span>
                     </div>
 
                     {/* Transaction ID */}
-                    {viewModal.donation.razorpayPaymentId && (
+                    {viewModal.donation.razorpayOrderId && (
                       <div className={styles.modalField}>
                         <p className={styles.modalFieldLabel}>TRANSACTION ID</p>
-                        <p className={styles.modalTxId}>{viewModal.donation.razorpayPaymentId}</p>
+                        <p className={styles.modalTxId}>{viewModal.donation.razorpayOrderId}</p>
                       </div>
                     )}
                   </div>
 
                   {/* Modal Actions */}
                   <div className={styles.modalFooter}>
+                    {viewModal.donation.status === 'created' && (
+                      <button
+                        onClick={handlePayFromModal}
+                        disabled={actionLoading === viewModal.donation._id}
+                        className={`${styles.modalActionBtn} ${styles.modalPayBtn}`}
+                      >
+                        {actionLoading === viewModal.donation._id ? 'Processing...' : 'Pay Now'}
+                      </button>
+                    )}
                     <button
                       onClick={() => setViewModal({ isOpen: false, donation: null })}
                       className={`${styles.modalActionBtn} ${styles.modalCloseBtn2}`}

@@ -43,6 +43,18 @@ export const createOrder = async (req, res) => {
 
 		console.log('Razorpay order created:', order.id);
 
+		// Create pending payment record to link Razorpay order with user
+		const paymentRecord = await Payment.create({
+			user: req.user._id,
+			amount: numericAmount,
+			currency: 'INR',
+			purpose: trimmedPurpose,
+			status: 'created',
+			razorpayOrderId: order.id,
+		});
+
+		console.log('Payment record created (pending):', paymentRecord._id);
+
 		return res.status(201).json({
 			success: true,
 			order: {
@@ -87,33 +99,34 @@ export const verifyPayment = async (req, res) => {
 		console.log('Signature valid:', isValid);
 
 		if (!isValid) {
+			// Update payment status to failed if signature is invalid
+			await Payment.findOneAndUpdate(
+				{ razorpayOrderId: orderId },
+				{ status: 'failed' },
+				{ returnDocument: 'after' }
+			);
+
 			return res.status(400).json({ success: false, message: 'Invalid payment signature' });
 		}
 
-		// Get order details from Razorpay to retrieve donation purpose from notes
-		const razorpay = getRazorpayClient();
-		let razorpayOrder;
-		try {
-			razorpayOrder = await razorpay.orders.fetch(orderId);
-		} catch (err) {
-			console.error('Failed to fetch Razorpay order:', err);
-			return res.status(400).json({ success: false, message: 'Could not verify order details' });
+		// Update existing payment record to mark as paid
+		const payment = await Payment.findOneAndUpdate(
+			{ razorpayOrderId: orderId },
+			{
+				status: 'paid',
+				razorpayPaymentId: paymentId,
+				razorpaySignature: signature,
+				paidAt: new Date(),
+			},
+			{ returnDocument: 'after' }
+		);
+
+		if (!payment) {
+			console.error('Payment record not found for order:', orderId);
+			return res.status(400).json({ success: false, message: 'Payment record not found' });
 		}
 
-		// Create payment record in DB ONLY after successful verification
-		const payment = await Payment.create({
-			user: req.user._id,
-			amount: razorpayOrder.amount / 100, // Convert from paise to rupees
-			currency: razorpayOrder.currency || 'INR',
-			purpose: razorpayOrder.notes?.donationPurpose || 'Donation',
-			status: 'paid',
-			razorpayOrderId: orderId,
-			razorpayPaymentId: paymentId,
-			razorpaySignature: signature,
-			paidAt: new Date(),
-		});
-
-		console.log('Payment record created successfully:', payment._id);
+		console.log('Payment updated to paid:', payment._id);
 
 		return res.status(200).json({ success: true, message: 'Payment verified', payment });
 	} catch (error) {
