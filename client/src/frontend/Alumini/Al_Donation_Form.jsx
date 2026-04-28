@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Al_Donation_Form.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 import { useAuth } from '../../context/authContext/authContext';
 
+
 const API_BASE = import.meta.env.VITE_API_URL;
+
+const isTestMode = true;
 
 const parseApiResponse = async (response) => {
     const raw = await response.text();
@@ -56,8 +59,7 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
             return;
         }
 
-        // Check for test mode amount limit
-        const isTestMode = process.env.VITE_RAZORPAY_KEY_ID?.startsWith('rzp_test_');
+
         const testModeLimit = 50000; // ₹50,000 limit in test mode
         if (isTestMode && numericAmount > testModeLimit) {
             alert(`Test mode limit: Maximum ₹${testModeLimit.toLocaleString()} allowed.\n\nPlease use production keys for larger amounts.`);
@@ -214,7 +216,7 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
                         onChange={(e) => setAmount(e.target.value)}
                     />
                     </div>
-                    {process.env.VITE_RAZORPAY_KEY_ID?.startsWith('rzp_test_') && (
+                    {isTestMode && (
                         <p style={{fontSize: '12px', color: '#ff6b6b', marginTop: '8px'}}>
                             ⚠️ Test Mode: Maximum ₹50,000 allowed
                         </p>
