@@ -56,6 +56,14 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
             return;
         }
 
+        // Check for test mode amount limit
+        const isTestMode = process.env.VITE_RAZORPAY_KEY_ID?.startsWith('rzp_test_');
+        const testModeLimit = 50000; // ₹50,000 limit in test mode
+        if (isTestMode && numericAmount > testModeLimit) {
+            alert(`Test mode limit: Maximum ₹${testModeLimit.toLocaleString()} allowed.\n\nPlease use production keys for larger amounts.`);
+            return;
+        }
+
         if (!user?.token) {
             alert('Please login again to continue payment.');
             return;
@@ -199,13 +207,18 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
                     <label className={styles.inputLabel}>Enter Amount</label>
                     <div className={styles.inputWrapper}>
                     <span className={styles.currencySymbol}>₹</span>
-                    <input 
-                        type="number" 
-                        className={styles.amountInput} 
-                        value={amount} 
+                    <input
+                        type="number"
+                        className={styles.amountInput}
+                        value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                     />
                     </div>
+                    {process.env.VITE_RAZORPAY_KEY_ID?.startsWith('rzp_test_') && (
+                        <p style={{fontSize: '12px', color: '#ff6b6b', marginTop: '8px'}}>
+                            ⚠️ Test Mode: Maximum ₹50,000 allowed
+                        </p>
+                    )}
                 </div>
 
                 {/* Donate Button */}
