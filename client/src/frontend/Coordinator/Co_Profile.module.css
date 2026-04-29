@@ -1,193 +1,493 @@
-.sidebarTransition {
-    transition: width 0.3s ease-in-out;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.pageLayout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  background-color: #f8fafc;
 }
 
-.customSidebarScrollbar::-webkit-scrollbar {
-    width: 4px;
+.mainContent {
+  flex: 1;
+  margin-left: 70px;
+  background-color: #f8fafc;
+  overflow-y: auto;
+  height: 100vh;
 }
 
-.customSidebarScrollbar::-webkit-scrollbar-thumb {
-    background: var(--text-lighter);
-    border-radius: 10px;
+.mainContent::-webkit-scrollbar {
+  width: 10px;
 }
 
-.mainScrollable {
-    flex: 1;
-    height: 100vh;
-    overflow-y: auto;
+.mainContent::-webkit-scrollbar-track {
+  background-color: #e5e7eb;
+  border-radius: 10px;
+  margin: 8px 0;
 }
 
-
-/* Volume Bar Style Scrollbar - Red Theme */
-
-.mainScrollable::-webkit-scrollbar {
-    width: 10px;
+.mainContent::-webkit-scrollbar-thumb {
+  background-color: #ff3d00;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
 }
 
-.mainScrollable::-webkit-scrollbar-track {
-    background-color: var(--border-color);
-    border-radius: 100px;
-    margin: 8px 0;
+.mainContent::-webkit-scrollbar-thumb:hover {
+  background-color: #e63600;
+  border-color: #e63600;
 }
 
-.mainScrollable::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, var(--primary-green), var(--primary-hover));
-    border-radius: 100px;
-    border: 2px solid var(--border-color);
-    box-shadow: inset 0 0 6px rgba(255, 61, 0, 0.3);
+.contentWrapper {
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-.mainScrollable::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, var(--primary-hover), var(--primary-dark));
-    border-color: var(--primary-green);
-    box-shadow: inset 0 0 8px rgba(255, 61, 0, 0.5), 0 0 4px rgba(255, 61, 0, 0.4);
+.pageHeader {
+  margin-bottom: 2rem;
 }
 
-.mainScrollable::-webkit-scrollbar-thumb:active {
-    background: linear-gradient(to bottom, var(--primary-dark), var(--primary-dark));
-    box-shadow: inset 0 0 10px rgba(255, 61, 0, 0.7);
+.pageTitle {
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #0f172a;
 }
 
-.header {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    flex: none;
-    background-color: white;
-    border-bottom: 1px solid var(--border-light);
-    padding: 0.600rem 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    z-index: 40;
+.pageSubtitle {
+  margin: 0.5rem 0 0 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
 }
 
-.headerLeft {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+.message {
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
 }
 
-.collegeName {
-    color: var(--text-title);
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    font-size: 1.8rem;
-    text-transform: uppercase;
-    letter-spacing: -0.025em;
-    margin-left: 10px;
+.success {
+  background-color: #dcfce7;
+  border: 1px solid #bbf7d0;
+  color: #166534;
 }
 
-.sidebarHeader {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.1rem 1.25rem 1.5rem 0.1rem;
-    border-bottom: 0px solid var(--bg-surface);
-    overflow: hidden;
-    white-space: nowrap;
-    justify-content: flex-start;
+.error {
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
 }
 
-.sidebarLogo {
-    width: 70px;
-    height: 70px;
-    min-width: 70px;
-    object-fit: contain;
-    flex-shrink: 0;
+.loadingText {
+  text-align: center;
+  color: #64748b;
+  font-size: 1.1rem;
+  padding: 2rem;
 }
 
-.card {
-    background-color: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--bg-surface);
-    overflow: hidden;
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.cardContainer {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
 }
 
 .cardHeader {
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--bg-light);
-    background-color: rgba(248, 250, 252, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
 }
 
-.fieldRow {
-    display: flex;
-    align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--bg-light);
-    transition: background-color 0.2s;
+.cardTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.fieldRow:last-child {
-    border-bottom: none;
+.primaryText {
+  color: #ff3d00;
 }
 
-.fieldRow:hover {
-    background-color: rgba(248, 250, 252, 0.3);
+.cardTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
 }
 
-.btnPrimary {
-    background-color: var(--primary-green);
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s;
-    min-width: 80px;
+.editBtn {
+  background-color: #ff3d00;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.btnPrimary:hover {
-    background-color: var(--primary-hover);
+.editBtn:hover {
+  background-color: #e63600;
 }
 
-.btnSecondary {
-    background-color: var(--text-light);
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s;
-    min-width: 80px;
+.cardBody {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.btnSecondary:hover {
-    background-color: var(--text-muted);
+.formSection {
+  background-color: #fafbfd;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
 }
 
-
-/* Modal Animations */
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+.sectionTitle {
+  margin: 0 0 0.9rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+.inputGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 }
 
-.animate-fadeIn {
-    animation: fadeIn 0.3s ease-out;
+@media (min-width: 768px) {
+  .inputGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.animate-slideUp {
-    animation: slideUp 0.4s ease-out;
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.inputLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.inputField {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.65rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: #ff3d00;
+  box-shadow: 0 0 0 3px rgba(255, 61, 0, 0.15);
+}
+
+.inputField:disabled {
+  background-color: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.textArea {
+  resize: vertical;
+  min-height: 88px;
+}
+
+.educationActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.smallBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #ff3d00;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.45rem;
+  border: none;
+  cursor: pointer;
+}
+
+.smallBtn:hover {
+  background-color: #e63600;
+}
+
+.educationRow {
+  padding-top: 0.8rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.educationRow:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.removeBtn {
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid #fecaca;
+  background-color: #fff1f2;
+  color: #b91c1c;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.32rem 0.62rem;
+  border-radius: 0.42rem;
+  cursor: pointer;
+}
+
+.actionRow {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.discardBtn {
+  background-color: #ef4444;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.7rem 1.3rem;
+  border-radius: 0.55rem;
+  border: none;
+  cursor: pointer;
+}
+
+.discardBtn:hover {
+  background-color: #dc2626;
+}
+
+.saveBtn {
+  background-color: #ff3d00;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.7rem 1.3rem;
+  border-radius: 0.55rem;
+  border: none;
+  cursor: pointer;
+}
+
+.saveBtn:hover {
+  background-color: #e63600;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.passwordSection {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #fff8f5 0%, #ffffff 100%);
+}
+
+.passwordToggleBtn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.passwordForm {
+  border-top: 1px solid #e2e8f0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.passwordFormTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.passwordFormGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .passwordFormGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.passwordWrapper {
+  position: relative;
+}
+
+.passwordWrapper .inputField {
+  padding-right: 2.4rem;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.primary {
+  align-self: flex-start;
+  background-color: #ff3d00;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.68rem 1.3rem;
+  border-radius: 0.55rem;
+  border: none;
+  cursor: pointer;
+}
+
+.primary:hover {
+  background-color: #e63600;
+}
+
+.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.stepIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 0.6rem;
+  padding: 0.8rem;
+}
+
+.stepDot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.stepDot.active {
+  background-color: #ff3d00;
+  color: #ffffff;
+}
+
+.stepDot.completed {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+
+.stepConnector {
+  width: 20px;
+  height: 2px;
+  background-color: #cbd5e1;
+}
+
+.stepConnector.active {
+  background-color: #ff3d00;
+}
+
+.noteBox {
+  background-color: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-left: 4px solid #f97316;
+  border-radius: 0.45rem;
+  padding: 0.7rem 0.85rem;
+}
+
+.noteBox p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #9a3412;
+}
+
+.otpStep {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.otpInputGroup {
+  flex: 1;
+}
+
+@media (min-width: 768px) {
+  .otpStep {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .contentWrapper {
+    padding: 1.25rem;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+
+  .actionRow {
+    flex-direction: column;
+  }
+
+  .discardBtn,
+  .saveBtn {
+    width: 100%;
+  }
 }

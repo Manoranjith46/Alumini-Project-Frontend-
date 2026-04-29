@@ -109,6 +109,17 @@ const coordinatorSchema = new Schema(
 			type: Number,
 			default: 0,
 		},
+		// OTP reset flow state (mirrors admin flow)
+		resetPhoneNumber: {
+			type: String,
+			trim: true,
+		},
+		twilioVerificationSid: {
+			type: String,
+		},
+		resetOtpVerifiedAt: {
+			type: Date,
+		},
 		isActive: {
 			type: Boolean,
 			default: true,

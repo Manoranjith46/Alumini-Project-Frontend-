@@ -1,382 +1,949 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { User, Lock, Eye, EyeOff, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import styles from './Co_Profile.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
-import Back from './Components/BackButton/Back';
+import { useAuth } from '../../context/authContext/authContext';
 
-const CoordinatorProfile = ( { onLogout } ) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [formData, setFormData] = useState({
-        name: 'Mohammed Ashik M',
-        designation: 'Coordinator',
-        personalEmail: 'ashik@example.com',
-        domainEmail: 'm.ashik@ksrce.ac.in',
-        branch: 'Computer Science',
-        mobileNo: '+91 98765 43210',
-        cabinNo: 'C-204',
-        staffId: 'KSRCE-882',
-        department: 'CSE',
-        role: 'Alumni Coordinator',
-        joiningDate: '12 Aug 2018',
-        status: 'Active',
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+const emptyEducationRow = { degree: '', institution: '', year: '' };
+
+const mapProfileFromApi = (profile) => ({
+  name: profile?.name || '',
+  email: profile?.email || '',
+  phone: profile?.phone || '',
+  staffId: profile?.staffId || '',
+  designation: profile?.designation || '',
+  department: profile?.department || '',
+  roles: Array.isArray(profile?.roles) ? profile.roles : ['coordinator'],
+  location: profile?.location || '',
+  status: profile?.status || 'Active',
+  joinDate: profile?.joinDate ? new Date(profile.joinDate).toISOString().split('T')[0] : '',
+  experience: profile?.experience || '',
+  publications: profile?.publications ?? 0,
+  patents: profile?.patents ?? 0,
+  personalInfo: {
+    dob: profile?.personalInfo?.dob ? new Date(profile.personalInfo.dob).toISOString().split('T')[0] : '',
+    gender: profile?.personalInfo?.gender || '',
+    bloodGroup: profile?.personalInfo?.bloodGroup || '',
+    address: profile?.personalInfo?.address || '',
+  },
+  education:
+    Array.isArray(profile?.education) && profile.education.length > 0
+      ? profile.education.map((row) => ({
+          degree: row?.degree || '',
+          institution: row?.institution || '',
+          year: row?.year || '',
+        }))
+      : [emptyEducationRow],
+});
+
+const initialProfileState = mapProfileFromApi(null);
+
+const CoordinatorProfile = ({ onLogout }) => {
+  const { user } = useAuth();
+
+  const [profileData, setProfileData] = useState(initialProfileState);
+  const [originalProfile, setOriginalProfile] = useState(initialProfileState);
+
+  const [loading, setLoading] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [showUpdatePassword, setShowUpdatePassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+
+  const [showPasswords, setShowPasswords] = useState({
+    old: false,
+    new: false,
+    confirm: false,
+    resetNew: false,
+    resetConfirm: false,
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const [resetData, setResetData] = useState({
+    mobile: '',
+    otp: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [resetStep, setResetStep] = useState('none');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  const showMessage = (type, text) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage({ type: '', text: '' }), 4000);
+  };
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/api/coordinators/profile/me`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        const mapped = mapProfileFromApi(data.data);
+        setProfileData(mapped);
+        setOriginalProfile(mapped);
+        setResetData((prev) => ({ ...prev, mobile: mapped.phone || '' }));
+      } else if (data.success && !data.data) {
+        showMessage('error', 'Coordinator profile not found. Please contact admin.');
+      } else {
+        showMessage('error', data.message || 'Failed to load profile');
+      }
+    } catch (error) {
+      console.error('Error fetching coordinator profile:', error);
+      showMessage('error', 'Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.token]);
+
+  useEffect(() => {
+    if (user?.token) {
+      fetchProfile();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.token, fetchProfile]);
+
+  const handleProfileChange = (field, value) => {
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.');
+      setProfileData((prev) => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value,
+        },
+      }));
+      return;
+    }
+
+    setProfileData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleEducationChange = (index, field, value) => {
+    setProfileData((prev) => {
+      const updated = [...prev.education];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, education: updated };
     });
+  };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+  const addEducationRow = () => {
+    setProfileData((prev) => ({
+      ...prev,
+      education: [...prev.education, { ...emptyEducationRow }],
+    }));
+  };
 
-    const handleSave = async () => {
-        setIsSaving(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsSaving(false);
-            setIsEditing(false);
-            setShowSuccessModal(true);
-        }, 2000);
-    };
+  const removeEducationRow = (index) => {
+    setProfileData((prev) => {
+      if (prev.education.length <= 1) return prev;
+      return {
+        ...prev,
+        education: prev.education.filter((_, i) => i !== index),
+      };
+    });
+  };
 
-    const handleDiscard = () => {
-        // Reset form data to original values
-        setFormData({
-            name: 'Mohammed Ashik M',
-            designation: 'Coordinator',
-            personalEmail: 'ashik@example.com',
-            domainEmail: 'm.ashik@ksrce.ac.in',
-            branch: 'Computer Science',
-            mobileNo: '+91 98765 43210',
-            cabinNo: 'C-204',
-            staffId: 'KSRCE-882',
-            department: 'CSE',
-            role: 'Alumni Coordinator',
-            joiningDate: '12 Aug 2018',
-            status: 'Active',
-        });
+  const validateProfile = () => {
+    if (!profileData.name.trim()) return 'Name is required';
+    if (!profileData.email.trim()) return 'Email is required';
+    if (!profileData.staffId.trim()) return 'Staff ID is required';
+    if (!profileData.designation.trim()) return 'Designation is required';
+    if (!profileData.department.trim()) return 'Department is required';
+    if (!profileData.joinDate) return 'Join Date is required';
+    return null;
+  };
+
+  const handleSaveProfile = async () => {
+    const validationError = validateProfile();
+    if (validationError) {
+      showMessage('error', validationError);
+      return;
+    }
+
+    try {
+      setSavingProfile(true);
+
+      const payload = {
+        name: profileData.name,
+        email: profileData.email,
+        phone: profileData.phone,
+        staffId: profileData.staffId,
+        designation: profileData.designation,
+        department: profileData.department,
+        roles: profileData.roles,
+        location: profileData.location,
+        status: profileData.status,
+        joinDate: profileData.joinDate,
+        experience: profileData.experience,
+        publications: Number(profileData.publications) || 0,
+        patents: Number(profileData.patents) || 0,
+        personalInfo: {
+          ...profileData.personalInfo,
+          dob: profileData.personalInfo.dob || undefined,
+        },
+        education: profileData.education,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/coordinators/profile/me`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        const mapped = mapProfileFromApi(data.data);
+        setProfileData(mapped);
+        setOriginalProfile(mapped);
         setIsEditing(false);
-    };
+        showMessage('success', 'Profile updated successfully');
+      } else {
+        showMessage('error', data.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error saving coordinator profile:', error);
+      showMessage('error', 'Failed to update profile');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
-    useEffect(() => {
-        const handleEscape = (e) => {
-            if (e.key === 'Escape' && showSuccessModal) {
-                setShowSuccessModal(false);
-            }
-        };
+  const handleDiscard = () => {
+    setProfileData(originalProfile);
+    setIsEditing(false);
+    showMessage('success', 'Changes discarded');
+  };
 
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
-    }, [showSuccessModal]);
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
 
+  const handleUpdatePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      showMessage('error', 'New passwords do not match');
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/coordinators/profile/password`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(passwordData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showMessage('success', 'Password updated successfully');
+        setShowUpdatePassword(false);
+        setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        showMessage('error', data.message || 'Failed to update password');
+      }
+    } catch (error) {
+      console.error('Error updating coordinator password:', error);
+      showMessage('error', 'Failed to update password');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (!resetData.mobile.trim()) {
+      showMessage('error', 'Mobile number is required');
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/coordinators/profile/send-otp`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mobile: resetData.mobile }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showMessage('success', 'OTP sent successfully');
+        setOtpSent(true);
+        setResetStep('otp');
+      } else {
+        showMessage('error', data.message || 'Failed to send OTP');
+      }
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      showMessage('error', 'Failed to send OTP');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!resetData.otp.trim()) {
+      showMessage('error', 'OTP is required');
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/coordinators/profile/verify-otp`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: resetData.otp }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showMessage('success', 'OTP verified successfully');
+        setOtpVerified(true);
+        setResetStep('password');
+      } else {
+        showMessage('error', data.message || 'Invalid OTP');
+      }
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      showMessage('error', 'Failed to verify OTP');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (resetData.newPassword !== resetData.confirmPassword) {
+      showMessage('error', 'Passwords do not match');
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/coordinators/profile/reset-password`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          newPassword: resetData.newPassword,
+          confirmPassword: resetData.confirmPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showMessage('success', 'Password reset successfully');
+        setShowResetPassword(false);
+        setResetData((prev) => ({
+          ...prev,
+          otp: '',
+          newPassword: '',
+          confirmPassword: '',
+        }));
+        setResetStep('none');
+        setOtpSent(false);
+        setOtpVerified(false);
+      } else {
+        showMessage('error', data.message || 'Failed to reset password');
+      }
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      showMessage('error', 'Failed to reset password');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (loading) {
     return (
-        <div className="bg-[#F8FAFC] font-display text-slate-900 h-screen flex overflow-hidden">
-            {/* Sidebar */}
-            <Sidebar currentView="profile" onLogout={onLogout} />
-            {/* Main Content Area */}
-            <main className="flex-1 ml-[70px] h-screen flex flex-col overflow-hidden">
-                <div className={`flex-1 overflow-y-auto ${styles.mainScrollable} p-10 bg-[#F8FAFC]`}>
-                    <Back to={'/coordinator/dashboard'} />
-                    <div className="w-full">
-                        <div className="mb-10">
-                            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Coordinator Profile</h2>
-                            <p className="text-slate-500 mt-2">Manage your personal and institutional information</p>
-                        </div>
-
-                        {/* Profile cards arranged in a row on larger screens */}
-                        <div className="flex flex-col lg:flex-row items-stretch gap-8">
-                            {/* Contact Info Section */}
-                            <div className="w-full lg:w-1/2 flex flex-col">
-                                <div className={`${styles.card} flex-1 flex flex-col`}>
-                                    <div className={styles.cardHeader}>
-                                        <div className="flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-[#FF3D00]">contact_page</span>
-                                            <h3 className="text-lg font-bold text-slate-900">Contact Information</h3>
-                                        </div>
-                                        <button onClick={() => setIsEditing(!isEditing)} className={styles.btnPrimary}>{isEditing ? 'Cancel' : 'Edit Profile'}</button>
-                                    </div>
-                                    <div className="p-0">
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Name</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        name="name"
-                                                        value={formData.name}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.name}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Designation</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        name="designation"
-                                                        value={formData.designation}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.designation}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Personal Email</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="email"
-                                                        name="personalEmail"
-                                                        value={formData.personalEmail}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.personalEmail}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Domain Email</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="email"
-                                                        name="domainEmail"
-                                                        value={formData.domainEmail}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.domainEmail}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Branch</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        name="branch"
-                                                        value={formData.branch}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.branch}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Mobile No</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="tel"
-                                                        name="mobileNo"
-                                                        value={formData.mobileNo}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.mobileNo}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Administrative Info Section */}
-                            <div className="w-full lg:w-1/2 flex flex-col">
-                                <div className={`${styles.card} flex-1 flex flex-col`}>
-                                    <div className={styles.cardHeader}>
-                                        <div className="flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-[#FF3D00]">admin_panel_settings</span>
-                                            <h3 className="text-lg font-bold text-slate-900">Administrative Info</h3>
-                                        </div>
-                                    </div>
-                                    <div className="p-0">
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Cabin No</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        name="cabinNo"
-                                                        value={formData.cabinNo}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.cabinNo}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Staff ID</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        name="staffId"
-                                                        value={formData.staffId}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.staffId}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Department</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        name="department"
-                                                        value={formData.department}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.department}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Role</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        name="role"
-                                                        value={formData.role}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.role}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Joining Date</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        name="joiningDate"
-                                                        value={formData.joiningDate}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-semibold text-slate-900">{formData.joiningDate}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={styles.fieldRow}>
-                                            <div className="w-1/3">
-                                                <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Status</span>
-                                            </div>
-                                            <div className="w-2/3">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        name="status"
-                                                        value={formData.status}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF3D00]"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-bold text-emerald-600">{formData.status}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {isEditing && (
-                            <div className="mt-6 flex items-center justify-end gap-3">
-                                <button onClick={handleDiscard} className={styles.btnSecondary}>Discard</button>
-                                <button onClick={handleSave} disabled={isSaving} className={styles.btnPrimary}>{isSaving ? 'Saving...' : 'Save'}</button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </main>
-
-            {/* Saving Popup */}
-            {isSaving && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-sm">
-                        <div className="w-16 h-16 rounded-full bg-[#FF3D00]/10 flex items-center justify-center animate-pulse">
-                            <span className="material-symbols-outlined text-[#FF3D00] text-3xl">check_circle</span>
-                        </div>
-                        <h3 className="text-xl font-bold text-slate-900">Saving...</h3>
-                        <p className="text-center text-slate-600 text-sm">Your profile changes are being saved. Please wait.</p>
-                    </div>
-                </div>
-            )}
-
-            {/* Success Modal */}
-            {showSuccessModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fadeIn">
-                    <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-6 max-w-sm animate-slideUp">
-                        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                            <span className="material-symbols-outlined text-green-600 text-3xl">check_circle</span>
-                        </div>
-                        <div className="text-center">
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">Saved!</h3>
-                            <p className="text-slate-600 text-sm">Your profile has been updated successfully.</p>
-                        </div>
-                        <button
-                            onClick={() => setShowSuccessModal(false)}
-                            className="w-full bg-[#FF3D00] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#E63946] transition-colors duration-200"
-                        >
-                            OK
-                        </button>
-                    </div>
-                </div>
-            )}
-        </div>
+      <div className={styles.pageLayout}>
+        <Sidebar currentView="profile" onLogout={onLogout} />
+        <main className={styles.mainContent}>
+          <p className={styles.loadingText}>Loading profile...</p>
+        </main>
+      </div>
     );
+  }
+
+  return (
+    <div className={styles.pageLayout}>
+      <Sidebar currentView="profile" onLogout={onLogout} />
+
+      <main className={styles.mainContent}>
+        <div className={styles.contentWrapper}>
+          <header className={styles.pageHeader}>
+            <h1 className={styles.pageTitle}>Coordinator Profile</h1>
+            <p className={styles.pageSubtitle}>Manage your coordinator details in one place</p>
+          </header>
+
+          {message.text && (
+            <div className={`${styles.message} ${styles[message.type]}`}>
+              {message.text}
+            </div>
+          )}
+
+          <div className={styles.formContainer}>
+            <section className={styles.cardContainer}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitleGroup}>
+                  <User className={styles.primaryText} size={20} />
+                  <h3 className={styles.cardTitle}>Profile Information</h3>
+                </div>
+                <button
+                  className={styles.editBtn}
+                  onClick={() => {
+                    if (isEditing) {
+                      handleDiscard();
+                    } else {
+                      setIsEditing(true);
+                    }
+                  }}
+                >
+                  {isEditing ? 'Cancel' : 'Edit'}
+                </button>
+              </div>
+
+              <div className={styles.cardBody}>
+                <div className={styles.formSection}>
+                  <h4 className={styles.sectionTitle}>Basic Details</h4>
+                  <div className={styles.inputGrid}>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Name</label>
+                      <input
+                        type="text"
+                        className={styles.inputField}
+                        value={profileData.name}
+                        onChange={(e) => handleProfileChange('name', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Email</label>
+                      <input
+                        type="email"
+                        className={styles.inputField}
+                        value={profileData.email}
+                        onChange={(e) => handleProfileChange('email', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Phone</label>
+                      <input
+                        type="text"
+                        className={styles.inputField}
+                        value={profileData.phone}
+                        onChange={(e) => handleProfileChange('phone', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Staff ID</label>
+                      <input
+                        type="text"
+                        className={styles.inputField}
+                        value={profileData.staffId}
+                        onChange={(e) => handleProfileChange('staffId', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.formSection}>
+                  <h4 className={styles.sectionTitle}>Professional Information</h4>
+                  <div className={styles.inputGrid}>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Designation</label>
+                      <input
+                        type="text"
+                        className={styles.inputField}
+                        value={profileData.designation}
+                        onChange={(e) => handleProfileChange('designation', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Department</label>
+                      <input
+                        type="text"
+                        className={styles.inputField}
+                        value={profileData.department}
+                        onChange={(e) => handleProfileChange('department', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Location</label>
+                      <input
+                        type="text"
+                        className={styles.inputField}
+                        value={profileData.location}
+                        onChange={(e) => handleProfileChange('location', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Status</label>
+                      <select
+                        className={styles.inputField}
+                        value={profileData.status}
+                        onChange={(e) => handleProfileChange('status', e.target.value)}
+                        disabled={!isEditing}
+                      >
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                        <option value="On Leave">On Leave</option>
+                      </select>
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Join Date</label>
+                      <input
+                        type="date"
+                        className={styles.inputField}
+                        value={profileData.joinDate}
+                        onChange={(e) => handleProfileChange('joinDate', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Experience</label>
+                      <input
+                        type="text"
+                        className={styles.inputField}
+                        value={profileData.experience}
+                        onChange={(e) => handleProfileChange('experience', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Publications</label>
+                      <input
+                        type="number"
+                        min="0"
+                        className={styles.inputField}
+                        value={profileData.publications}
+                        onChange={(e) => handleProfileChange('publications', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Patents</label>
+                      <input
+                        type="number"
+                        min="0"
+                        className={styles.inputField}
+                        value={profileData.patents}
+                        onChange={(e) => handleProfileChange('patents', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.formSection}>
+                  <h4 className={styles.sectionTitle}>Personal Information</h4>
+                  <div className={styles.inputGrid}>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Date of Birth</label>
+                      <input
+                        type="date"
+                        className={styles.inputField}
+                        value={profileData.personalInfo.dob}
+                        onChange={(e) => handleProfileChange('personalInfo.dob', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Gender</label>
+                      <select
+                        className={styles.inputField}
+                        value={profileData.personalInfo.gender}
+                        onChange={(e) => handleProfileChange('personalInfo.gender', e.target.value)}
+                        disabled={!isEditing}
+                      >
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Blood Group</label>
+                      <input
+                        type="text"
+                        className={styles.inputField}
+                        value={profileData.personalInfo.bloodGroup}
+                        onChange={(e) => handleProfileChange('personalInfo.bloodGroup', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Address</label>
+                      <textarea
+                        className={`${styles.inputField} ${styles.textArea}`}
+                        rows="3"
+                        value={profileData.personalInfo.address}
+                        onChange={(e) => handleProfileChange('personalInfo.address', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.formSection}>
+                  <div className={styles.educationActions}>
+                    <h4 className={styles.sectionTitle}>Education</h4>
+                    {isEditing && (
+                      <button className={styles.smallBtn} onClick={addEducationRow} type="button">
+                        <Plus size={14} /> Add Row
+                      </button>
+                    )}
+                  </div>
+
+                  {profileData.education.map((row, index) => (
+                    <div key={`${row.degree}-${index}`} className={styles.educationRow}>
+                      <div className={styles.inputGrid}>
+                        <div className={styles.inputGroup}>
+                          <label className={styles.inputLabel}>Degree</label>
+                          <input
+                            type="text"
+                            className={styles.inputField}
+                            value={row.degree}
+                            onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
+                            disabled={!isEditing}
+                          />
+                        </div>
+                        <div className={styles.inputGroup}>
+                          <label className={styles.inputLabel}>Institution</label>
+                          <input
+                            type="text"
+                            className={styles.inputField}
+                            value={row.institution}
+                            onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
+                            disabled={!isEditing}
+                          />
+                        </div>
+                        <div className={styles.inputGroup}>
+                          <label className={styles.inputLabel}>Year</label>
+                          <input
+                            type="text"
+                            className={styles.inputField}
+                            value={row.year}
+                            onChange={(e) => handleEducationChange(index, 'year', e.target.value)}
+                            disabled={!isEditing}
+                          />
+                        </div>
+                      </div>
+
+                      {isEditing && profileData.education.length > 1 && (
+                        <button
+                          type="button"
+                          className={styles.removeBtn}
+                          onClick={() => removeEducationRow(index)}
+                        >
+                          <Trash2 size={14} /> Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {isEditing && (
+                  <div className={styles.actionRow}>
+                    <button className={styles.discardBtn} onClick={handleDiscard} type="button">
+                      Discard
+                    </button>
+                    <button
+                      className={styles.saveBtn}
+                      onClick={handleSaveProfile}
+                      type="button"
+                      disabled={savingProfile}
+                    >
+                      {savingProfile ? 'Saving...' : 'Save Profile'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className={styles.cardContainer}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitleGroup}>
+                  <Lock className={styles.primaryText} size={20} />
+                  <h3 className={styles.cardTitle}>Password Management</h3>
+                </div>
+              </div>
+
+              <div className={styles.cardBody}>
+                <div className={styles.passwordSection}>
+                  <button
+                    className={styles.passwordToggleBtn}
+                    onClick={() => setShowUpdatePassword((prev) => !prev)}
+                    type="button"
+                  >
+                    <span>Update Password</span>
+                    {showUpdatePassword ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+
+                  {showUpdatePassword && (
+                    <div className={styles.passwordForm}>
+                      <h4 className={styles.passwordFormTitle}>Update Password</h4>
+
+                      <div className={styles.passwordFormGrid}>
+                        <div className={styles.inputGroup}>
+                          <label className={styles.inputLabel}>Current Password</label>
+                          <div className={styles.passwordWrapper}>
+                            <input
+                              type={showPasswords.old ? 'text' : 'password'}
+                              className={styles.inputField}
+                              value={passwordData.oldPassword}
+                              onChange={(e) =>
+                                setPasswordData((prev) => ({ ...prev, oldPassword: e.target.value }))
+                              }
+                            />
+                            <button
+                              type="button"
+                              className={styles.passwordToggle}
+                              onClick={() => togglePasswordVisibility('old')}
+                            >
+                              {showPasswords.old ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                          <label className={styles.inputLabel}>New Password</label>
+                          <div className={styles.passwordWrapper}>
+                            <input
+                              type={showPasswords.new ? 'text' : 'password'}
+                              className={styles.inputField}
+                              value={passwordData.newPassword}
+                              onChange={(e) =>
+                                setPasswordData((prev) => ({ ...prev, newPassword: e.target.value }))
+                              }
+                            />
+                            <button
+                              type="button"
+                              className={styles.passwordToggle}
+                              onClick={() => togglePasswordVisibility('new')}
+                            >
+                              {showPasswords.new ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                          <label className={styles.inputLabel}>Confirm Password</label>
+                          <div className={styles.passwordWrapper}>
+                            <input
+                              type={showPasswords.confirm ? 'text' : 'password'}
+                              className={styles.inputField}
+                              value={passwordData.confirmPassword}
+                              onChange={(e) =>
+                                setPasswordData((prev) => ({ ...prev, confirmPassword: e.target.value }))
+                              }
+                            />
+                            <button
+                              type="button"
+                              className={styles.passwordToggle}
+                              onClick={() => togglePasswordVisibility('confirm')}
+                            >
+                              {showPasswords.confirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        className={styles.primary}
+                        onClick={handleUpdatePassword}
+                        disabled={
+                          actionLoading ||
+                          !passwordData.oldPassword ||
+                          !passwordData.newPassword ||
+                          !passwordData.confirmPassword
+                        }
+                        type="button"
+                      >
+                        {actionLoading ? 'Updating...' : 'Update Password'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.passwordSection}>
+                  <button
+                    className={styles.passwordToggleBtn}
+                    onClick={() => setShowResetPassword((prev) => !prev)}
+                    type="button"
+                  >
+                    <span>Reset Password (OTP)</span>
+                    {showResetPassword ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+
+                  {showResetPassword && (
+                    <div className={styles.passwordForm}>
+                      <h4 className={styles.passwordFormTitle}>Reset Password</h4>
+
+                      <div className={styles.stepIndicator}>
+                        <div className={`${styles.stepDot} ${otpSent ? styles.completed : styles.active}`}>
+                          {otpSent ? '✓' : '1'}
+                        </div>
+                        <div className={`${styles.stepConnector} ${otpSent ? styles.active : ''}`}></div>
+                        <div className={`${styles.stepDot} ${otpVerified ? styles.completed : ''} ${resetStep === 'otp' ? styles.active : ''}`}>
+                          {otpVerified ? '✓' : '2'}
+                        </div>
+                        <div className={`${styles.stepConnector} ${otpVerified ? styles.active : ''}`}></div>
+                        <div className={`${styles.stepDot} ${resetStep === 'password' ? styles.active : ''}`}>
+                          3
+                        </div>
+                      </div>
+
+                      {resetStep === 'none' && (
+                        <>
+                          <div className={styles.noteBox}>
+                            <p>
+                              OTP will be sent to your registered mobile number in profile.
+                            </p>
+                          </div>
+
+                          <div className={styles.inputGroup}>
+                            <label className={styles.inputLabel}>Mobile Number</label>
+                            <input
+                              type="text"
+                              className={styles.inputField}
+                              value={resetData.mobile}
+                              onChange={(e) =>
+                                setResetData((prev) => ({ ...prev, mobile: e.target.value }))
+                              }
+                            />
+                          </div>
+
+                          <button className={styles.primary} onClick={handleSendOtp} disabled={actionLoading} type="button">
+                            {actionLoading ? 'Sending...' : 'Send OTP'}
+                          </button>
+                        </>
+                      )}
+
+                      {resetStep === 'otp' && (
+                        <div className={styles.otpStep}>
+                          <div className={styles.otpInputGroup}>
+                            <label className={styles.inputLabel}>Enter OTP</label>
+                            <input
+                              type="text"
+                              className={styles.inputField}
+                              value={resetData.otp}
+                              onChange={(e) =>
+                                setResetData((prev) => ({ ...prev, otp: e.target.value }))
+                              }
+                              maxLength={6}
+                            />
+                          </div>
+                          <button className={styles.primary} onClick={handleVerifyOtp} disabled={actionLoading} type="button">
+                            {actionLoading ? 'Verifying...' : 'Verify OTP'}
+                          </button>
+                        </div>
+                      )}
+
+                      {resetStep === 'password' && (
+                        <>
+                          <div className={styles.passwordFormGrid}>
+                            <div className={styles.inputGroup}>
+                              <label className={styles.inputLabel}>New Password</label>
+                              <div className={styles.passwordWrapper}>
+                                <input
+                                  type={showPasswords.resetNew ? 'text' : 'password'}
+                                  className={styles.inputField}
+                                  value={resetData.newPassword}
+                                  onChange={(e) =>
+                                    setResetData((prev) => ({ ...prev, newPassword: e.target.value }))
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  className={styles.passwordToggle}
+                                  onClick={() => togglePasswordVisibility('resetNew')}
+                                >
+                                  {showPasswords.resetNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                              <label className={styles.inputLabel}>Confirm Password</label>
+                              <div className={styles.passwordWrapper}>
+                                <input
+                                  type={showPasswords.resetConfirm ? 'text' : 'password'}
+                                  className={styles.inputField}
+                                  value={resetData.confirmPassword}
+                                  onChange={(e) =>
+                                    setResetData((prev) => ({ ...prev, confirmPassword: e.target.value }))
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  className={styles.passwordToggle}
+                                  onClick={() => togglePasswordVisibility('resetConfirm')}
+                                >
+                                  {showPasswords.resetConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <button className={styles.primary} onClick={handleResetPassword} disabled={actionLoading} type="button">
+                            {actionLoading ? 'Resetting...' : 'Reset Password'}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 };
 
 export default CoordinatorProfile;

@@ -77,7 +77,16 @@ export default function Sidebar({ onLogout, currentView }) {
             Job &amp; Reference
           </span>
         </a>
-        <a className={`${styles.navLink} ${currentView === 'donation_history' ? styles.navLinkActive : ''}`} 
+        <a
+          className={`${styles.navLink} ${currentView === 'alumni' ? styles.navLinkActive : ''}`}
+          onClick={(e) => handleNavClick(e, 'alumni')}
+        >
+          <span className="material-symbols-outlined">people</span>
+          <span className={styles.navLinkText}>
+            Alumni
+          </span>
+        </a>
+        <a className={`${styles.navLink} ${currentView === 'donation_history' ? styles.navLinkActive : ''}`}
         onClick={(e) => handleNavClick(e, 'donation_history')}>
           <span className="material-symbols-outlined">volunteer_activism</span>
           <span className={styles.navLinkText}>

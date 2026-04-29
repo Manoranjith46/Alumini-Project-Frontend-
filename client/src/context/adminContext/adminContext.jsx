@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { io } from 'socket.io-client';
 
 const AdminContext = createContext();
 
@@ -13,6 +14,37 @@ export const AdminProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const pollingIntervalRef = useRef(null);
   const lastTokenRef = useRef(null);
+  const socketRef = useRef(null);
+
+  // Initialize Socket.io connection
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io(API_BASE_URL, {
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5,
+      });
+
+      // Listen for real-time branding updates
+      socketRef.current.on('admin-branding-updated', (data) => {
+        if (data.success && data.data) {
+          setAdminBranding({
+            profilePhoto: null,
+            logo: data.data.logo ? `${API_BASE_URL}${data.data.logo}` : null,
+            banner: data.data.banner ? `${API_BASE_URL}${data.data.banner}` : null,
+          });
+        }
+      });
+    }
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, []);
 
   // Fetch admin profile data for branding
   const fetchAdminBranding = useCallback(async (token = null) => {

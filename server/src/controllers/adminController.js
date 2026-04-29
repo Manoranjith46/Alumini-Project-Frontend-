@@ -11,6 +11,7 @@ import User from '../models/user.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { sendSmsOtp, verifySmsOtp } from '../utils/messanger.js';
+import { io } from '../server.js';
 
 /**
  * Get dashboard statistics for admin panel
@@ -357,6 +358,19 @@ export const updateAdminProfile = async (req, res) => {
       { $set: { ...updateData, userId: req.user.id } },
       { returnDocument: 'after', upsert: true, runValidators: true }
     );
+
+    // Emit socket event if branding (logo/banner) was updated
+    if (instituteDetails && (instituteDetails.logo !== undefined || instituteDetails.banner !== undefined)) {
+      const brandingData = {
+        logo: admin.instituteDetails?.logo ? `/api/images/${admin.instituteDetails.logo}` : null,
+        banner: admin.instituteDetails?.banner ? `/api/images/${admin.instituteDetails.banner}` : null,
+      };
+
+      io.emit('admin-branding-updated', {
+        success: true,
+        data: brandingData,
+      });
+    }
 
     return res.status(200).json({
       success: true,

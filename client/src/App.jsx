@@ -62,6 +62,8 @@ import CoordinatorViewInvitation from './frontend/Coordinator/Co_View_Invitation
 import CoordinatorFeedbackHistory from './frontend/Coordinator/Co_Feedback'
 import CoordinatorFeedbackForm from './frontend/Coordinator/Co_Feedback_Form'
 import CoordinatorProfile from './frontend/Coordinator/Co_Profile'
+import Coordinator_Alumni from './frontend/Coordinator/Co_Alumni'
+import Coordinator_View_Alumni from './frontend/Coordinator/Co_View_Alumni'
 
 import PageTitleManager from './components/PageTitleManager';
 
@@ -353,6 +355,16 @@ function App() {
         <Route
           path="/coordinator/View_job_and_reference/:id"
           element={guard('coordinator', <CoordinatorViewJobForm onLogout={logout} />)}
+        />
+
+{/* Co-Oridinator Alumni Routes */}
+        <Route
+          path="/coordinator/alumni"
+          element={guard('coordinator', <Coordinator_Alumni onLogout={logout} />)}
+        />
+        <Route
+          path="/coordinator/alumni/:id"
+          element={guard('coordinator', <Coordinator_View_Alumni onLogout={logout} />)}
         />
 
 {/* Co-Oridinator Donation Routes */}

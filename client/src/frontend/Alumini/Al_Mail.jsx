@@ -14,8 +14,6 @@ export default function Alumini_Mail({ onLogout }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Alumni User object:', user); // Debug log
-    // Always fetch mails, regardless of user state
     fetchAlumniMails();
   }, []);
 
@@ -25,16 +23,12 @@ export default function Alumini_Mail({ onLogout }) {
 
       let apiUrl;
       if (user?.email) {
-        console.log('Fetching mails for alumni:', user.email); // Debug log
         apiUrl = `${API_BASE_URL}/api/mail/alumni/${encodeURIComponent(user.email)}`;
       } else {
-        console.log('No user email found, no mails to fetch'); // Debug log
         setMailHistory([]);
         setLoading(false);
         return;
       }
-
-      console.log('API URL:', apiUrl); // Debug log
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -42,31 +36,22 @@ export default function Alumini_Mail({ onLogout }) {
         }
       });
 
-      console.log('Response status:', response.status); // Debug log
-      console.log('Response ok:', response.ok); // Debug log
-
       const data = await response.json();
-      console.log('Response data:', data); // Debug log
 
       if (data.success) {
-        // Transform backend data to match original structure
         const transformedMails = data.mails.map((mail) => ({
           id: mail._id,
           sender: mail.senderName,
+          title: mail.title || 'No Subject',
           badge: mail.isBroadcast ? "Broadcast" : "",
           text: mail.content,
-          time: formatDate(mail.createdAt),
-          btnStyle: getButtonStyleByStatus(mail.responseStatus),
-          borderColor: getBorderColorByStatus(mail.responseStatus),
-          responseStatus: mail.responseStatus, // Include status for frontend use
-          responseData: mail.responseData, // Include response data
-          mailData: mail // Keep original data for navigation
+          date: new Date(mail.createdAt),
+          responseStatus: mail.responseStatus,
+          mailData: mail
         }));
 
-        console.log('Transformed mails:', transformedMails); // Debug log
         setMailHistory(transformedMails);
       } else {
-        console.error('API returned success: false', data);
         setMailHistory([]);
       }
     } catch (err) {
@@ -77,8 +62,7 @@ export default function Alumini_Mail({ onLogout }) {
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
+  const formatDate = (date) => {
     const now = new Date();
     const diffTime = Math.abs(now - date);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -92,27 +76,25 @@ export default function Alumini_Mail({ onLogout }) {
     }
   };
 
-  const getButtonStyleByStatus = (status) => {
+  const getStatusBadgeColor = (status) => {
     switch (status) {
       case 'accept':
-        return 'btnViewGreenOutline';
+        return '#22c55e';
       case 'reject':
-        return 'btnViewRedOutline';
-      case 'pending':
+        return '#ef4444';
       default:
-        return 'btnViewGreyOutline';
+        return '#94a3b8';
     }
   };
 
-  const getBorderColorByStatus = (status) => {
+  const getStatusLabel = (status) => {
     switch (status) {
       case 'accept':
-        return '#22c55e'; // Green border for accepted
+        return 'Accepted';
       case 'reject':
-        return '#ef4444'; // Red border for rejected
-      case 'pending':
+        return 'Rejected';
       default:
-        return '#d1d5db'; // Grey border for pending
+        return 'Pending';
     }
   };
 
@@ -122,26 +104,23 @@ export default function Alumini_Mail({ onLogout }) {
   };
 
   const handleViewMail = (mail) => {
-    // Navigate to alumni mail view page with complete mail data including response status
     navigate('/alumini/mail/viewmail', {
       state: {
         mailId: mail.mailData._id,
         mailData: {
           ...mail.mailData,
-          responseStatus: mail.responseStatus,
-          responseData: mail.responseData,
-          submittedAt: mail.mailData.submittedAt
+          responseStatus: mail.responseStatus
         }
       }
     });
   };
 
-  // Filter mails based on search query
   const filteredMails = mailHistory.filter((mail) => {
     const query = searchQuery.toLowerCase();
     return (
       mail.sender.toLowerCase().includes(query) ||
       mail.text.toLowerCase().includes(query) ||
+      mail.title.toLowerCase().includes(query) ||
       (mail.badge && mail.badge.toLowerCase().includes(query))
     );
   });
@@ -156,7 +135,7 @@ export default function Alumini_Mail({ onLogout }) {
             <div>
               <h2 className={styles.pageTitle}>Mail History</h2>
               {user?.email && (
-                <p className="text-sm text-slate-500 mt-1">Email: {user.email}</p>
+                <p className={styles.emailSubtext}>Email: {user.email}</p>
               )}
             </div>
             <div className={styles.headerActions}>
@@ -181,42 +160,64 @@ export default function Alumini_Mail({ onLogout }) {
           </div>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF3D00] mb-4"></div>
-              <p className="text-slate-500">Loading your mails...</p>
+            <div className={styles.emptyState}>
+              <div className={styles.spinner}></div>
+              <p>Loading your mails...</p>
             </div>
           ) : filteredMails.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <span className="material-symbols-outlined text-6xl text-slate-300 mb-4">mail</span>
-              <h3 className="text-lg font-semibold text-slate-600 mb-2">No mails found</h3>
-              <p className="text-slate-500">
+            <div className={styles.emptyState}>
+              <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '16px' }}>mail</span>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>No mails found</h3>
+              <p style={{ color: '#94a3b8' }}>
                 {searchQuery ? "Try adjusting your search query" : "No mails have been sent to your email address yet"}
               </p>
             </div>
           ) : (
-            <div className={styles.mailGrid}>
-              {filteredMails.map((mail) => (
-                <div key={mail.id} className={styles.mailCard} style={{ borderColor: mail.borderColor }}>
-                  <div className={styles.mailCardContent}>
-                    <div className={styles.mailCardHeader}>
-                      <span className={styles.mailCardSender}>{mail.sender}</span>
-                      {mail.badge && <span className={styles.mailCardBadge}>{mail.badge}</span>}
-                    </div>
-                    <p className={styles.mailCardText}>
-                      {mail.text.length > 120 ? mail.text.substring(0, 120) + '...' : mail.text}
-                    </p>
-                  </div>
-                  <div className={styles.mailCardFooter}>
-                    <span className={styles.mailCardTime}>{mail.time}</span>
-                    <button
-                      className={`${styles.btnView} ${styles[mail.btnStyle]}`}
-                      onClick={() => handleViewMail(mail)}
-                    >
-                      View
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div className={styles.tableWrapper}>
+              <table className={styles.mailTable}>
+                <thead>
+                  <tr>
+                    <th className={styles.thSender}>From</th>
+                    <th className={styles.thSubject}>Subject</th>
+                    <th className={styles.thDate}>Date</th>
+                    <th className={styles.thStatus}>Status</th>
+                    <th className={styles.thAction}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMails.map((mail) => (
+                    <tr key={mail.id} className={styles.mailRow}>
+                      <td className={styles.tdSender}>
+                        <div className={styles.senderCell}>
+                          <span className={styles.senderName}>{mail.sender}</span>
+                          {mail.badge && <span className={styles.badge}>{mail.badge}</span>}
+                        </div>
+                      </td>
+                      <td className={styles.tdSubject}>
+                        <div className={styles.subjectCell}>
+                          {mail.text.length > 80 ? mail.text.substring(0, 80) + '...' : mail.text}
+                        </div>
+                      </td>
+                      <td className={styles.tdDate}>{formatDate(mail.date)}</td>
+                      <td className={styles.tdStatus}>
+                        <span
+                          className={styles.statusBadge}
+                        >
+                          {getStatusLabel(mail.responseStatus)}
+                        </span>
+                      </td>
+                      <td className={styles.tdAction}>
+                        <button
+                          className={styles.viewButton}
+                          onClick={() => handleViewMail(mail)}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

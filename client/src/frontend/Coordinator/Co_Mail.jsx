@@ -34,7 +34,6 @@ const CoordinatorMail = ({ onLogout }) => {
                 return;
             }
 
-            // Fetch mails for coordinator's department or all mails
             const response = await fetch(`${API_BASE_URL}/api/mail/department/${encodeURIComponent(user.department)}`, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -46,22 +45,21 @@ const CoordinatorMail = ({ onLogout }) => {
 
             if (data.success) {
                 setResolvedDepartment(data.department || "");
-                const transformedMails = data.mails.map((mail, index) => ({
+                const transformedMails = data.mails.map((mail) => ({
                     id: mail._id,
                     sender: mail.senderName,
+                    title: mail.title || 'No Subject',
                     type: mail.isBroadcast ? "Broadcast" : "",
                     message: mail.content,
-                    time: formatDate(mail.createdAt),
-                    btnClass: getButtonClass(index),
-                    dominantStatus: mail.dominantStatus || 'pending', // Add status for border coloring
+                    date: new Date(mail.createdAt),
+                    dominantStatus: mail.dominantStatus || 'pending',
                     responseStats: mail.responseStats || { total: 0, accepted: 0, rejected: 0, pending: mail.recipientCount || 0 },
-                    mailData: mail // Keep original data for navigation
+                    mailData: mail
                 }));
 
                 setMailHistory(transformedMails);
             } else {
                 setMailHistory([]);
-                console.error('API returned success: false', data);
             }
         } catch (err) {
             setMailHistory([]);
@@ -76,8 +74,7 @@ const CoordinatorMail = ({ onLogout }) => {
         fetchDepartmentMails();
     };
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
+    const formatDate = (date) => {
         const now = new Date();
         const diffTime = Math.abs(now - date);
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -91,37 +88,14 @@ const CoordinatorMail = ({ onLogout }) => {
         }
     };
 
-    const getButtonClass = (index) => {
-        const classes = [
-            styles.btnViewGreyOutline,
-            styles.btnViewGreenOutline,
-            styles.btnViewRedOutline
-        ];
-        return classes[index % classes.length];
-    };
-
-    // Function to get border class based on response status
-    const getBorderClassByStatus = (status) => {
-        switch (status) {
-            case 'accept':
-                return styles.borderGreen;
-            case 'reject':
-                return styles.borderRed;
-            case 'pending':
-            default:
-                return styles.borderGrey;
-        }
-    };
-
-    // Filter mails based on search query
     const filteredMails = mailHistory.filter(mail =>
         mail.sender.toLowerCase().includes(searchQuery.toLowerCase()) ||
         mail.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        mail.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (mail.type && mail.type.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     const handleViewMail = (mail) => {
-        // Navigate to coordinator mail view page with complete mail data including response info
         navigate('/coordinator/info-form', {
             state: {
                 mailId: mail.mailData._id,
@@ -136,9 +110,7 @@ const CoordinatorMail = ({ onLogout }) => {
 
     return (
         <div className="bg-[#F8FAFC] font-display text-slate-900 h-screen flex overflow-hidden">
-            {/* Sidebar */}
             <Sidebar currentView="mail" onLogout={onLogout} />
-            {/* Main Content Area */}
             <main className="flex-1 ml-[70px] h-screen flex flex-col overflow-hidden">
                 <div className="sticky top-0 bg-[#F8FAFC] px-8 pt-6 pb-2 z-10 border-b border-slate-200">
                     <Back to={'/coordinator/dashboard'} />
@@ -194,55 +166,63 @@ const CoordinatorMail = ({ onLogout }) => {
                                 </p>
                             </div>
                         ) : (
-                            <div className={`${styles.mailGrid} pb-12`}>
-                                {filteredMails.map((mail, index) => (
-                                    <div
-                                        key={mail.id}
-                                        className={`${styles.mailCard} ${getBorderClassByStatus(mail.dominantStatus)}`}
-                                    >
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.25rem' }}>
-                                                <span style={{ fontWeight: 600, color: '#001E2B', fontSize: '0.95rem' }}>{mail.sender}</span>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    {mail.type && (
-                                                        <span style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.25rem', paddingBottom: '0.25rem', background: '#f1f5f9', color: '#475569', fontSize: '0.7rem', fontWeight: 'bold', borderRadius: '9999px', textTransform: 'uppercase' }}>{mail.type}</span>
-                                                    )}
-                                                    {mail.responseStats && mail.responseStats.total > 0 && (
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                                                            {mail.responseStats.accepted > 0 && (
-                                                                <span style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem', paddingTop: '0.25rem', paddingBottom: '0.25rem', background: '#dcfce7', color: '#166534', borderRadius: '9999px' }}>
-                                                                    ✓ {mail.responseStats.accepted}
-                                                                </span>
-                                                            )}
-                                                            {mail.responseStats.rejected > 0 && (
-                                                                <span style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem', paddingTop: '0.25rem', paddingBottom: '0.25rem', background: '#fee2e2', color: '#991b1b', borderRadius: '9999px' }}>
-                                                                    ✗ {mail.responseStats.rejected}
-                                                                </span>
-                                                            )}
-                                                            {mail.responseStats.pending > 0 && (
-                                                                <span style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem', paddingTop: '0.25rem', paddingBottom: '0.25rem', background: '#f3f4f6', color: '#374151', borderRadius: '9999px' }}>
-                                                                    ⏳ {mail.responseStats.pending}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                {mail.message.length > 150 ? mail.message.substring(0, 150) + '...' : mail.message}
-                                            </p>
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '1rem', marginLeft: '1rem', whiteSpace: 'nowrap' }}>
-                                            <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#94a3b8' }}>{mail.time}</span>
-                                            <button
-                                                onClick={() => handleViewMail(mail)}
-                                                className={`${styles.btnView} ${mail.btnClass}`}
-                                            >
-                                                View
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
+                            <div className={styles.tableWrapper}>
+                                <table className={styles.mailTable}>
+                                    <thead>
+                                        <tr>
+                                            <th className={styles.thSender}>From</th>
+                                            <th className={styles.thSubject}>Subject</th>
+                                            <th className={styles.thDate}>Date</th>
+                                            <th className={styles.thStats}>Response Stats</th>
+                                            <th className={styles.thAction}>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredMails.map((mail) => (
+                                            <tr key={mail.id} className={styles.mailRow}>
+                                                <td className={styles.tdSender}>
+                                                    <div className={styles.senderCell}>
+                                                        <span className={styles.senderName}>{mail.sender}</span>
+                                                        {mail.type && <span className={styles.badge}>{mail.type}</span>}
+                                                    </div>
+                                                </td>
+                                                <td className={styles.tdSubject}>
+                                                    <div className={styles.subjectCell}>
+                                                        {mail.message.length > 100 ? mail.message.substring(0, 100) + '...' : mail.message}
+                                                    </div>
+                                                </td>
+                                                <td className={styles.tdDate}>{formatDate(mail.date)}</td>
+                                                <td className={styles.tdStats}>
+                                                    <div className={styles.statsContainer}>
+                                                        {mail.responseStats.accepted > 0 && (
+                                                            <span className={styles.statAccepted}>
+                                                                ✓ {mail.responseStats.accepted}
+                                                            </span>
+                                                        )}
+                                                        {mail.responseStats.rejected > 0 && (
+                                                            <span className={styles.statRejected}>
+                                                                ✗ {mail.responseStats.rejected}
+                                                            </span>
+                                                        )}
+                                                        {mail.responseStats.pending > 0 && (
+                                                            <span className={styles.statPending}>
+                                                                ⏳ {mail.responseStats.pending}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className={styles.tdAction}>
+                                                    <button
+                                                        className={styles.viewButton}
+                                                        onClick={() => handleViewMail(mail)}
+                                                    >
+                                                        View
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         )}
                     </div>
