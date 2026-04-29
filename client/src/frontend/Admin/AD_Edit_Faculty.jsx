@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, X, User, Book, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Save, X, User, Book } from 'lucide-react';
 import styles from './AD_Add_Faculty.module.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from './Components/Sidebar/Sidebar';
@@ -33,6 +33,8 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
+  const [departmentsLoading, setDepartmentsLoading] = useState(false);
+  const [departments, setDepartments] = useState([]);
   const [submitError, setSubmitError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -86,7 +88,34 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
       }
     };
 
+    const fetchDepartments = async () => {
+      if (!user?.token) return;
+
+      try {
+        setDepartmentsLoading(true);
+        const response = await fetch(`${API_BASE}/api/departments`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch departments');
+        }
+
+        const data = await response.json();
+        if (data.success && Array.isArray(data.departments)) {
+          setDepartments(data.departments);
+        }
+      } catch (err) {
+        console.error('Error fetching departments:', err);
+      } finally {
+        setDepartmentsLoading(false);
+      }
+    };
+
     fetchCoordinator();
+    fetchDepartments();
   }, [id, user?.token]);
 
   const handleInputChange = (e) => {
@@ -113,6 +142,7 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
     if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
     if (!formData.location.trim()) newErrors.location = 'Location is required';
     if (!formData.designation) newErrors.designation = 'Designation is required';
+    if (!formData.department) newErrors.department = 'Department is required';
     if (!formData.staffId.trim()) newErrors.staffId = 'Staff ID is required';
 
     // Email validation
@@ -397,15 +427,27 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label>Department</label>
-                    <input
-                      type="text"
+                    <label>Department *</label>
+                    <select
                       name="department"
                       value={formData.department}
                       onChange={handleInputChange}
-                      className={styles.formInput}
-                      placeholder="Department"
-                    />
+                      className={`${styles.formInput} ${errors.department ? styles.inputError : ''}`}
+                      disabled={departmentsLoading}
+                    >
+                      <option value="">
+                        {departmentsLoading ? 'Loading departments...' : 'Select Department'}
+                      </option>
+                      {departments.map((dept) => (
+                        <option key={dept._id} value={dept.branch}>
+                          {dept.branch}{dept.deptCode ? ` (${dept.deptCode})` : ''}
+                        </option>
+                      ))}
+                      {formData.department && !departments.some((dept) => dept.branch === formData.department) && (
+                        <option value={formData.department}>{formData.department}</option>
+                      )}
+                    </select>
+                    {errors.department && <span className={styles.errorText}>{errors.department}</span>}
                   </div>
 
                   <div className={styles.formGroup}>

@@ -97,8 +97,13 @@ const buildCoordinatorProfileUpdate = (payload = {}) => {
     if (department) updateData.department = department;
   }
 
-  if (Object.prototype.hasOwnProperty.call(payload, 'roles') && Array.isArray(payload.roles)) {
-    updateData.roles = payload.roles;
+  if (Object.prototype.hasOwnProperty.call(payload, 'role')) {
+    const role = cleanString(payload.role);
+    if (role) updateData.role = role;
+  } else if (Object.prototype.hasOwnProperty.call(payload, 'roles') && Array.isArray(payload.roles)) {
+    // Backward compatibility: accept legacy roles array and map first value to role
+    const role = cleanString(payload.roles[0]);
+    if (role) updateData.role = role;
   }
 
   if (Object.prototype.hasOwnProperty.call(payload, 'location')) {
@@ -158,7 +163,8 @@ export const createCoordinator = async (req, res) => {
       staffId,
       designation,
       department,
-      roles = ['coordinator'], // Default role
+      role = 'coordinator', // Default coordinator role
+      roles, // Legacy fallback from older clients
       phone,
       location,
       status,
@@ -169,6 +175,11 @@ export const createCoordinator = async (req, res) => {
       publications,
       patents,
     } = req.body;
+
+    const normalizedRole =
+      cleanString(role) ||
+      (Array.isArray(roles) ? cleanString(roles[0]) : undefined) ||
+      'coordinator';
 
     // Validate required fields
     if (!userId || !name || !email || !password || !staffId || !designation || !department || !joinDate) {
@@ -217,7 +228,7 @@ export const createCoordinator = async (req, res) => {
       name,
       designation,
       department,
-      roles,
+      role: normalizedRole,
       email,
       phone,
       location,
@@ -258,11 +269,13 @@ export const createCoordinator = async (req, res) => {
 export const getAllCoordinators = async (req, res) => {
   try {
     const { department, status, role } = req.query;
-    const filter = { isActive: true };
+    const filter = {};
 
     if (department) filter.department = department;
     if (status) filter.status = status;
-    if (role) filter.roles = { $in: [role] };
+    if (role) {
+      filter.$or = [{ role }, { roles: { $in: [role] } }];
+    }
 
     const coordinators = await Coordinator.find(filter)
       .populate('userId', 'userId name email role')
@@ -296,8 +309,7 @@ export const getCoordinatorsByDepartment = async (req, res) => {
 
     // Now search coordinators by the full branch name
     const coordinators = await Coordinator.find({
-      department: deptRecord.branch,
-      isActive: true
+      department: deptRecord.branch
     })
       .populate('userId', 'userId name email role')
       .sort({ name: 1 });
@@ -751,7 +763,7 @@ export const getCoordinatorById = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid coordinator ID' });
     }
 
-    const coordinator = await Coordinator.findOne({ _id: id, isActive: true })
+    const coordinator = await Coordinator.findOne({ _id: id })
       .populate('userId', 'userId name email role');
 
     if (!coordinator) {
@@ -772,7 +784,13 @@ export const updateCoordinator = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid coordinator ID' });
     }
 
-    const coordinator = await Coordinator.findByIdAndUpdate(id, req.body, {
+    const updatePayload = { ...req.body };
+    if (!updatePayload.role && Array.isArray(updatePayload.roles)) {
+      updatePayload.role = cleanString(updatePayload.roles[0]);
+    }
+    delete updatePayload.roles;
+
+    const coordinator = await Coordinator.findByIdAndUpdate(id, updatePayload, {
       returnDocument: 'after',
       runValidators: true,
     }).populate('userId', 'userId name email role');
@@ -803,7 +821,7 @@ export const updateCoordinator = async (req, res) => {
   }
 };
 
-// Soft delete coordinator and associated user
+// Hard delete coordinator and associated user
 export const deleteCoordinator = async (req, res) => {
   try {
     const { id } = req.params;
@@ -818,14 +836,10 @@ export const deleteCoordinator = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Coordinator not found' });
     }
 
-    // Deactivate the coordinator
-    await Coordinator.findByIdAndUpdate(
-      id,
-      { isActive: false },
-      { returnDocument: 'after' }
-    );
+    // Delete coordinator profile
+    await Coordinator.findByIdAndDelete(id);
 
-    // Also delete/deactivate the associated user
+    // Also delete the associated user
     if (coordinator.userId) {
       await User.findByIdAndDelete(coordinator.userId);
     }

@@ -66,8 +66,7 @@ export const getAllDepartments = async (_, res) => {
             branch: dept.branch
           }),
           Coordinator.countDocuments({
-            department: dept.branch,
-            isActive: true
+            department: dept.branch
           })
         ]);
         return {

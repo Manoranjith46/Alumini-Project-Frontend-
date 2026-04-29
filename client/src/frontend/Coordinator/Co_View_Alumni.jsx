@@ -12,7 +12,7 @@ import {
   Heart,
   Users
 } from 'lucide-react';
-import styles from '../Admin/AD_View_Alumni.module.css';
+import styles from './Co_View_Alumni.module.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from './Components/Sidebar/Sidebar';
 import { useAuth } from '../../context/authContext/authContext';

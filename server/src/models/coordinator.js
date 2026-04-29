@@ -33,11 +33,12 @@ const coordinatorSchema = new Schema(
 			maxlength: 200,
 		},
 		// Role/responsibilities in the system
-		roles: [{
+		role: {
 			type: String,
 			enum: ['coordinator', 'hod', 'admin_assistant', 'senior_coordinator'],
-			default: ['coordinator']
-		}],
+			default: 'coordinator',
+			trim: true,
+		},
 		email: {
 			type: String,
 			required: true,
@@ -120,10 +121,6 @@ const coordinatorSchema = new Schema(
 		resetOtpVerifiedAt: {
 			type: Date,
 		},
-		isActive: {
-			type: Boolean,
-			default: true,
-		},
 	},
 	{ timestamps: true }
 );
@@ -131,7 +128,7 @@ const coordinatorSchema = new Schema(
 // Index for faster queries (staffId already indexed via unique: true)
 coordinatorSchema.index({ department: 1 });
 coordinatorSchema.index({ email: 1 });
-coordinatorSchema.index({ roles: 1 });
+coordinatorSchema.index({ role: 1 });
 
 const Coordinator = model('Coordinator', coordinatorSchema, 'coordinators');
 

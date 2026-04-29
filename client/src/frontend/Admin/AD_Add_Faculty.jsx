@@ -139,7 +139,7 @@ const Admin_Add_Faculty = ({ onLogout }) => {
         staffId: formData.staffId.trim(),
         designation: formData.designation,
         department: formData.department,
-        roles: ['coordinator'],
+        role: 'coordinator',
         phone: formData.phone.trim(),
         location: formData.location.trim(),
         status: formData.status || 'Active',

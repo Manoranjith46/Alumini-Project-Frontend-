@@ -47,8 +47,8 @@ export const getDashboardStats = async (req, res) => {
       // 1. Total alumni
       Alumni.countDocuments({}),
 
-      // 2. Active coordinators (status='Active' AND isActive=true)
-      Coordinator.countDocuments({ status: 'Active', isActive: true }),
+      // 2. Active coordinators (status='Active')
+      Coordinator.countDocuments({ status: 'Active' }),
 
       // 3. Upcoming events count (pending status and date >= today)
       Event.countDocuments({
@@ -845,4 +845,3 @@ export const getInstituteBranding = async (req, res) => {
     });
   }
 };
-

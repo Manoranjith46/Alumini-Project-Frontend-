@@ -106,7 +106,7 @@
 }
 
 .deleteBtn {
-  background-color: var(--primary-danger);
+  background-color: #ef4444;
   color: white;
   border: 1px solid #ef4444;
   font-weight: 600;
@@ -121,7 +121,7 @@
 }
 
 .deleteBtn:hover {
-  background-color: var(--primary-danger-hover);
+  background-color: #dc2626;
 }
 
 /* ================== PROFILE CONTENT ================== */

@@ -121,8 +121,8 @@ const getHODEmailsForRecipients = async (recipientEmails) => {
             try {
                 const hods = await Coordinator.find({
                     department: department,
-                    roles: { $in: ['hod'] },
-                    isActive: true
+                    $or: [{ role: 'hod' }, { roles: { $in: ['hod'] } }],
+                    status: 'Active'
                 }).select('email');
 
                 for (const hod of hods) {

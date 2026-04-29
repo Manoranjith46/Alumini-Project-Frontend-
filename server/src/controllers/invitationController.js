@@ -154,7 +154,6 @@ export const getDepartmentInvitations = async (req, res) => {
 			try {
 				const invCreator = await Coordinator.findOne({
 					userId: invitation.createdBy._id,
-					isActive: true,
 				}).select('department');
 
 				const normalizedCreatorDept = (invCreator?.department || '').trim().toLowerCase();

@@ -177,7 +177,6 @@ const Coordinator_Alumni = ({ onLogout }) => {
                   onChange={(e) => setFilterType(e.target.value)}
                 >
                   <option value="">Select Filter</option>
-                  <option value="department">By Department</option>
                   <option value="designation">By Designation</option>
                   <option value="name">By Name</option>
                   <option value="type">By Type</option>

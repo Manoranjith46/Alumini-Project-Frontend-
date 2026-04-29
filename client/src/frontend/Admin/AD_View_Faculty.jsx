@@ -74,7 +74,7 @@ const Admin_View_Faculty = ({ onLogout }) => {
   };
 
   const handleDeactivate = async () => {
-    if (!window.confirm('Are you sure you want to deactivate this coordinator?\n\nThis will:\n- Deactivate the coordinator profile\n- Delete the associated user account\n\nThis action can be undone.')) {
+    if (!window.confirm('Are you sure you want to delete this coordinator?\n\nThis will permanently remove:\n- Coordinator profile\n- Associated user account\n\nThis action cannot be undone.')) {
       return;
     }
 
@@ -89,14 +89,14 @@ const Admin_View_Faculty = ({ onLogout }) => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        alert('Coordinator profile and user account deactivated successfully');
+        alert('Coordinator profile and user account deleted successfully');
         navigate('/admin/department');
       } else {
-        alert(data.message || 'Failed to deactivate coordinator');
+        alert(data.message || 'Failed to delete coordinator');
       }
     } catch (err) {
-      alert('Error deactivating coordinator: ' + err.message);
-      console.error('Error deactivating coordinator:', err);
+      alert('Error deleting coordinator: ' + err.message);
+      console.error('Error deleting coordinator:', err);
     }
   };
 
@@ -169,7 +169,7 @@ const Admin_View_Faculty = ({ onLogout }) => {
                 <Edit size={18} /> Edit Profile
               </button>
               <button className={styles.deleteBtn} onClick={handleDeactivate}>
-                <Trash2 size={18} /> Deactivate
+                <Trash2 size={18} /> Delete
               </button>
             </div>
           </div>

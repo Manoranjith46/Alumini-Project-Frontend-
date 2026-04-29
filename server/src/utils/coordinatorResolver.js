@@ -6,7 +6,6 @@ export const findCoordinatorForUser = async (user) => {
   const { default: Coordinator } = await import('../models/coordinator.js');
 
   const coordinators = await Coordinator.find({
-    isActive: true,
     $or: [
       { userId: user._id },
       ...(user.email ? [{ email: user.email.toLowerCase() }] : []),
