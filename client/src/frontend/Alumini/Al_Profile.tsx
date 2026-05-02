@@ -47,14 +47,15 @@ interface CompetitiveExam {
   examName: string;
   regNo: string;
   year: string;
-  score: string;
+  marks: string;
 }
 
 interface Qualification {
-  degree: string;
-  branch: string;
-  yearOfPassing: string;
+  course: string;
   institution: string;
+  yearOfPassing: string;
+  percentage: string;
+  boardUniversity: string;
 }
 
 interface EntrepreneurDetails {
@@ -713,7 +714,7 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
                 <DateInput
                   theme="alumni"
                   value={formData.dob} 
-                  onChange={handleChange('dob')}
+                  onChange={(e: any) => setFormData(prev => ({ ...prev, dob: e.target.value }))}
                   className={styles.input} 
                   readOnly={!editMode}
                 />
@@ -999,7 +1000,7 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: 'center', color: '#6b7280' }}>No qualifications added</td>
+                      <td colSpan={5} style={{ textAlign: 'center', color: '#6b7280' }}>No qualifications added</td>
                     </tr>
                   )}
                 </tbody>
@@ -1107,7 +1108,7 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Name and Address of Organization</label>
                   <textarea 
-                    rows="2" 
+                    rows={2} 
                     value={formData.organizationName} 
                     onChange={handleChange('organizationName')}
                     className={styles.textarea}
@@ -1213,7 +1214,7 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
             <div className={styles.formGroup}>
               <label className={styles.label}>Role/Contribution to Alumnus (Activities like seminars/placements/funds/awards etc.)</label>
               <textarea
-                rows="4"
+                rows={4}
                 value={formData.extraCurricular}
                 onChange={handleChange('extraCurricular')}
                 placeholder="Mention your contributions..."
@@ -1224,7 +1225,7 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
             <div className={styles.formGroup}>
               <label className={styles.label}>Any Other Relevant Information</label>
               <textarea
-                rows="3"
+                rows={3}
                 value={formData.otherInfo}
                 onChange={handleChange('otherInfo')}
                 className={styles.textarea}

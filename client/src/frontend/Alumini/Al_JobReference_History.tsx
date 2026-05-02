@@ -63,7 +63,7 @@ interface AluminiJobReferenceHistoryProps {
 const Alumini_JobReference_History = ({ onLogout }: AluminiJobReferenceHistoryProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const menuRef = useRef(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [jobsData, setJobsData] = useState<JobRecord[]>([]);
@@ -126,7 +126,7 @@ const Alumini_JobReference_History = ({ onLogout }: AluminiJobReferenceHistoryPr
     setActiveMenuId(activeMenuId === id ? null : id);
   };
 
-  const handleDelete = async (jobId) => {
+  const handleDelete = async (jobId: string) => {
     if (!window.confirm('Are you sure you want to remove this job reference?')) {
       return;
     }
@@ -135,7 +135,7 @@ const Alumini_JobReference_History = ({ onLogout }: AluminiJobReferenceHistoryPr
       const response = await fetch(`${API_BASE}/api/jobs/${jobId}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
       });
 
@@ -156,8 +156,8 @@ const Alumini_JobReference_History = ({ onLogout }: AluminiJobReferenceHistoryPr
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setActiveMenuId(null);
       }
     };

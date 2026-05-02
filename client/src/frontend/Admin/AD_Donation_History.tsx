@@ -253,7 +253,7 @@ const Admin_Donation_History = ({ onLogout }: { onLogout?: () => void }) => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="7" className={styles.emptyCell}>
+                      <td colSpan={7} className={styles.emptyCell}>
                         No donations found
                       </td>
                     </tr>

@@ -31,7 +31,7 @@ export default function Al_TokenHandler() {
 
   useEffect(() => {
     // Check if this token was already used in this session
-    if (tokenSession?.token === token && tokenSession?.isUsed) {
+    if (tokenSession && tokenSession.token === token && tokenSession.isUsed) {
       setAlreadyUsed(true);
       setTokenInfo({
         recipientEmail: tokenSession.recipientEmail,
@@ -43,7 +43,7 @@ export default function Al_TokenHandler() {
     }
 
     // If already logged in with this token, skip validation
-    if (isTokenLoggedIn && tokenSession?.token === token) {
+    if (isTokenLoggedIn && tokenSession && tokenSession.token === token) {
       setTokenInfo({
         recipientEmail: tokenSession.recipientEmail,
         mail: tokenSession.mail,

@@ -291,7 +291,7 @@ const styles = {
         cursor: 'pointer',
         transition: 'background-color 0.2s'
     }
-};
+} as const;
 
 // Add CSS animation
 const styleSheet = document.createElement("style");

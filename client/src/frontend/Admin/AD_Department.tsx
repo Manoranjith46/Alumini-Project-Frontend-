@@ -230,7 +230,7 @@ const Admin_Department = ( { onLogout }: { onLogout?: () => void } ) => {
                   ))}
                   {departments.length === 0 && !loading && (
                     <tr>
-                      <td colSpan="6" className={styles.emptyState}>No departments found. Add a new one to get started.</td>
+                      <td colSpan={6} className={styles.emptyState}>No departments found. Add a new one to get started.</td>
                     </tr>
                   )}
                 </tbody>

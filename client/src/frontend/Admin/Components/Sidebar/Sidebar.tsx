@@ -4,7 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAdminContext } from '../../../../context/adminContext/adminContext';
 import { useAuth } from '../../../../context/authContext/authContext';
 
-export default function Sidebar({ onLogout, currentView }) {
+interface SidebarProps {
+  onLogout?: () => void;
+  currentView: string;
+}
+
+export default function Sidebar({ onLogout, currentView }: SidebarProps) {
   const navigate = useNavigate();
   const { adminBranding, fetchAdminBranding } = useAdminContext();
   const { user } = useAuth();
@@ -13,7 +18,7 @@ export default function Sidebar({ onLogout, currentView }) {
     fetchAdminBranding(user?.token);
   }, [user?.token]);
 
-  const handleLogout = (e) => {
+  const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
     if (onLogout) {
       onLogout();
@@ -21,7 +26,7 @@ export default function Sidebar({ onLogout, currentView }) {
   };
 
 
-  const handleNavClick = (e, view) => {
+  const handleNavClick = (e: React.MouseEvent, view: string) => {
     e.preventDefault();
     navigate(`/admin/${view}`);
   };
@@ -30,7 +35,7 @@ export default function Sidebar({ onLogout, currentView }) {
     <aside id="sidebar" className={styles.sidebar}>
       <div className={styles.sidebarHeader}>
         <img
-          src={adminBranding.logo}
+          src={adminBranding?.logo || undefined}
           alt="KSRCE Logo"
           className={styles.sidebarLogo}
         />

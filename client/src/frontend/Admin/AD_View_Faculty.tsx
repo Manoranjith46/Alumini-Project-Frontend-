@@ -13,21 +13,40 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from './Components/Sidebar/Sidebar';
 import { useAuth } from '../../context/authContext/authContext';
 
+interface FacultyMember {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  location?: string;
+  designation: string;
+  status: string;
+  department: string;
+  staffId: string;
+  joinDate?: string;
+  personalInfo?: {
+    dob?: string;
+    gender?: string;
+    bloodGroup?: string;
+    address?: string;
+  };
+}
+
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | undefined | null) => {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-const Admin_View_Faculty = ({ onLogout }) => {
+const Admin_View_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useAuth();
-  const [coordinatorData, setCoordinatorData] = useState(null);
+  const [coordinatorData, setCoordinatorData] = useState<FacultyMember | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCoordinator = async () => {
@@ -40,7 +59,7 @@ const Admin_View_Faculty = ({ onLogout }) => {
       try {
         const response = await fetch(`${API_BASE}/api/coordinators/${id}`, {
           headers: {
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${user?.token}`,
           },
         });
 
@@ -53,7 +72,7 @@ const Admin_View_Faculty = ({ onLogout }) => {
         if (data.success && data.coordinator) {
           setCoordinatorData(data.coordinator);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -82,7 +101,7 @@ const Admin_View_Faculty = ({ onLogout }) => {
       const response = await fetch(`${API_BASE}/api/coordinators/${id}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
       });
 

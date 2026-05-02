@@ -7,10 +7,10 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-const Admin_ViewMail = ({ onLogout }) => {
-  const [mail, setMail] = useState(null);
-  const [responses, setResponses] = useState([]);
-  const [responseStats, setResponseStats] = useState(null);
+const Admin_ViewMail = ({ onLogout }: { onLogout?: () => void }) => {
+  const [mail, setMail] = useState<any>(null);
+  const [responses, setResponses] = useState<any[]>([]);
+  const [responseStats, setResponseStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAlumniModal, setShowAlumniModal] = useState(false);
   const location = useLocation();
@@ -79,7 +79,7 @@ const Admin_ViewMail = ({ onLogout }) => {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string | Date) => {
     if (!dateString) return 'No date set';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -89,7 +89,7 @@ const Admin_ViewMail = ({ onLogout }) => {
     });
   };
 
-  const formatDateTime = (dateString) => {
+  const formatDateTime = (dateString: string | Date) => {
     if (!dateString) return 'No date';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -101,7 +101,7 @@ const Admin_ViewMail = ({ onLogout }) => {
     });
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'accept':
         return '#22c55e'; // Green
@@ -130,7 +130,7 @@ const Admin_ViewMail = ({ onLogout }) => {
   /**
    * Navigate to flyer page with single recipient
    */
-  const navigateToFlyerSingle = (recipient) => {
+  const navigateToFlyerSingle = (recipient: any) => {
     setShowAlumniModal(false);
     navigate('/admin/mail/flyer', {
       state: {
@@ -442,7 +442,7 @@ const Admin_ViewMail = ({ onLogout }) => {
                                 Educational Qualifications
                               </h4>
                               <div style={{ fontSize: '11px', color: '#6b7280' }}>
-                                {response.responseData.collegeQualifications.map((qual, idx) => (
+                                {response.responseData.collegeQualifications.map((qual: any, idx: number) => (
                                   <div key={idx} style={{ marginBottom: '4px' }}>
                                     <strong>{qual.course}</strong> from {qual.institution}
                                     {qual.yearOfPassing && ` (${qual.yearOfPassing})`}

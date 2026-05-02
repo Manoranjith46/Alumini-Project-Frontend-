@@ -84,7 +84,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
           setEventTime(e.eventTime);
           setVenue(e.venue);
           setOrganizer(e.organizer?._id || '');
-          setCoOrganizers(e.coOrganizers?.map(co => co._id) || []);
+          setCoOrganizers(e.coOrganizers?.map((co: any) => co._id) || []);
           setStatus(e.status);
           setPhotos(e.photos || []);
         } else {
@@ -161,7 +161,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
         body: JSON.stringify({
           eventName: eventName.trim(),
@@ -200,7 +200,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
     try {
       const response = await fetch(`${API_BASE}/api/events/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${user.token}` },
+        headers: { Authorization: `Bearer ${user?.token}` },
       });
 
       const data = await response.json();
@@ -246,8 +246,8 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
 
     // Validate files
     const maxFileSize = 10 * 1024 * 1024; // 10MB
-    const invalidFiles = [];
-    const oversizedFiles = [];
+    const invalidFiles: string[] = [];
+    const oversizedFiles: string[] = [];
 
     files.forEach(file => {
       const isImage = file.type.startsWith('image/') || supportedImageTypes.includes(file.type);
@@ -281,7 +281,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
       const response = await fetch(`${API_BASE}/api/events/${id}/photos`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
         body: formData,
       });
@@ -310,7 +310,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
       const response = await fetch(`${API_BASE}/api/events/${id}/photos/${photoId}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
       });
 
@@ -615,8 +615,8 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
                             alt="Event photo"
                             className={styles.photoImage}
                             onLoad={(e) => handleImageLoad(photoId, e)}
-                            onError={(e) => {
-                              console.error('Image failed to load:', e.target.src);
+                            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                              console.error('Image failed to load:', (e.target as HTMLImageElement).src);
                             }}
                           />
                           <button

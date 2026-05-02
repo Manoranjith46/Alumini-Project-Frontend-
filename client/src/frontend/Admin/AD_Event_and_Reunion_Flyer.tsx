@@ -179,7 +179,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
       setEventsLoading(true);
       const res = await fetch(`${API_BASE}/api/events`, {
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
       });
       const data = await res.json();
@@ -255,7 +255,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
         body: JSON.stringify({ text: eventDesc }),
       });
@@ -295,7 +295,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
       const res = await fetch(`${API_BASE}/api/invitations`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
         body: formData,
       });
@@ -327,7 +327,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
       let base64Data = null;
       const reader = new FileReader();
       reader.onload = (ev) => {
-        base64Data = ev.target.result;
+        base64Data = ev.target?.result;
       };
       reader.readAsDataURL(file);
 
@@ -416,7 +416,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
       const res = await fetch(`${API_BASE}/api/flyers/generate`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
         body: formData,
       });
@@ -432,7 +432,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
 
       const imageRes = await fetch(imageUrl, {
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
       });
 
@@ -597,7 +597,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
                             <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
                               <button
                                 type="button"
-                                onClick={() => document.getElementById('logo-upload').click()}
+                                onClick={() => document.getElementById('logo-upload')?.click()}
                                 style={{
                                   width: '100%',
                                   padding: '0.5rem 1rem',
@@ -616,7 +616,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
                           </>
                         ) : (
                           <div
-                            onClick={() => document.getElementById('logo-upload').click()}
+                            onClick={() => document.getElementById('logo-upload')?.click()}
                             style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                           >
                             <div className={styles.uploadIconWrapper}>
@@ -643,7 +643,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
                             <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
                               <button
                                 type="button"
-                                onClick={() => document.getElementById('banner-upload').click()}
+                                onClick={() => document.getElementById('banner-upload')?.click()}
                                 style={{
                                   width: '100%',
                                   padding: '0.5rem 1rem',
@@ -661,7 +661,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
                           </>
                         ) : (
                           <div
-                            onClick={() => document.getElementById('banner-upload').click()}
+                            onClick={() => document.getElementById('banner-upload')?.click()}
                             style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                           >
                             <div className={styles.uploadIconWrapper}>
@@ -690,7 +690,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
                     <textarea 
                       id="event-desc" 
                       className={styles.textareaCustom} 
-                      rows="6" 
+                      rows={6} 
                       placeholder="Describe your event in detail (e.g., A networking brunch for 2015 graduates featuring industry speakers at the Grand Hall...)"
                       value={eventDesc}
                       onChange={(e) => setEventDesc(e.target.value)}
@@ -731,7 +731,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
                               className={`${styles.templateThumbnail} ${currentTemplateIndex === idx ? styles.selected : ''}`}
                               onClick={() => setCurrentTemplateIndex(idx)}
                             >
-                              <img src={template.preview} />
+                              <img src={template.preview || undefined} />
                             </div>
                           ))}
                         </div>
@@ -739,7 +739,7 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
                       </>
                     ) : (
                       <div
-                        onClick={() => document.getElementById('gemini-template-upload').click()}
+                        onClick={() => document.getElementById('gemini-template-upload')?.click()}
                         style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                       >
                         <div className={styles.uploadIconWrapper}>

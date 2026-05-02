@@ -179,14 +179,14 @@ const styles = {
     maxWidth: '500px',
     width: '100%',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    textAlign: 'center'
+    textAlign: 'center' as const
   },
   successCard: {
     backgroundColor: '#ffffff',
     border: '1px solid #d1fae5',
     borderRadius: '12px',
     padding: '48px 32px',
-    textAlign: 'center',
+    textAlign: 'center' as const,
     maxWidth: '500px',
     width: '100%',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
@@ -229,7 +229,7 @@ const styles = {
     padding: '16px',
     borderRadius: '8px',
     marginBottom: '24px',
-    textAlign: 'left'
+    textAlign: 'left' as const
   },
   mailTitle: {
     margin: '0 0 8px 0',
@@ -276,7 +276,7 @@ const styles = {
   },
   reasonSection: {
     marginBottom: '32px',
-    textAlign: 'left'
+    textAlign: 'left' as const
   },
   reasonLabel: {
     display: 'block',
@@ -292,7 +292,7 @@ const styles = {
     borderRadius: '8px',
     fontSize: '14px',
     color: '#111827',
-    resize: 'vertical',
+    resize: 'vertical' as const,
     minHeight: '100px',
     fontFamily: 'Arial, sans-serif',
     outline: 'none',
@@ -301,7 +301,7 @@ const styles = {
   charCount: {
     fontSize: '12px',
     color: '#9ca3af',
-    textAlign: 'right',
+    textAlign: 'right' as const,
     marginTop: '4px'
   },
   buttonSection: {

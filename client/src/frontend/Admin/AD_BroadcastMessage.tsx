@@ -30,6 +30,32 @@ interface SharedData {
   message: string;
 }
 
+interface Event {
+  _id: string;
+  eventName: string;
+  eventDate?: string;
+  venue?: string;
+  eventTime?: string;
+}
+
+interface Department {
+  _id: string;
+  stream: string;
+  branch: string;
+  deptCode: string;
+}
+
+interface AlumniSearchResult {
+  _id: string;
+  name: string;
+  email: string;
+  branch?: string;
+  yearFrom?: number;
+  yearTo?: number;
+  profilePhoto?: string;
+  profilePicture?: string;
+}
+
 interface AdminBroadcastMessageProps {
   onLogout?: () => void;
   adminName?: string;
@@ -116,11 +142,11 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
   const [alert, setAlert] = useState({ show: false, message: '', type: '' });
   const [formSent, setFormSent] = useState(false);
   const [formCleared, setFormCleared] = useState(false);
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [isEventFormEnabled, setIsEventFormEnabled] = useState(false);
   const [generatingEmail, setGeneratingEmail] = useState(false);
-  const [departments, setDepartments] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loadingDepartments, setLoadingDepartments] = useState(false);
 
   // Helper function to get cookie value
@@ -154,7 +180,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
                 }];
 
             // Convert to alumni entries format
-            const alumniData = recipients.map(r => ({
+            const alumniData = (recipients as any[]).map((r: any) => ({
               ...createEmptyAlumniEntry(),
               alumniName: r.name || '',
               alumniEmail: r.email || '',
@@ -267,7 +293,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
       return;
     }
 
-    const selectedEvent = events.find((event: any) => event._id === selectedEventId);
+    const selectedEvent = events.find((event: Event) => event._id === selectedEventId);
     if (selectedEvent) {
       // Format the date for the date input (YYYY-MM-DD)
       let formattedDate = '';
@@ -382,7 +408,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
   };
 
   // Handle alumni selection from search results
-  const handleSelectAlumni = (index: number, alumni: any) => {
+  const handleSelectAlumni = (index: number, alumni: AlumniSearchResult) => {
     setAlumniEntries(prev => prev.map((entry, i) =>
       i === index ? {
         ...entry,
@@ -912,7 +938,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate all alumni entries
@@ -1282,10 +1308,9 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
                                     padding: '10px',
                                     borderBottom: '1px solid #eee',
                                     cursor: 'pointer',
-                                    hover: { backgroundColor: '#f5f5f5' }
                                   }}
-                                  onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
-                                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                  onMouseEnter={(e) => (e.currentTarget as HTMLDivElement).style.backgroundColor = '#f5f5f5'}
+                                  onMouseLeave={(e) => (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent'}
                                 >
                                   <div style={{ fontWeight: '500' }}>{alumni.name}</div>
                                   <div style={{ fontSize: '0.85em', color: '#666' }}>
@@ -1488,7 +1513,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
                 name="message"
                 placeholder="Write your message here..."
                 className={`${styles.inputField} ${styles.textarea}`}
-                rows="10"
+                rows={10}
                 value={sharedData.message}
                 onChange={handleSharedInputChange}
                 disabled={loading}
@@ -1543,7 +1568,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
                     <div className={styles.duplicateEmailsList}>
                       {Array.from(duplicateEmails.entries()).map(([email, indices]) => (
                         <div key={email} className={styles.duplicateEmailItem}>
-                          <code>{email}</code> - Found in Alumni {indices.map(i => i + 1).join(', ')}
+                          <code>{email}</code> - Found in Alumni {(indices as number[]).map((i: number) => i + 1).join(', ')}
                         </div>
                       ))}
                     </div>

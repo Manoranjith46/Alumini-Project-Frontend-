@@ -5,6 +5,74 @@ import styles from './AD_Alumni_Registration.module.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+interface Address {
+  street: string;
+  city: string;
+  pinCode: string;
+  mobile: string;
+}
+
+interface QualificationRow {
+  id: number;
+  course: string;
+  institution: string;
+  yearOfPassing: string;
+  percentage: string;
+  boardUniversity: string;
+}
+
+interface AlumniRow {
+  id: number;
+  name: string;
+  degree: string;
+  batch: string;
+  email: string;
+  phone: string;
+}
+
+interface Department {
+  _id: string;
+  stream: string;
+  branch: string;
+}
+
+interface FormData {
+  password: string;
+  confirmPassword: string;
+  name: string;
+  fatherName: string;
+  registerNumber: string;
+  dob: string;
+  yearFrom: string;
+  degree: string;
+  branch: string;
+  presentAddress: Address;
+  permanentAddress: Address;
+  sameAsPermanent: boolean;
+  hasCompetitiveExams: boolean;
+  exams: Record<string, string>;
+  othersExam: { name: string; marks: string };
+  placementType: string;
+  designation: string;
+  companyAddress: string;
+  employmentRemarks: string;
+  isEntrepreneur: boolean;
+  entrepreneurDetails: {
+    organizationName: string;
+    natureOfWork: string;
+    annualTurnover: string;
+    numberOfEmployees: string;
+  };
+  maritalStatus: string;
+  spouseDetails: {
+    name: string;
+    qualification: string;
+    numberOfChildren: string;
+  };
+  extraCurricular: string;
+  otherInfo: string;
+}
+
 const Admin_Alumni_Registration = () => {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
@@ -17,7 +85,7 @@ const Admin_Alumni_Registration = () => {
   const [tokenError, setTokenError] = useState('');
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     password: '',
     confirmPassword: '',
     name: '',
@@ -70,17 +138,17 @@ const Admin_Alumni_Registration = () => {
     otherInfo: '',
   });
 
-  const [qualRows, setQualRows] = useState([
+  const [qualRows, setQualRows] = useState<QualificationRow[]>([
     { id: 1, course: '', institution: '', yearOfPassing: '', percentage: '', boardUniversity: '' },
   ]);
 
-  const [alumniRows, setAlumniRows] = useState([
+  const [alumniRows, setAlumniRows] = useState<AlumniRow[]>([
     { id: 1, name: '', degree: '', batch: '', email: '', phone: '' },
   ]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
-  const [departments, setDepartments] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   // Validate token on mount
   useEffect(() => {
@@ -140,7 +208,7 @@ const Admin_Alumni_Registration = () => {
     }
   }, [tokenValid]);
 
-  const uniqueStreams = [...new Set(departments.map((dept: any) => dept.stream))];
+  const uniqueStreams = [...new Set(departments.map((dept: Department) => dept.stream))];
   const endYear = formData.yearFrom ? parseInt(formData.yearFrom, 10) + 4 : '';
 
   // Handle input changes
@@ -148,10 +216,10 @@ const Admin_Alumni_Registration = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleNestedChange = (parent: string, field: string, value: any) => {
-    setFormData((prev: any) => ({
+  const handleNestedChange = (parent: keyof FormData, field: string, value: any) => {
+    setFormData((prev: FormData) => ({
       ...prev,
-      [parent]: { ...prev[parent], [field]: value },
+      [parent]: { ...(prev[parent] as any), [field]: value },
     }));
   };
 
@@ -163,7 +231,7 @@ const Admin_Alumni_Registration = () => {
   };
 
   const handleSameAddress = (checked: boolean) => {
-    setFormData((prev: any) => ({
+    setFormData((prev: FormData) => ({
       ...prev,
       sameAsPermanent: checked,
       permanentAddress: checked ? { ...prev.presentAddress } : prev.permanentAddress,
@@ -177,12 +245,12 @@ const Admin_Alumni_Registration = () => {
 
   const deleteQualRow = (id: number) => {
     if (qualRows.length > 1) {
-      setQualRows(qualRows.filter((row: any) => row.id !== id));
+      setQualRows(qualRows.filter((row: QualificationRow) => row.id !== id));
     }
   };
 
   const handleQualRowChange = (id: number, field: string, value: any) => {
-    setQualRows(qualRows.map((row: any) => (row.id === id ? { ...row, [field]: value } : row)));
+    setQualRows(qualRows.map((row: QualificationRow) => (row.id === id ? { ...row, [field]: value } : row)));
   };
 
   // Alumni rows handlers
@@ -192,12 +260,12 @@ const Admin_Alumni_Registration = () => {
 
   const deleteAlumniRow = (id: number) => {
     if (alumniRows.length > 1) {
-      setAlumniRows(alumniRows.filter((row: any) => row.id !== id));
+      setAlumniRows(alumniRows.filter((row: AlumniRow) => row.id !== id));
     }
   };
 
   const handleAlumniRowChange = (id: number, field: string, value: any) => {
-    setAlumniRows(alumniRows.map((row: any) => (row.id === id ? { ...row, [field]: value } : row)));
+    setAlumniRows(alumniRows.map((row: AlumniRow) => (row.id === id ? { ...row, [field]: value } : row)));
   };
 
   // Handle form submission

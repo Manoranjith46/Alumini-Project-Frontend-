@@ -88,7 +88,7 @@ const Admin_Alumni_Registration_Form = ({ onLogout }: AdminAlumniRegistrationFor
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': `Bearer ${user?.token}`,
         },
         body: JSON.stringify({
           email: formData.email
@@ -159,7 +159,7 @@ const Admin_Alumni_Registration_Form = ({ onLogout }: AdminAlumniRegistrationFor
 
   return (
     <div className={styles.container}>
-      <Sidebar onLogout={onLogout} />
+      <Sidebar onLogout={onLogout} currentView="view_alumni" />
 
       <main className={styles.mainContent}>
         <div className={styles.headerContainer}>

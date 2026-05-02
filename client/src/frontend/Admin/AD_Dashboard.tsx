@@ -195,8 +195,8 @@ const Admin_Dashboard = ( { onLogout }: { onLogout?: () => void } ) => {
                 <span className={styles.cardBadge}>{cards?.mail?.newCount || 0} New</span>
               </div>
               <div className={styles.cardBody}>
-                {cards?.mail?.recentMails?.length > 0 ? (
-                  cards.mail.recentMails.map((mail, idx) => (
+                {(cards?.mail?.recentMails && cards.mail.recentMails.length > 0) ? (
+                  cards.mail.recentMails.map((mail: any, idx: number) => (
                     <div key={idx} className={styles.mailPreview}>{mail.preview || mail.title}</div>
                   ))
                 ) : (
@@ -214,8 +214,8 @@ const Admin_Dashboard = ( { onLogout }: { onLogout?: () => void } ) => {
                 <span className={styles.cardStatus}>{cards?.jobs?.activeCount || 0} Active</span>
               </div>
               <div className={styles.cardBody}>
-                {cards?.jobs?.recentJobs?.length > 0 ? (
-                  cards.jobs.recentJobs.map((job, idx) => (
+                {(cards?.jobs?.recentJobs && cards.jobs.recentJobs.length > 0) ? (
+                  cards.jobs.recentJobs.map((job: any, idx: number) => (
                     <div key={idx} className={styles.jobPreview}>
                       <b>{job.role}, {job.company}</b> <span>Referral by {job.referredBy}</span>
                     </div>

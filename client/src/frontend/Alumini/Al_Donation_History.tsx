@@ -25,6 +25,11 @@ interface PaymentRecord {
   status: string;
   paymentId: string;
   rawStatus: string;
+  razorpayOrderId?: string;
+  _id?: string;
+  amount_num?: number;
+  purpose?: string;
+  createdAt?: string;
 }
 
 interface ApiPayment {
@@ -175,7 +180,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
     }
   };
 
-  const openRazorpayCheckout = (payment: ApiPayment) => {
+  const openRazorpayCheckout = (payment: any) => {
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_SSwNZtauzpeLMb',
       amount: Math.round(payment.amount * 100),
@@ -184,8 +189,8 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
       description: payment.purpose,
       order_id: payment.razorpayOrderId,
       prefill: {
-        name: user.name || '',
-        email: user.email || '',
+        name: user?.name || '',
+        email: user?.email || '',
       },
       handler: async (response: any) => {
         try {
@@ -193,7 +198,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${user?.token}`,
             },
             body: JSON.stringify(response),
           });
@@ -240,7 +245,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
       const response = await fetch(`${API_BASE}/api/payments/${row.paymentId}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
       });
 
@@ -265,7 +270,16 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
   const handleViewDonation = (row: PaymentRecord) => {
     const payment = rawPayments.find(p => p._id === row.paymentId);
     if (payment) {
-      setViewModal({ isOpen: true, donation: { ...row, ...payment } });
+      // Prepare modal data carefully to avoid type conflicts
+      const modalDonation: PaymentRecord = {
+        ...row,
+        _id: payment._id,
+        razorpayOrderId: payment.razorpayOrderId,
+        amount_num: payment.amount,
+        purpose: payment.purpose,
+        createdAt: payment.createdAt
+      };
+      setViewModal({ isOpen: true, donation: modalDonation });
     }
   };
 
@@ -273,7 +287,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
     if (!viewModal.donation) return;
 
     try {
-      setActionLoading(viewModal.donation._id);
+      setActionLoading(viewModal.donation._id || null);
 
       // Load Razorpay script
       if (!window.Razorpay) {
@@ -423,7 +437,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="8" className={styles.emptyState}>
+                        <td colSpan={8} className={styles.emptyState}>
                           <p>No donations yet. Make your first contribution!</p>
                         </td>
                       </tr>
@@ -494,14 +508,14 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
                     <div className={styles.modalField}>
                       <p className={styles.modalFieldLabel}>AMOUNT</p>
                       <p className={`${styles.modalFieldValue} ${styles.modalFieldAmount}`}>
-                        {formatAmount(viewModal.donation.amount)}
+                        {formatAmount(viewModal.donation.amount_num || 0)}
                       </p>
                     </div>
 
                     {/* Date */}
                     <div className={styles.modalField}>
                       <p className={styles.modalFieldLabel}>DATE</p>
-                      <p className={styles.modalFieldValue}>{formatDate(viewModal.donation.createdAt)}</p>
+                      <p className={styles.modalFieldValue}>{formatDate(viewModal.donation.createdAt || new Date())}</p>
                     </div>
 
                     {/* Status */}

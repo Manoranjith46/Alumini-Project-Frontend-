@@ -130,12 +130,12 @@ const Admin_View_Department = ( { onLogout }: { onLogout?: () => void } ) => {
     setCurrentPage(1); // Reset to first page when filtering by name
   };
 
-  const handleRoleFilterChange = (designation) => {
+  const handleRoleFilterChange = (designation: string) => {
     setFilterRole(designation);
     setCurrentPage(1); // Reset to first page when filtering by role
   };
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
@@ -146,7 +146,7 @@ const Admin_View_Department = ( { onLogout }: { onLogout?: () => void } ) => {
     navigate(`/admin/department/${deptCode}/add_faculty`);
   };
 
-  const handleViewStaff = (staffId) => {
+  const handleViewStaff = (staffId: string) => {
     navigate(`/admin/department/view_faculty/${staffId}`);
   };
 
@@ -326,14 +326,14 @@ const Admin_View_Department = ( { onLogout }: { onLogout?: () => void } ) => {
                   ))}
                   {filteredStaff.length === 0 && !loading && (
                     <tr>
-                      <td colSpan="6" className={styles.emptyState}>
+                      <td colSpan={6} className={styles.emptyState}>
                         No staff members found matching your search criteria.
                       </td>
                     </tr>
                   )}
                   {paginatedStaff.length === 0 && filteredStaff.length > 0 && (
                     <tr>
-                      <td colSpan="6" className={styles.emptyState}>
+                      <td colSpan={6} className={styles.emptyState}>
                         No results for this page. Try a different page or adjust your filters.
                       </td>
                     </tr>

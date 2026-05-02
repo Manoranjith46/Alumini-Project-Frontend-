@@ -294,7 +294,7 @@ const Admin_Feedback_Form = ({ onLogout }: { onLogout?: () => void }) => {
                       readOnly
                       className={styles.feedbackTextarea}
                       placeholder="Comments/Suggestions"
-                      rows="2"
+                      rows={2}
                       value={item.comment}
                     ></textarea>
                   </div>

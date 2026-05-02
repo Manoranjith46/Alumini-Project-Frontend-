@@ -1,6 +1,11 @@
+interface PixelCrop {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
-
-export const getCroppedImg = async (imageSrc, pixelCrop) => {
+export const getCroppedImg = async (imageSrc: string, pixelCrop: PixelCrop): Promise<string> => {
   const image = new Image();
   image.src = imageSrc;
   
@@ -11,6 +16,10 @@ export const getCroppedImg = async (imageSrc, pixelCrop) => {
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    throw new Error('Could not get canvas context');
+  }
 
   // Set canvas size to match the cropped area
   canvas.width = pixelCrop.width;
@@ -31,14 +40,13 @@ export const getCroppedImg = async (imageSrc, pixelCrop) => {
 
   // Return the cropped image as a Blob (File)
   return new Promise((resolve, reject) => {
-    canvas.toBlob((file) => {
-      if (!file) {
+    canvas.toBlob((blob) => {
+      if (!blob) {
         reject(new Error('Canvas is empty'));
         return;
       }
-      file.name = 'cropped-signature.jpeg';
       // Returns a URL you can use in an <img> tag, or upload to a server
-      resolve(URL.createObjectURL(file)); 
+      resolve(URL.createObjectURL(blob)); 
     }, 'image/jpeg', 1);
   });
 };

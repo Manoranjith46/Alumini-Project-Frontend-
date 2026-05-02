@@ -119,7 +119,7 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
         setImageError(false); // Reset image error state
         const response = await fetch(`${API_BASE_URL}/api/alumni/${id}`, {
           headers: {
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${user?.token}`,
           },
         });
 
@@ -161,7 +161,7 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
       const response = await fetch(`${API_BASE_URL}/api/alumni/${id}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
       });
 
@@ -457,14 +457,14 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
               )}
 
               {/* Competitive Exams (if applicable) */}
-              {alumniData.hasCompetitiveExams && alumniData.competitiveExams?.length > 0 && (
+              {alumniData.hasCompetitiveExams && (alumniData.competitiveExams?.length ?? 0) > 0 && (
                 <div className={styles.infoCard}>
                   <div className={styles.cardHeader}>
                     <Award size={20} className={styles.cardIcon} />
                     <h3>Competitive Exams</h3>
                   </div>
                   <div className={styles.cardBody}>
-                    {alumniData.competitiveExams.map((exam, index) => (
+                    {alumniData.competitiveExams?.map((exam, index) => (
                       <div key={index} className={styles.infoRow}>
                         <span className={styles.infoLabel}>{exam.examName}</span>
                         <span className={styles.infoValue}>{exam.marks}</span>
@@ -475,7 +475,7 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
               )}
 
               {/* College Qualifications (if applicable) */}
-              {alumniData.collegeQualifications?.length > 0 && (
+              {(alumniData.collegeQualifications?.length ?? 0) > 0 && (
                 <div className={`${styles.infoCard} ${styles.fullSection}`}>
                   <div className={styles.cardHeader}>
                     <GraduationCap size={20} className={styles.cardIcon} />
@@ -483,7 +483,7 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
                   </div>
                   <div className={styles.cardBody}>
                     <div className={styles.timeline}>
-                      {alumniData.collegeQualifications.map((qual, index) => (
+                      {alumniData.collegeQualifications?.map((qual, index) => (
                         <div key={index} className={styles.timelineItem}>
                           <div className={styles.timelineDot}></div>
                           <div className={styles.timelineContent}>
@@ -509,7 +509,7 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
               )}
 
               {/* Known Alumni (if applicable) */}
-              {alumniData.knownAlumni?.length > 0 && (
+              {(alumniData.knownAlumni?.length ?? 0) > 0 && (
                 <div className={`${styles.infoCard} ${styles.fullSection}`}>
                   <div className={styles.cardHeader}>
                     <Users size={20} className={styles.cardIcon} />
@@ -517,7 +517,7 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
                   </div>
                   <div className={styles.cardBody}>
                     <div className={styles.knownAlumniGrid}>
-                      {alumniData.knownAlumni.map((known, index) => (
+                      {alumniData.knownAlumni?.map((known, index) => (
                         <div key={index} className={styles.knownAlumniCard}>
                           <div className={styles.knownAlumniAvatar}>
                             {known.name?.charAt(0).toUpperCase() || 'A'}

@@ -5,14 +5,37 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from './Components/Sidebar/Sidebar';
 import { useAuth } from '../../context/authContext/authContext';
 
+interface FacultyFormData {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  dateOfBirth: string;
+  gender: string;
+  bloodGroup: string;
+  address: string;
+  designation: string;
+  status: string;
+  department: string;
+  staffId: string;
+  dateOfJoining: string;
+}
+
+interface Department {
+  _id: string;
+  stream: string;
+  branch: string;
+  deptCode: string;
+}
+
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const Admin_Edit_Faculty = ({ onLogout }) => {
+const Admin_Edit_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FacultyFormData>({
     // Personal Information
     name: '',
     email: '',
@@ -80,7 +103,7 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
         } else {
           setSubmitError('Coordinator not found');
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching coordinator:', err);
         setSubmitError(err.message || 'Error loading coordinator data');
       } finally {
@@ -118,12 +141,12 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
     fetchDepartments();
   }, [id, user?.token]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
 
     // Clear error when user starts typing
-    if (errors[name]) {
+    if (errors[name as keyof FacultyFormData]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
 
@@ -134,7 +157,7 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
   };
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: Partial<Record<keyof FacultyFormData, string>> = {};
 
     // Required fields validation
     if (!formData.name.trim()) newErrors.name = 'Name is required';
@@ -161,7 +184,7 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) return;
@@ -214,7 +237,7 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
       } else {
         setSubmitError(data.message || 'Failed to update coordinator');
       }
-    } catch (err) {
+    } catch (err: any) {
       setSubmitError('Error updating coordinator');
       console.error('Error updating coordinator:', err);
     } finally {
@@ -381,7 +404,7 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
                       onChange={handleInputChange}
                       className={styles.formTextarea}
                       placeholder="Enter residential address"
-                      rows="3"
+                      rows={3}
                     />
                   </div>
                 </div>

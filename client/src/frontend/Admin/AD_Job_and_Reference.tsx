@@ -63,7 +63,7 @@ const Admin_Job_and_Reference = ({ onLogout }: { onLogout?: () => void }) => {
     try {
       const response = await fetch(`${API_BASE}/api/jobs/all`, {
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
       });
 

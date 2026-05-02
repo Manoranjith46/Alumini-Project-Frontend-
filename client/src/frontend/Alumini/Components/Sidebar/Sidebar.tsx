@@ -35,7 +35,7 @@ export default function Sidebar({ onLogout, currentView }: SidebarProps) {
     <aside id="sidebar" className={styles.sidebar}>
       <div className={styles.sidebarHeader}>
         <img
-          src={adminBranding.logo}
+          src={adminBranding.logo || undefined}
           alt="KSRCE Logo"
           className={styles.sidebarLogo}
         />

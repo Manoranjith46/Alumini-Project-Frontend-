@@ -132,7 +132,7 @@ const Alumini_Feedback = ({ onLogout }: AluminiFeedbackProps) => {
       const res = await fetch(`${API_BASE}/api/feedback`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
         },
         body: formData,
       });

@@ -255,24 +255,28 @@ const Admin_Profile = ({ onLogout }: { onLogout?: () => void }) => {
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  const handleProfileChange = (field: string, value: any) => {
+  const handleProfileChange = (field: string, value: string) => {
     if (field.includes('.')) {
       const [parent, child] = field.split('.') as [keyof ProfileData, string];
       setProfileData(prev => {
-        const newData = {
-          ...prev,
-          [parent]: {
-            ...(prev[parent] as any),
-            [child]: value
+        const parentData = prev[parent];
+        if (typeof parentData === 'object' && parentData !== null) {
+          const newData = {
+            ...prev,
+            [parent]: {
+              ...parentData,
+              [child]: value
+            }
+          } as ProfileData;
+
+          // If present address is being changed and checkbox is checked, update permanent address too
+          if (parent === 'presentAddress' && sameAsPresent) {
+            newData.permanentAddress = { ...(newData.presentAddress as Address) };
           }
-        };
 
-        // If present address is being changed and checkbox is checked, update permanent address too
-        if (parent === 'presentAddress' && sameAsPresent) {
-          newData.permanentAddress = { ...newData.presentAddress };
+          return newData;
         }
-
-        return newData;
+        return prev;
       });
     } else {
       setProfileData(prev => ({ ...prev, [field]: value }));

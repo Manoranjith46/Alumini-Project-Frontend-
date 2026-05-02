@@ -134,7 +134,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }: { onLogout?: () => voi
         // Check if draft has multiple recipients
         if (draft.recipients && draft.recipients.length > 0) {
           // Load all recipients from the recipients array
-          const entries = draft.recipients.map(recipient => ({
+          const entries = draft.recipients.map((recipient: any) => ({
             alumniName: recipient.name || '',
             department: recipient.department || '',
             batchStart: recipient.batch ? recipient.batch.split('-')[0] : '',
@@ -1116,7 +1116,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }: { onLogout?: () => voi
                       disabled={sending}
                     >
                       <option value="">Select alumni email ({entry.matchedAlumni.length} matches found)</option>
-                      {entry.matchedAlumni.map((alumni, alIdx) => (
+                      {entry.matchedAlumni.map((alumni: any, alIdx: number) => (
                         <option key={alumni._id || alIdx} value={alumni.email}>
                           {alumni.email}
                         </option>
@@ -1209,7 +1209,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }: { onLogout?: () => voi
                 name="message"
                 placeholder="Write your message here..."
                 className={`${styles.inputField} ${styles.textarea}`}
-                rows="10"
+                rows={10}
                 value={sharedData.message}
                 onChange={handleSharedInputChange}
                 disabled={sending}
@@ -1262,7 +1262,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }: { onLogout?: () => voi
                     <div className={styles.duplicateEmailsList}>
                       {Array.from(duplicateEmails.entries()).map(([email, indices]) => (
                         <div key={email} className={styles.duplicateEmailItem}>
-                          <code>{email}</code> - Found in Alumni {indices.map(i => i + 1).join(', ')}
+                          <code>{email}</code> - Found in Alumni {indices.map((i: number) => i + 1).join(', ')}
                         </div>
                       ))}
                     </div>

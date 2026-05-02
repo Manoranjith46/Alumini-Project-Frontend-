@@ -162,7 +162,7 @@ export default function TokenBasedAcceptForm() {
     setError(null);
 
     try {
-      const responseData = {
+      const responseData: any = {
         fullName: formData.fullName.trim(),
         designation: formData.designation.trim(),
         companyName: formData.companyName.trim(),
