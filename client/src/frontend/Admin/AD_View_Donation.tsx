@@ -8,22 +8,37 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
-const formatAmount = (amount) => {
+const formatAmount = (amount: number) => {
   return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
-const Admin_View_Donation = ({ onLogout }) => {
-  const { id } = useParams();
+interface Donation {
+  _id: string;
+  status: string;
+  purpose: string;
+  amount: number;
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  paidAt?: string;
+  createdAt: string;
+  user?: {
+    name: string;
+    email: string;
+  };
+}
+
+const Admin_View_Donation = ({ onLogout }: { onLogout?: () => void }) => {
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const receiptRef = useRef(null);
-  const [donation, setDonation] = useState(null);
+  const receiptRef = useRef<HTMLDivElement>(null);
+  const [donation, setDonation] = useState<Donation | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPayment = async () => {
@@ -49,7 +64,7 @@ const Admin_View_Donation = ({ onLogout }) => {
         if (data.success && data.payment) {
           setDonation(data.payment);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -61,7 +76,7 @@ const Admin_View_Donation = ({ onLogout }) => {
     }
   }, [id, user]);
 
-  const getStatusLabel = (status) => {
+  const getStatusLabel = (status: string | undefined) => {
     switch (status) {
       case 'paid':
         return 'Successful';
@@ -70,7 +85,7 @@ const Admin_View_Donation = ({ onLogout }) => {
       case 'created':
         return 'Pending';
       default:
-        return status;
+        return status || '';
     }
   };
 
@@ -84,10 +99,10 @@ const Admin_View_Donation = ({ onLogout }) => {
       try {
         await navigator.share({
           title: 'Donation Receipt',
-          text: `Donation Receipt - ${donation.user?.name || 'Unknown'}`,
+          text: `Donation Receipt - ${donation?.user?.name || 'Unknown'}`,
           url: url,
         });
-      } catch (err) {
+      } catch (err: any) {
         if (err.name !== 'AbortError') {
           alert('Failed to share');
         }
@@ -132,7 +147,7 @@ const Admin_View_Donation = ({ onLogout }) => {
 
       pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST');
 
-      const fileName = `donation-receipt-${donation.user?.name?.replace(/\s+/g, '_') || 'unknown'}-${Date.now()}.pdf`;
+      const fileName = `donation-receipt-${donation?.user?.name?.replace(/\s+/g, '_') || 'unknown'}-${Date.now()}.pdf`;
       pdf.save(fileName);
     } catch (err) {
       alert('Failed to generate PDF');

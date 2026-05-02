@@ -1,102 +1,297 @@
-.mainScrollable {
-    flex: 1;
-    height: 100vh;
-    overflow-y: scroll;
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap');
+
+.pageContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-light);
+  font-family: 'Public Sans', sans-serif;
+  color: var(--text-dark);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
 }
 
-/* Volume Bar Style Scrollbar - Consistency */
-.mainScrollable::-webkit-scrollbar {
-    width: 10px;
+/* ================== MAIN CONTENT ================== */
+.mainContent {
+  margin-left: 60px;
+  height: 100vh;
+  width: 100%;
+  overflow-y: auto;
 }
 
-.mainScrollable::-webkit-scrollbar-track {
-    background-color: var(--border-color);
-    border-radius: 100px;
-    margin: 8px 0;
+.mainContent::-webkit-scrollbar {
+  width: 12px;
 }
 
-.mainScrollable::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, var(--primary-green), var(--primary-hover));
-    border-radius: 100px;
-    border: 2px solid var(--border-color);
-    box-shadow: inset 0 0 6px rgba(255, 61, 0, 0.3);
+.mainContent::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-left: 1px solid #e2e8f0;
 }
 
-.mainScrollable::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, var(--primary-hover), var(--primary-dark));
+.mainContent::-webkit-scrollbar-thumb {
+  background-color: #FF3D00;
+  border-radius: 10px;
+  border: 3px solid #f1f5f9;
 }
 
-.mainScrollable::-webkit-scrollbar-button {
-    display: none !important;
+.mainContent::-webkit-scrollbar-thumb:hover {
+  background-color: #C42E00;
 }
 
-.header {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    background-color: white;
-    border-bottom: 1px solid var(--border-light);
-    padding: 0.6rem 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    z-index: 40;
+.contentWrapper {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0rem 2rem;
 }
 
-.headerLeft {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+
+/* Back Button */
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #475569;
+  margin: 20px 0px 0px 20px;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
-.collegeName {
-    color: var(--text-title);
-    font-weight: 700;
-    font-size: 1.8rem;
-    text-transform: uppercase;
-    letter-spacing: -0.025em;
-    margin-left: 10px;
+.backButton:hover {
+  color: #FF3D00;
 }
 
-.sidebarHeader {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.1rem 1.25rem 1.5rem 0.1rem;
-    border-bottom: 0px solid var(--bg-surface);
-    overflow: hidden;
-    white-space: nowrap;
-    justify-content: flex-start;
+.backButton span {
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.sidebarLogo {
-    width: 70px;
-    height: 70px;
-    min-width: 70px;
-    object-fit: contain;
-    flex-shrink: 0;
+/* --- Header Section --- */
+.headerSection {
+  margin: 2rem 0rem;
 }
 
-.customSidebarScrollbar::-webkit-scrollbar {
-    width: 4px;
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.customSidebarScrollbar::-webkit-scrollbar-thumb {
-    background: var(--text-lighter);
-    border-radius: 10px;
+.mainTitle {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: var(--text-dark);
+  letter-spacing: -0.025em;
+  margin: 0;
 }
 
-.customSidebarScrollbar::-webkit-scrollbar-button {
-    display: none;
+@media (min-width: 768px) {
+  .mainTitle { font-size: 3rem; }
 }
 
-/* Specialized Event Detail Styles */
-.dottedBg {
-    background-image: radial-gradient(var(--border-gray) 1px, transparent 1px);
-    background-size: 24px 24px;
+@media (min-width: 1024px) {
+  .mainTitle { font-size: 3.75rem; }
 }
 
-.glassEffect {
-    backdrop-filter: blur(8px);
-    background: rgba(255, 255, 255, 0.8);
+/* Status Badge */
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  width: fit-content;
+}
+
+.statusPending {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.statusCompleted {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.statusCancelled {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* Status Display */
+.statusDisplay {
+  padding: 0.5rem 0;
+}
+
+.statusBadgeLarge {
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Form Card */
+.formCard {
+  background-color: var(--bg-white);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-light);
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .formCard { padding: 2.5rem; }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.formInput {
+  display: block;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-light);
+  background-color: var(--bg-white);
+  padding: 0.875rem 1rem;
+  color: var(--text-dark);
+  font-family: inherit;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.formInput:disabled {
+  background-color: var(--bg-light);
+  cursor: default;
+}
+
+.rowGroup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .rowGroup {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Photos Section --- */
+.photosSection {
+  background-color: var(--bg-white);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-light);
+  margin-bottom: 4rem;
+}
+
+@media (min-width: 768px) {
+  .photosSection { padding: 2.5rem; }
+}
+
+.photosSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.sectionTitle span {
+  color: #FF3D00;
+}
+
+.photosContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.photoGroup {
+  display: grid;
+  gap: 1rem;
+}
+
+.trio {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.pair {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.single {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 640px) {
+  .trio, .pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+.photoItem {
+  position: relative;
+  aspect-ratio: 16/9;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.photoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.noPhotos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  color: var(--text-light);
+  gap: 1rem;
+}
+
+.noPhotos span {
+  font-size: 3rem;
+}
+
+.loadingState,
+.errorState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 1.125rem;
+  color: var(--text-muted);
 }

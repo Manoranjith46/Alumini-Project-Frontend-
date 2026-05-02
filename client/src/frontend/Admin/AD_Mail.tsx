@@ -6,9 +6,18 @@ import { useAuth } from "../../context/authContext/authContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-export default function Admin_Mail({ onLogout }) {
+interface MailItem {
+  _id: string;
+  title?: string;
+  content: string;
+  senderName: string;
+  dominantStatus: string;
+  createdAt: string;
+}
+
+export default function Admin_Mail({ onLogout }: { onLogout?: () => void }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [mailData, setMailData] = useState([]);
+  const [mailData, setMailData] = useState<MailItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [draftCount, setDraftCount] = useState(0);
   const navigate = useNavigate();
@@ -36,7 +45,7 @@ export default function Admin_Mail({ onLogout }) {
       if (data.success) {
         setMailData(data.mails);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching messages:', err);
     } finally {
       setLoading(false);
@@ -53,7 +62,7 @@ export default function Admin_Mail({ onLogout }) {
       if (data.success) {
         setDraftCount(data.count);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching draft count:', err);
     }
   };
@@ -65,10 +74,10 @@ export default function Admin_Mail({ onLogout }) {
   };
 
   // Format date to display like original mock data
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffTime = Math.abs(now - date);
+    const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) {
@@ -80,7 +89,7 @@ export default function Admin_Mail({ onLogout }) {
     }
   };
 
-  const getButtonClassByStatus = (dominantStatus) => {
+  const getButtonClassByStatus = (dominantStatus: string | undefined) => {
     switch (dominantStatus) {
       case 'accept':
         return styles.btnViewGreenOutline;
@@ -92,7 +101,7 @@ export default function Admin_Mail({ onLogout }) {
     }
   };
 
-  const getCardBorderByStatus = (dominantStatus) => {
+  const getCardBorderByStatus = (dominantStatus: string | undefined) => {
     switch (dominantStatus) {
       case 'accept':
         return styles.borderGreen;

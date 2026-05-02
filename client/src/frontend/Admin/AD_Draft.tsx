@@ -7,8 +7,37 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+interface AlumniEntry {
+  alumniName: string;
+  department: string;
+  batchStart: string;
+  alumniEmail: string;
+  alumniPhoto: string | null;
+  matchedAlumni: any[];
+  showEmailDropdown: boolean;
+  fetchingPhoto: boolean;
+}
+
+interface SharedData {
+  eventName: string;
+  eventDate: string;
+  eventVenue: string;
+  eventTime: string;
+  title: string;
+  message: string;
+  senderName: string;
+}
+
+interface Event {
+  _id: string;
+  eventName: string;
+  eventDate: string;
+  venue?: string;
+  eventTime?: string;
+}
+
 // Default alumni entry structure
-const createEmptyAlumniEntry = () => ({
+const createEmptyAlumniEntry = (): AlumniEntry => ({
   alumniName: '',
   department: '',
   batchStart: '',
@@ -19,26 +48,27 @@ const createEmptyAlumniEntry = () => ({
   fetchingPhoto: false
 });
 
-const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
+const Admin_Draft = ({ onLogout, adminName, adminEmail }: { onLogout?: () => void; adminName?: string; adminEmail?: string }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const draftId = location.state?.draftId;
+  const state = location.state as { draftId?: string } | null;
+  const draftId = state?.draftId;
 
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [generatingEmail, setGeneratingEmail] = useState(false);
-  const [alert, setAlert] = useState({ show: false, message: '', type: '' });
-  const [events, setEvents] = useState([]);
+  const [alert, setAlert] = useState<{ show: boolean; message: string; type: string }>({ show: false, message: '', type: '' });
+  const [events, setEvents] = useState<Event[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [isEventFormEnabled, setIsEventFormEnabled] = useState(false);
 
   // Alumni entries array
-  const [alumniEntries, setAlumniEntries] = useState([createEmptyAlumniEntry()]);
+  const [alumniEntries, setAlumniEntries] = useState<AlumniEntry[]>([createEmptyAlumniEntry()]);
 
   // Shared form data (event info, subject, message)
-  const [sharedData, setSharedData] = useState({
+  const [sharedData, setSharedData] = useState<SharedData>({
     eventName: '',
     eventDate: '',
     eventVenue: '',
@@ -49,7 +79,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
   });
 
   // Helper function to get cookie value
-  const getCookie = (name) => {
+  const getCookie = (name: string) => {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? decodeURIComponent(match[2]) : null;
   };
@@ -155,29 +185,29 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
           setIsEventFormEnabled(true);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching draft:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const showAlert = (message, type) => {
+  const showAlert = (message: string, type: string) => {
     setAlert({ show: true, message, type });
-    setTimeout(() => {
+    window.setTimeout(() => {
       setAlert({ show: false, message: '', type: '' });
     }, 5000);
   };
 
   // Calculate ending year for a specific alumni entry
-  const getBatchEnd = (batchStart) => batchStart ? String(Number(batchStart) + 4) : '';
-  const getBatch = (batchStart) => {
+  const getBatchEnd = (batchStart: string) => batchStart ? String(Number(batchStart) + 4) : '';
+  const getBatch = (batchStart: string) => {
     const batchEnd = getBatchEnd(batchStart);
     return batchStart && batchEnd ? `${batchStart}-${batchEnd}` : '';
   };
 
   // Handle event selection from dropdown
-  const handleEventSelect = (e) => {
+  const handleEventSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedEventId = e.target.value;
     if (!selectedEventId) {
       setSharedData(prev => ({
@@ -209,7 +239,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Handle alumni-specific input changes
-  const handleAlumniInputChange = (index, e) => {
+  const handleAlumniInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
     // Check for duplicate email when email changes
@@ -227,7 +257,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Handle shared data input changes
-  const handleSharedInputChange = (e) => {
+  const handleSharedInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setSharedData(prev => ({
       ...prev,
@@ -241,14 +271,14 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Remove alumni entry
-  const handleRemoveAlumni = (index) => {
+  const handleRemoveAlumni = (index: number) => {
     if (alumniEntries.length > 1) {
       setAlumniEntries(prev => prev.filter((_, i) => i !== index));
     }
   };
 
   // Check for duplicate email addresses
-  const checkDuplicateEmail = (email, currentIndex) => {
+  const checkDuplicateEmail = (email: string, currentIndex: number) => {
     if (!email.trim()) return false;
     return alumniEntries.some((entry, index) =>
       index !== currentIndex &&
@@ -279,7 +309,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Replace placeholders and first alumni's data with each recipient's data
-  const personalizeContent = (text, entry, firstEntry) => {
+  const personalizeContent = (text: string, entry: AlumniEntry, firstEntry: AlumniEntry) => {
     const batchEnd = getBatchEnd(entry.batchStart);
     const batch = entry.batchStart ? `${entry.batchStart}-${batchEnd}` : '';
 
@@ -317,7 +347,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
     return personalizedText;
   };
 
-  const handleEventFormToggleChange = (e) => {
+  const handleEventFormToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsEventFormEnabled(e.target.checked);
     if (!e.target.checked) {
       setSharedData(prev => ({
@@ -331,7 +361,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Fetch alumni by name, department, and batch for a specific entry
-  const fetchAlumniByDetails = async (index) => {
+  const fetchAlumniByDetails = async (index: number) => {
     const entry = alumniEntries[index];
     const batch = getBatch(entry.batchStart);
 
@@ -413,7 +443,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Fetch alumni by email for a specific entry
-  const fetchAlumniByEmail = async (index) => {
+  const fetchAlumniByEmail = async (index: number) => {
     const entry = alumniEntries[index];
 
     if (entry.alumniEmail && !entry.matchedAlumni.find(a => a.email === entry.alumniEmail)) {
@@ -464,7 +494,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
     const timeouts = alumniEntries.map((entry, index) => {
       const batch = getBatch(entry.batchStart);
       if (entry.alumniName && entry.department && batch) {
-        return setTimeout(() => {
+        return window.setTimeout(() => {
           fetchAlumniByDetails(index);
         }, 500);
       }
@@ -473,7 +503,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
 
     return () => {
       timeouts.forEach(timeout => {
-        if (timeout) clearTimeout(timeout);
+        if (timeout) window.clearTimeout(timeout);
       });
     };
   }, [alumniEntries.map(e => `${e.alumniName}-${e.department}-${e.batchStart}`).join(',')]);
@@ -483,7 +513,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const timeouts = alumniEntries.map((entry, index) => {
       if (emailRegex.test(entry.alumniEmail)) {
-        return setTimeout(() => {
+        return window.setTimeout(() => {
           fetchAlumniByEmail(index);
         }, 500);
       }
@@ -492,13 +522,13 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
 
     return () => {
       timeouts.forEach(timeout => {
-        if (timeout) clearTimeout(timeout);
+        if (timeout) window.clearTimeout(timeout);
       });
     };
   }, [alumniEntries.map(e => e.alumniEmail).join(',')]);
 
   // Handle email selection from dropdown for a specific entry
-  const handleEmailSelect = (index, e) => {
+  const handleEmailSelect = (index: number, e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedEmail = e.target.value;
     const entry = alumniEntries[index];
     const selectedAlumni = entry.matchedAlumni.find(a => a.email === selectedEmail);
@@ -623,7 +653,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
     }
   };
 
-  const handleSendNow = async (e) => {
+  const handleSendNow = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate all alumni entries
@@ -736,7 +766,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
           showAlert(alumniEntries.length > 1 ? `All ${successCount} emails sent successfully!` : 'Mail sent successfully!', 'success');
         }
 
-        setTimeout(() => {
+        window.setTimeout(() => {
           navigate('/admin/mail');
         }, 1500);
       } else {
@@ -751,7 +781,7 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }) => {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this draft?')) return;
+    if (!window.confirm('Are you sure you want to delete this draft?')) return;
 
     setDeleting(true);
 

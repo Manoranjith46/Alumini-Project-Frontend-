@@ -4,14 +4,27 @@ import axios from 'axios';
 import { useTokenAuth } from '../../context/tokenAuthContext/tokenAuthContext';
 import styles from './Al_TokenHandler.module.css';
 
+interface TokenInfo {
+  recipientEmail?: string;
+  mailTitle?: string;
+  mailId?: string;
+  mailContent?: string;
+  expiresAt?: string;
+  mail?: {
+    id?: string;
+    title?: string;
+    content?: string;
+  };
+}
+
 export default function Al_TokenHandler() {
-  const { token } = useParams();
+  const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { loginWithToken, isTokenLoggedIn, tokenSession } = useTokenAuth();
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [tokenInfo, setTokenInfo] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [alreadyUsed, setAlreadyUsed] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -81,7 +94,7 @@ export default function Al_TokenHandler() {
         setError('Invalid token response from server');
         setLoading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Token validation error:', error);
 
       if (error.response?.data?.message) {

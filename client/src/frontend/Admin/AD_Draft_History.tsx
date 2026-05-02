@@ -5,9 +5,17 @@ import styles from './AD_Draft_History.module.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-const Admin_Draft_History = ({ onLogout }) => {
+interface Draft {
+  _id: string;
+  recipientName?: string;
+  title?: string;
+  content?: string;
+  updatedAt: string;
+}
+
+const Admin_Draft_History = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
-  const [drafts, setDrafts] = useState([]);
+  const [drafts, setDrafts] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,17 +33,17 @@ const Admin_Draft_History = ({ onLogout }) => {
       if (data.success) {
         setDrafts(data.drafts);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching drafts:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string | Date) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffTime = Math.abs(now - date);
+    const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
@@ -52,7 +60,7 @@ const Admin_Draft_History = ({ onLogout }) => {
     }
   };
 
-  const getIconStyle = (index) => {
+  const getIconStyle = (index: number) => {
     return index % 2 === 0 ? 'slate' : 'primary';
   };
 

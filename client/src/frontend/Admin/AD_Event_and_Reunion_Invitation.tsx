@@ -6,22 +6,46 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
+interface Department {
+  _id: string;
+  branch: string;
+  deptCode: string;
+}
+
+interface EventDetails {
+  _id: string;
+  eventName: string;
+  eventDate: string;
+  eventDay: string;
+  eventTime: string;
+  venue: string;
+  organizer: Department;
+  coOrganizers: Department[];
+  status: string;
+  photos: string[];
+}
+
+interface PhotoGroup {
+  type: string;
+  images: string[];
+}
+
+const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
 
-  const [event, setEvent] = useState(null);
-  const [departments, setDepartments] = useState([]);
+  const [event, setEvent] = useState<EventDetails | null>(null);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [photos, setPhotos] = useState([]);
+  const [photos, setPhotos] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [imageDimensions, setImageDimensions] = useState({});
-  const [photoGroups, setPhotoGroups] = useState([]);
+  const [imageDimensions, setImageDimensions] = useState<Record<string, { width: number; height: number; aspectRatio: number }>>({});
+  const [photoGroups, setPhotoGroups] = useState<PhotoGroup[]>([]);
 
   // Form states
   const [eventName, setEventName] = useState('');
@@ -30,10 +54,10 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
   const [eventTime, setEventTime] = useState('');
   const [venue, setVenue] = useState('');
   const [organizer, setOrganizer] = useState('');
-  const [coOrganizers, setCoOrganizers] = useState([]);
+  const [coOrganizers, setCoOrganizers] = useState<string[]>([]);
   const [status, setStatus] = useState('pending');
   const [isCoOrgDropdownOpen, setIsCoOrgDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch event and departments
   useEffect(() => {
@@ -75,7 +99,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
         if (deptData.success) {
           setDepartments(deptData.departments);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -96,8 +120,8 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsCoOrgDropdownOpen(false);
       }
     };
@@ -109,7 +133,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
   const coOrganizerOptions = departments.filter(dept => dept._id !== organizer);
 
   // Toggle co-organizer selection
-  const toggleCoOrganizer = (deptId) => {
+  const toggleCoOrganizer = (deptId: string) => {
     if (coOrganizers.includes(deptId)) {
       setCoOrganizers(coOrganizers.filter(id => id !== deptId));
     } else {
@@ -159,7 +183,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
       } else {
         alert(data.message || 'Failed to update event');
       }
-    } catch (err) {
+    } catch (err: any) {
       alert('Failed to update event');
     } finally {
       setIsSaving(false);
@@ -186,7 +210,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
       } else {
         alert(data.message || 'Failed to delete event');
       }
-    } catch (err) {
+    } catch (err: any) {
       alert('Failed to delete event');
     } finally {
       setIsDeleting(false);
@@ -209,8 +233,8 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
   };
 
   // Handle image upload (multiple images)
-  const handlePhotoUpload = async (e) => {
-    const files = Array.from(e.target.files);
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
     // Define supported formats
@@ -268,7 +292,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
       } else {
         alert(data.message || 'Failed to upload images');
       }
-    } catch (err) {
+    } catch (err: any) {
       alert('Failed to upload images. Please check your internet connection and try again.');
     } finally {
       setIsUploading(false);
@@ -277,7 +301,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
   };
 
   // Handle image delete
-  const handlePhotoDelete = async (photoId) => {
+  const handlePhotoDelete = async (photoId: string) => {
     if (!window.confirm('Are you sure you want to delete this image?')) {
       return;
     }
@@ -296,14 +320,14 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }) => {
       } else {
         alert(data.message || 'Failed to delete image');
       }
-    } catch (err) {
+    } catch (err: any) {
       alert('Failed to delete image');
     }
   };
 
   // Handle image dimension tracking
-  const handleImageLoad = (photoId, e) => {
-    const img = e.target;
+  const handleImageLoad = (photoId: string, e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const img = e.currentTarget;
     const aspectRatio = img.naturalWidth / img.naturalHeight;
     setImageDimensions(prev => ({
       ...prev,

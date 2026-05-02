@@ -79,7 +79,7 @@ export const updateDraft = async (req: Request, res: Response): Promise<void> =>
         const draft = await Draft.findByIdAndUpdate(
             draftId,
             { ...updateData, updatedAt: new Date() },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!draft) {

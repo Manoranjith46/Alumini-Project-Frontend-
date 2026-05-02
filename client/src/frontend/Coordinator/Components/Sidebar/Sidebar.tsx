@@ -99,12 +99,12 @@ export default function Sidebar({ onLogout, currentView }: SidebarProps) {
           </span>
         </a>
         <a 
-        className={`${styles.navLink} ${currentView === 'invitations' ? styles.navLinkActive : ''}`} 
+        className={`${styles.navLink} ${currentView === 'Events_and_Reunions' ? styles.navLinkActive : ''}`} 
         href="#"
         onClick={(e) => handleNavClick(e, 'invitations')}>
           <span className="material-symbols-outlined">event</span>
           <span className={styles.navLinkText}>
-            Invitations
+            Events and Reunions
           </span>
         </a>
         <a 

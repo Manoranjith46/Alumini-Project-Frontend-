@@ -1,5 +1,5 @@
+import { FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import styles from './Co_Mail.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 import Back from './Components/BackButton/Back';
@@ -7,23 +7,50 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-const CoordinatorMail = ({ onLogout }) => {
-    const [mailHistory, setMailHistory] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [resolvedDepartment, setResolvedDepartment] = useState("");
+interface ResponseStats {
+    total: number;
+    accepted: number;
+    rejected: number;
+    pending: number;
+}
+
+interface ApiMail {
+    _id: string;
+    senderName: string;
+    title?: string;
+    isBroadcast: boolean;
+    content: string;
+    createdAt: string;
+    dominantStatus?: string;
+    responseStats?: ResponseStats;
+    recipientCount?: number;
+}
+
+interface MailItem {
+    id: string;
+    sender: string;
+    title: string;
+    type: string;
+    message: string;
+    date: Date;
+    dominantStatus: string;
+    responseStats: ResponseStats;
+    mailData: ApiMail;
+}
+
+interface CoordinatorMailProps {
+    onLogout: () => void;
+}
+
+const CoordinatorMail: FC<CoordinatorMailProps> = ({ onLogout }) => {
+    const [mailHistory, setMailHistory] = useState<MailItem[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [resolvedDepartment, setResolvedDepartment] = useState<string>("");
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (user?.token) {
-            fetchDepartmentMails();
-        } else {
-            setLoading(false);
-        }
-    }, [user?.token]);
-
-    const fetchDepartmentMails = async () => {
+    const fetchDepartmentMails = async (): Promise<void> => {
         try {
             setLoading(true);
             setMailHistory([]);
@@ -45,7 +72,7 @@ const CoordinatorMail = ({ onLogout }) => {
 
             if (data.success) {
                 setResolvedDepartment(data.department || "");
-                const transformedMails = data.mails.map((mail) => ({
+                const transformedMails: MailItem[] = data.mails.map((mail: ApiMail) => ({
                     id: mail._id,
                     sender: mail.senderName,
                     title: mail.title || 'No Subject',
@@ -69,14 +96,22 @@ const CoordinatorMail = ({ onLogout }) => {
         }
     };
 
+    useEffect(() => {
+        if (user?.token) {
+            fetchDepartmentMails();
+        } else {
+            setLoading(false);
+        }
+    }, [user?.token]);
+
     const handleRefresh = () => {
         setSearchQuery("");
         fetchDepartmentMails();
     };
 
-    const formatDate = (date) => {
+    const formatDate = (date: Date): string => {
         const now = new Date();
-        const diffTime = Math.abs(now - date);
+        const diffTime = Math.abs(now.getTime() - date.getTime());
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays === 0) {
@@ -95,7 +130,7 @@ const CoordinatorMail = ({ onLogout }) => {
         (mail.type && mail.type.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
-    const handleViewMail = (mail) => {
+    const handleViewMail = (mail: MailItem) => {
         navigate('/coordinator/info-form', {
             state: {
                 mailId: mail.mailData._id,
@@ -122,11 +157,11 @@ const CoordinatorMail = ({ onLogout }) => {
                                 <h2 className="text-3xl font-bold text-[#001E2B]">Mail History</h2>
                                 <div className="flex items-center gap-2 mt-1">
                                     {(resolvedDepartment || user?.department) && (
-                                        <p className="text-sm text-slate-500">Department: {resolvedDepartment || user.department}</p>
+                                        <p className="text-sm text-slate-500">Department: {resolvedDepartment || user?.department}</p>
                                     )}
                                     {(resolvedDepartment || user?.department) && (
                                         <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
-                                            Showing only {(resolvedDepartment || user.department)} alumni mails
+                                            Showing only {(resolvedDepartment || user?.department)} alumni mails
                                         </span>
                                     )}
                                 </div>

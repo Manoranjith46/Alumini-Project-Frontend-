@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { FC, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import styles from './Co_View_JobForm.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 import Back from './Components/BackButton/Back';
@@ -7,10 +7,10 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffMs = now - date;
+    const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -22,15 +22,39 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-const CoordinatorViewJobForm = ({ onLogout }) => {
-    const { id } = useParams();
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const [jobReference, setJobReference] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+interface SubmittedBy {
+    _id: string;
+    name: string;
+    profilePhoto?: string;
+    jobRole?: string;
+}
 
-    const getBorderClassByStatus = (status) => {
+interface JobReference {
+    _id: string;
+    submittedBy?: SubmittedBy;
+    role: string;
+    companyName: string;
+    createdAt: string;
+    updatedAt: string;
+    status: 'pending' | 'approved' | 'rejected';
+    targetBranch: string;
+    vacancies: number | string;
+    location: string;
+    workMode: string;
+}
+
+interface CoordinatorViewJobFormProps {
+    onLogout: () => void;
+}
+
+const CoordinatorViewJobForm: FC<CoordinatorViewJobFormProps> = ({ onLogout }) => {
+    const { id } = useParams<{ id: string }>();
+    const { user } = useAuth();
+    const [jobReference, setJobReference] = useState<JobReference | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const getBorderClassByStatus = (status: string): string => {
         switch (status) {
             case 'approved':
                 return styles.borderGreen;
@@ -42,7 +66,7 @@ const CoordinatorViewJobForm = ({ onLogout }) => {
     };
 
     useEffect(() => {
-        const fetchJobReference = async () => {
+        const fetchJobReference = async (): Promise<void> => {
             if (!user?.token) {
                 setError('Please login to view job reference');
                 setLoading(false);
@@ -70,8 +94,8 @@ const CoordinatorViewJobForm = ({ onLogout }) => {
                 if (data.success && data.jobReference) {
                     setJobReference(data.jobReference);
                 }
-            } catch (err) {
-                setError(err.message);
+            } catch (err: any) {
+                setError(err.message || 'An unknown error occurred');
             } finally {
                 setLoading(false);
             }

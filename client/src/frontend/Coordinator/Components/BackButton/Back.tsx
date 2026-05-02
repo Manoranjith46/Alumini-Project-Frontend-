@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Back.module.css';
 
-const Back = ({ to, label = 'Back', className = '', onClick, }) => {
+interface BackProps {
+	to?: string | number;
+	label?: string;
+	className?: string;
+	onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
+}
+
+const Back: FC<BackProps> = ({ to, label = 'Back', className = '', onClick, }) => {
 	const navigate = useNavigate();
 
-	const handleBack = (event) => {
+	const handleBack = (event: MouseEvent<HTMLButtonElement>) => {
 		if (onClick) {
 			onClick(event);
 		}
@@ -15,7 +22,7 @@ const Back = ({ to, label = 'Back', className = '', onClick, }) => {
 		}
 
 		if (typeof to === 'number') {
-			navigate(to);
+			navigate(to as any); // navigate accepts number, but typing might be strict
 			return;
 		}
 

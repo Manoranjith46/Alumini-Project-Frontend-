@@ -8,12 +8,47 @@ import { useAdminContext } from '../../context/adminContext/adminContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
+interface Guest {
+  name: string;
+  email: string;
+  profilePhoto?: string;
+}
+
+interface EventRecord {
+  _id: string;
+  eventName: string;
+  eventDate: string;
+  venue: string;
+  eventTime?: string;
+  organizer?: {
+    name: string;
+  };
+}
+
+interface Template {
+  file: File;
+  name: string;
+  preview: string | null;
+}
+
+const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { adminBranding } = useAdminContext();
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const state = location.state as {
+    eventName?: string;
+    alumniName?: string;
+    mailId?: string;
+    mailData?: any;
+    eventDate?: string;
+    eventTime?: string;
+    eventLocation?: string;
+    recipientEmails?: string[];
+    recipients?: Guest[];
+  } | null;
 
   // Receive data from navigation state (mail data)
   const {
@@ -26,12 +61,12 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
     eventLocation: initialEventLocation = '',
     recipientEmails = [],
     recipients = []
-  } = location.state || {};
+  } = state || {};
 
   // Multi-guest state
   const [showGuestDialog, setShowGuestDialog] = useState(false);
-  const [guestCreationMode, setGuestCreationMode] = useState('single'); // 'single' or 'multiple'
-  const [guests, setGuests] = useState([]);
+  const [guestCreationMode, setGuestCreationMode] = useState<'single' | 'multiple'>('single');
+  const [guests, setGuests] = useState<Guest[]>([]);
   const [currentGuestIndex, setCurrentGuestIndex] = useState(0);
 
   // Canvas Flyer state
@@ -40,20 +75,20 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   const [eventTime, setEventTime] = useState(initialEventTime || new Date().toTimeString().slice(0, 5));
   const [eventLocation, setEventLocation] = useState(initialEventLocation);
   const [eventDesc, setEventDesc] = useState('');
-  const [bannerFile, setBannerFile] = useState(null);
-  const [bannerPreview, setBannerPreview] = useState(null);
-  const [logoFile, setLogoFile] = useState(null);
-  const [logoPreview, setLogoPreview] = useState(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // Canvas Flyer Preview state
   const [flyerGenerated, setFlyerGenerated] = useState(false);
-  const [flyerBlob, setFlyerBlob] = useState(null);
-  const [flyerPreviewUrl, setFlyerPreviewUrl] = useState(null);
+  const [flyerBlob, setFlyerBlob] = useState<Blob | null>(null);
+  const [flyerPreviewUrl, setFlyerPreviewUrl] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [enhancing, setEnhancing] = useState(false);
 
   // Gemini Flyer state
-  const [geminiTemplates, setGeminiTemplates] = useState([]);
+  const [geminiTemplates, setGeminiTemplates] = useState<Template[]>([]);
   const [currentTemplateIndex, setCurrentTemplateIndex] = useState(0);
   const [geminiEventName, setGeminiEventName] = useState('');
   const [geminiGuestName, setGeminiGuestName] = useState('');
@@ -62,9 +97,9 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   const [geminiVenue, setGeminiVenue] = useState('');
   const [geminiHostedBy, setGeminiHostedBy] = useState('K.S.R. College of Engineering');
   const [geminiLoading, setGeminiLoading] = useState(false);
-  const [geminiPreviewUrl, setGeminiPreviewUrl] = useState(null);
-  const [geminiError, setGeminiError] = useState(null);
-  const [events, setEvents] = useState([]);
+  const [geminiPreviewUrl, setGeminiPreviewUrl] = useState<string | null>(null);
+  const [geminiError, setGeminiError] = useState<string | null>(null);
+  const [events, setEvents] = useState<EventRecord[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [showEventSuggestions, setShowEventSuggestions] = useState(false);
 
@@ -87,7 +122,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
     fetchEvents();
 
     // Helper to format date to YYYY-MM-DD
-    const formatDateForInput = (dateValue) => {
+    const formatDateForInput = (dateValue: any) => {
       if (!dateValue) return new Date().toISOString().split('T')[0];
       try {
         const date = new Date(dateValue);
@@ -151,7 +186,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       if (data.success && Array.isArray(data.data)) {
         setEvents(data.data);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch events:', err);
     } finally {
       setEventsLoading(false);
@@ -159,7 +194,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   };
 
   // Handle event selection from dropdown
-  const handleEventSelect = (eventId) => {
+  const handleEventSelect = (eventId: string) => {
     const selectedEvent = events.find(e => e._id === eventId);
     if (selectedEvent) {
       setGeminiEventName(selectedEvent.eventName);
@@ -177,8 +212,8 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   };
 
   // Handle banner upload
-  const handleBannerChange = (e) => {
-    const file = e.target.files[0];
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
         alert('File size should be less than 5MB');
@@ -186,14 +221,14 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       }
       setBannerFile(file);
       const reader = new FileReader();
-      reader.onload = (ev) => setBannerPreview(ev.target.result);
+      reader.onload = (ev) => setBannerPreview(ev.target?.result as string);
       reader.readAsDataURL(file);
     }
   };
 
   // Handle logo upload
-  const handleLogoChange = (e) => {
-    const file = e.target.files[0];
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
         alert('File size should be less than 5MB');
@@ -201,13 +236,13 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       }
       setLogoFile(file);
       const reader = new FileReader();
-      reader.onload = (ev) => setLogoPreview(ev.target.result);
+      reader.onload = (ev) => setLogoPreview(ev.target?.result as string);
       reader.readAsDataURL(file);
     }
   };
 
   // Handle "Generate via Description" form submit — enhance text using Ollama
-  const handleDescGenerate = async (e) => {
+  const handleDescGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!eventDesc.trim()) {
       alert('Please enter a description to enhance');
@@ -229,7 +264,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       if (!res.ok) throw new Error(data.error || 'Failed to enhance text');
 
       setEventDesc(data.data);
-    } catch (err) {
+    } catch (err: any) {
       alert(err.message);
     } finally {
       setEnhancing(false);
@@ -270,7 +305,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
 
       alert('Invitation sent successfully!');
       navigate('/admin/event_and_reunion_history');
-    } catch (err) {
+    } catch (err: any) {
       alert(err.message);
     } finally {
       setSending(false);
@@ -278,7 +313,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
   };
 
   // Gemini Flyer Handlers
-  const handleGeminiTemplateChange = (e) => {
+  const handleGeminiTemplateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
@@ -304,21 +339,21 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
     }).filter(t => t !== null);
 
     // Update preview after file is read
-    setTimeout(() => {
-      const templatesWithPreview = newTemplates.map((t, idx) => {
+    window.setTimeout(() => {
+      const templatesWithPreview = newTemplates.map((t) => {
         const reader = new FileReader();
-        return new Promise((resolve) => {
+        return new Promise<Template>((resolve) => {
           reader.onload = (ev) => {
             resolve({
-              ...t,
-              preview: ev.target.result,
+              ...t!,
+              preview: ev.target?.result as string,
             });
           };
-          reader.readAsDataURL(t.file);
+          reader.readAsDataURL(t!.file);
         });
       });
 
-      Promise.all(templatesWithPreview).then((updated) => {
+      Promise.all(templatesWithPreview).then((updated: Template[]) => {
         setGeminiTemplates(prev => [...prev, ...updated]);
         setCurrentTemplateIndex(0);
         setGeminiError(null);
@@ -329,7 +364,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
 
 
   // Handle guest creation mode selection
-  const handleGuestModeSelection = (mode) => {
+  const handleGuestModeSelection = (mode: 'single' | 'multiple') => {
     setGuestCreationMode(mode);
     setShowGuestDialog(false);
     if (mode === 'single' && guests.length > 0) {
@@ -345,7 +380,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
     }
   };
 
-  const handleGenerateGeminiFlyer = async (e) => {
+  const handleGenerateGeminiFlyer = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!geminiEventName.trim()) {
@@ -416,7 +451,7 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
         return previewObjectUrl;
       });
       setFlyerGenerated(true);
-    } catch (err) {
+    } catch (err: any) {
       setGeminiError(err.message);
       setFlyerGenerated(false);
       setFlyerBlob(null);
@@ -441,13 +476,13 @@ const Admin_Event_and_Reunion_Form2 = ( { onLogout } ) => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
-    } catch (err) {
+    } catch (err: any) {
       setGeminiError('Failed to download flyer');
       console.error('Download error:', err);
     }
   };
 
-  const handleRegenerateGeminiFlyer = (e) => {
+  const handleRegenerateGeminiFlyer = (e: React.FormEvent) => {
     e.preventDefault();
     handleGenerateGeminiFlyer(e);
   };

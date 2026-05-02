@@ -94,7 +94,7 @@ const Admin_View_Faculty = ({ onLogout }) => {
       } else {
         alert(data.message || 'Failed to delete coordinator');
       }
-    } catch (err) {
+    } catch (err: any) {
       alert('Error deleting coordinator: ' + err.message);
       console.error('Error deleting coordinator:', err);
     }

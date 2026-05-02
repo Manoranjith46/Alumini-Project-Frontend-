@@ -103,7 +103,7 @@ const Admin_Alumni_Registration = () => {
         } else {
           setTokenError(data.message || 'Invalid or expired registration link');
         }
-      } catch (error) {
+      } catch (error: any) {
         setTokenError('Failed to validate registration link. Please try again.');
         console.error('Token validation error:', error);
       } finally {
@@ -130,7 +130,7 @@ const Admin_Alumni_Registration = () => {
             setDepartments(data.departments);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching departments:', error);
       }
     };
@@ -239,10 +239,10 @@ const Admin_Alumni_Registration = () => {
       const competitiveExams = [];
       if (formData.hasCompetitiveExams) {
         Object.entries(formData.exams).forEach(([examName, marks]) => {
-          if (marks) competitiveExams.push({ examName, marks: parseInt(marks) });
+          if (marks) competitiveExams.push({ examName, marks: parseInt(marks, 10) });
         });
         if (formData.othersExam.name && formData.othersExam.marks) {
-          competitiveExams.push({ examName: formData.othersExam.name, marks: parseInt(formData.othersExam.marks) });
+          competitiveExams.push({ examName: formData.othersExam.name, marks: parseInt(formData.othersExam.marks, 10) });
         }
       }
 
@@ -304,7 +304,7 @@ const Admin_Alumni_Registration = () => {
       } else {
         setSubmitMessage({ type: 'error', text: data.message || 'Registration failed. Please try again.' });
       }
-    } catch (error) {
+    } catch (error: any) {
       setSubmitMessage({ type: 'error', text: 'Network error. Please check your connection and try again.' });
       console.error('Registration error:', error);
     } finally {

@@ -6,11 +6,24 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const Alumini_JobReference_Form = ({ onLogout }) => {
+interface JobFormData {
+  companyName: string;
+  role: string;
+  targetBranch: string;
+  vacancies: string;
+  location: string;
+  workMode: string;
+}
+
+interface AluminiJobReferenceFormProps {
+  onLogout?: () => void;
+}
+
+const Alumini_JobReference_Form = ({ onLogout }: AluminiJobReferenceFormProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<JobFormData>({
     companyName: '',
     role: '',
     targetBranch: '',
@@ -22,13 +35,13 @@ const Alumini_JobReference_Form = ({ onLogout }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     setError('');
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -83,7 +96,7 @@ const Alumini_JobReference_Form = ({ onLogout }) => {
 
       alert('Job reference submitted successfully!');
       navigate('/alumini/jobreference_history');
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setIsSubmitting(false);

@@ -36,6 +36,79 @@ const base64ToBlob = (base64: string) => {
   return new Blob([uInt8Array], { type: contentType });
 };
 
+interface Address {
+  street: string;
+  city: string;
+  pinCode: string;
+  mobile?: string;
+}
+
+interface CompetitiveExam {
+  examName: string;
+  regNo: string;
+  year: string;
+  score: string;
+}
+
+interface Qualification {
+  degree: string;
+  branch: string;
+  yearOfPassing: string;
+  institution: string;
+}
+
+interface EntrepreneurDetails {
+  organizationName: string;
+  natureOfWork: string;
+  annualTurnover: string;
+  numberOfEmployees: string;
+}
+
+interface SpouseDetails {
+  name: string;
+  qualification: string;
+  numberOfChildren: string;
+}
+
+interface ProfileData {
+  fullName: string;
+  fatherSpouseName: string;
+  dob: string;
+  yearFrom: string;
+  yearTo: string;
+  degree: string;
+  branch: string;
+  rollNumber: string;
+  presentAddress: string;
+  presentCity: string;
+  presentPin: string;
+  presentMobile: string;
+  presentEmail: string;
+  permanentAddress: string;
+  permanentCity: string;
+  permanentPin: string;
+  hasCompetitiveExams: boolean;
+  competitiveExams: CompetitiveExam[];
+  collegeQualifications: Qualification[];
+  placementType: string;
+  designation: string;
+  officeAddress: string;
+  remarks: string;
+  isEntrepreneur: boolean;
+  organizationName: string;
+  natureOfWork: string;
+  annualTurnover: string;
+  numEmployees: string;
+  maritalStatus: string;
+  spouseName: string;
+  spouseQualification: string;
+  numChildren: string;
+  extraCurricular: string;
+  otherInfo: string;
+  signature: string | null;
+  profilePhoto: string | null;
+}
+
 interface ProfileProps {
   onLogout?: () => void;
 }
@@ -49,7 +122,7 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
   const [error, setError] = useState<string>('');
   const [saveMessage, setSaveMessage] = useState({ type: '', text: '' });
 
-  const initialProfileData = {
+  const initialProfileData: ProfileData = {
     // Personal Details
     fullName: '',
     fatherSpouseName: '',
@@ -95,27 +168,27 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
   };
 
   const [editMode, setEditMode] = useState(false);
-  const [savedData, setSavedData] = useState(initialProfileData);
-  const [formData, setFormData] = useState(initialProfileData);
+  const [savedData, setSavedData] = useState<ProfileData>(initialProfileData);
+  const [formData, setFormData] = useState<ProfileData>(initialProfileData);
 
   // Signature states
-  const [signaturePreviewUrl, setSignaturePreviewUrl] = useState(null);
+  const [signaturePreviewUrl, setSignaturePreviewUrl] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [tempPreviewUrl, setTempPreviewUrl] = useState(null);
+  const [tempPreviewUrl, setTempPreviewUrl] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
   // Profile photo states
-  const [profilePhotoUrl, setProfilePhotoUrl] = useState(null);
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
-  const [tempPhotoUrl, setTempPhotoUrl] = useState(null);
+  const [tempPhotoUrl, setTempPhotoUrl] = useState<string | null>(null);
   const [photoCrop, setPhotoCrop] = useState({ x: 0, y: 0 });
   const [photoZoom, setPhotoZoom] = useState(1);
-  const [croppedPhotoPixels, setCroppedPhotoPixels] = useState(null);
+  const [croppedPhotoPixels, setCroppedPhotoPixels] = useState<any>(null);
 
   // Map API data to form fields
-  const mapApiDataToForm = (alumni: any) => {
+  const mapApiDataToForm = (alumni: any): ProfileData => {
     const formatDate = (dateStr: string | null | undefined) => {
       if (!dateStr) return '';
       const date = new Date(dateStr);
@@ -210,7 +283,7 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
     fetchProfile();
   }, [user?.token]);
 
-  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (field: keyof ProfileData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }));
   };
 

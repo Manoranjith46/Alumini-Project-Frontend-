@@ -6,8 +6,38 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+interface AlumniEntry {
+  alumniName: string;
+  alumniId: string;
+  department: string;
+  batchStart: string;
+  alumniEmail: string;
+  alumniPhoto: string | null;
+  matchedAlumni: any[];
+  showEmailDropdown: boolean;
+  fetchingPhoto: boolean;
+  showNameDropdown: boolean;
+  searchResults: any[];
+  searchingName: boolean;
+}
+
+interface SharedData {
+  eventName: string;
+  eventDate: string;
+  eventVenue: string;
+  eventTime: string;
+  title: string;
+  message: string;
+}
+
+interface AdminBroadcastMessageProps {
+  onLogout?: () => void;
+  adminName?: string;
+  adminEmail?: string;
+}
+
 // Default alumni entry structure
-const createEmptyAlumniEntry = () => ({
+const createEmptyAlumniEntry = (): AlumniEntry => ({
   alumniName: '',
   alumniId: '',
   department: '',
@@ -22,10 +52,24 @@ const createEmptyAlumniEntry = () => ({
   searchingName: false
 });
 
-const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
+const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadcastMessageProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const state = location.state as {
+    eventName?: string;
+    eventDate?: string;
+    eventLocation?: string;
+    alumniName?: string;
+    editDraft?: boolean;
+    draftId?: string;
+    alumniEmail?: string;
+    department?: string;
+    batch?: string;
+    title?: string;
+    message?: string;
+  } | null;
 
   // Get event data from Form 1 or draft data for editing
   const {
@@ -41,10 +85,10 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
     batch: initialBatch = '',
     title: initialTitle = '',
     message: initialMessage = ''
-  } = location.state || {};
+  } = state || {};
 
   // Alumni entries array - each entry has its own alumni-specific data
-  const [alumniEntries, setAlumniEntries] = useState([
+  const [alumniEntries, setAlumniEntries] = useState<AlumniEntry[]>([
     initialAlumniName || initialAlumniEmail
       ? {
           ...createEmptyAlumniEntry(),
@@ -57,7 +101,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   ]);
 
   // Shared form data (event info, subject, message)
-  const [sharedData, setSharedData] = useState({
+  const [sharedData, setSharedData] = useState<SharedData>({
     eventName: initialEventName,
     eventDate: initialEventDate,
     eventVenue: '',
@@ -72,15 +116,15 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   const [alert, setAlert] = useState({ show: false, message: '', type: '' });
   const [formSent, setFormSent] = useState(false);
   const [formCleared, setFormCleared] = useState(false);
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [isEventFormEnabled, setIsEventFormEnabled] = useState(false);
   const [generatingEmail, setGeneratingEmail] = useState(false);
-  const [departments, setDepartments] = useState([]);
+  const [departments, setDepartments] = useState<any[]>([]);
   const [loadingDepartments, setLoadingDepartments] = useState(false);
 
   // Helper function to get cookie value
-  const getCookie = (name) => {
+  const getCookie = (name: string) => {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? decodeURIComponent(match[2]) : null;
   };
@@ -139,7 +183,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
               message: draft.content || ''
             });
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error fetching draft:', error);
           showAlert('Failed to load draft', 'error');
         } finally {
@@ -167,7 +211,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
         if (data.success) {
           setEvents(data.data || []);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching events:', error);
       } finally {
         setLoadingEvents(false);
@@ -196,7 +240,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
         if (data.success) {
           setDepartments(data.departments || []);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching departments:', error);
       } finally {
         setLoadingDepartments(false);
@@ -210,7 +254,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   }, [user]);
 
   // Handle event selection from dropdown
-  const handleEventSelect = (e) => {
+  const handleEventSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedEventId = e.target.value;
     if (!selectedEventId) {
       setSharedData(prev => ({
@@ -223,7 +267,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
       return;
     }
 
-    const selectedEvent = events.find(event => event._id === selectedEventId);
+    const selectedEvent = events.find((event: any) => event._id === selectedEventId);
     if (selectedEvent) {
       // Format the date for the date input (YYYY-MM-DD)
       let formattedDate = '';
@@ -243,14 +287,14 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Calculate ending year for a specific alumni entry
-  const getBatchEnd = (batchStart) => batchStart ? String(Number(batchStart) + 4) : '';
-  const getBatch = (batchStart) => {
+  const getBatchEnd = (batchStart: string) => batchStart ? String(Number(batchStart) + 4) : '';
+  const getBatch = (batchStart: string) => {
     const batchEnd = getBatchEnd(batchStart);
     return batchStart && batchEnd ? `${batchStart}-${batchEnd}` : '';
   };
 
   // Handle alumni-specific input changes
-  const handleAlumniInputChange = (index, e) => {
+  const handleAlumniInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
     // Check for duplicate email when email changes
@@ -268,7 +312,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Handle shared data input changes
-  const handleSharedInputChange = (e) => {
+  const handleSharedInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setSharedData(prev => ({
       ...prev,
@@ -282,14 +326,14 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Remove alumni entry
-  const handleRemoveAlumni = (index) => {
+  const handleRemoveAlumni = (index: number) => {
     if (alumniEntries.length > 1) {
       setAlumniEntries(prev => prev.filter((_, i) => i !== index));
     }
   };
 
   // Check for duplicate email addresses
-  const checkDuplicateEmail = (email, currentIndex) => {
+  const checkDuplicateEmail = (email: string, currentIndex: number) => {
     if (!email.trim()) return false;
     return alumniEntries.some((entry, index) =>
       index !== currentIndex &&
@@ -298,7 +342,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Search alumni by name
-  const handleSearchAlumniName = async (index, searchValue) => {
+  const handleSearchAlumniName = async (index: number, searchValue: string) => {
     setAlumniEntries(prev => prev.map((entry, i) =>
       i === index ? { ...entry, alumniName: searchValue, showNameDropdown: true, searchingName: true } : entry
     ));
@@ -329,7 +373,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
           searchingName: false
         } : entry
       ));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error searching alumni:', error);
       setAlumniEntries(prev => prev.map((entry, i) =>
         i === index ? { ...entry, searchResults: [], searchingName: false } : entry
@@ -338,7 +382,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Handle alumni selection from search results
-  const handleSelectAlumni = (index, alumni) => {
+  const handleSelectAlumni = (index: number, alumni: any) => {
     setAlumniEntries(prev => prev.map((entry, i) =>
       i === index ? {
         ...entry,
@@ -378,7 +422,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Replace placeholders and first alumni's data with each recipient's data
-  const personalizeContent = (text, entry, firstEntry) => {
+  const personalizeContent = (text: string, entry: AlumniEntry, firstEntry: AlumniEntry) => {
     const batchEnd = getBatchEnd(entry.batchStart);
     const batch = entry.batchStart ? `${entry.batchStart}-${batchEnd}` : '';
 
@@ -475,7 +519,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
         body: JSON.stringify(draftPayload)
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error auto-saving draft:', error);
     }
   };
@@ -510,7 +554,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
         const error = await response.json();
         showAlert(error.message || 'Failed to delete draft', 'error');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting draft:', error);
       showAlert('Error deleting draft', 'error');
     }
@@ -518,7 +562,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
 
   // Auto-save before page unload
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasContentToSave() && !formSent && !formCleared) {
         // Modern browsers ignore custom messages, but we still need to call preventDefault
         e.preventDefault();
@@ -536,18 +580,18 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
     };
   }, [alumniEntries, sharedData, formSent, formCleared]);
 
-  const showAlert = (message, type) => {
+  const showAlert = (message: string, type: string) => {
     setAlert({ show: true, message, type });
     setTimeout(() => {
       setAlert({ show: false, message: '', type: '' });
     }, 5000);
   };
 
-  const handleFormToggleChange = (e) => {
+  const handleFormToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsPreMessageFormEnabled(e.target.checked);
   };
 
-  const handleEventFormToggleChange = (e) => {
+  const handleEventFormToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsEventFormEnabled(e.target.checked);
     if (!e.target.checked) {
       // Clear event form data when disabled
@@ -562,7 +606,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Fetch alumni by name, department, and batch for a specific entry
-  const fetchAlumniByDetails = async (index) => {
+  const fetchAlumniByDetails = async (index: number) => {
     const entry = alumniEntries[index];
     const batch = getBatch(entry.batchStart);
 
@@ -622,7 +666,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
             } : e
           ));
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching alumni:', error);
         setAlumniEntries(prev => prev.map((e, i) =>
           i === index ? {
@@ -647,7 +691,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
   };
 
   // Fetch alumni by email for a specific entry
-  const fetchAlumniByEmail = async (index) => {
+  const fetchAlumniByEmail = async (index: number) => {
     const entry = alumniEntries[index];
 
     if (entry.alumniEmail && !entry.matchedAlumni.find(a => a.email === entry.alumniEmail)) {
@@ -684,7 +728,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
             i === index ? { ...e, fetchingPhoto: false } : e
           ));
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching alumni by email:', error);
         setAlumniEntries(prev => prev.map((e, i) =>
           i === index ? { ...e, fetchingPhoto: false } : e
@@ -698,7 +742,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
     const timeouts = alumniEntries.map((entry, index) => {
       const batch = getBatch(entry.batchStart);
       if (entry.alumniName && entry.department && batch) {
-        return setTimeout(() => {
+        return window.setTimeout(() => {
           fetchAlumniByDetails(index);
         }, 500);
       }
@@ -707,7 +751,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
 
     return () => {
       timeouts.forEach(timeout => {
-        if (timeout) clearTimeout(timeout);
+        if (timeout) window.clearTimeout(timeout);
       });
     };
   }, [alumniEntries.map(e => `${e.alumniName}-${e.department}-${e.batchStart}`).join(',')]);
@@ -717,7 +761,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const timeouts = alumniEntries.map((entry, index) => {
       if (emailRegex.test(entry.alumniEmail)) {
-        return setTimeout(() => {
+        return window.setTimeout(() => {
           fetchAlumniByEmail(index);
         }, 500);
       }
@@ -727,13 +771,13 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }) => {
     
     return () => {
       timeouts.forEach(timeout => {
-        if (timeout) clearTimeout(timeout);
+        if (timeout) window.clearTimeout(timeout);
       });
     };
   }, [alumniEntries.map(e => e.alumniEmail).join(',')]);
 
   // Handle email selection from dropdown for a specific entry
-  const handleEmailSelect = (index, e) => {
+  const handleEmailSelect = (index: number, e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedEmail = e.target.value;
     const entry = alumniEntries[index];
     const selectedAlumni = entry.matchedAlumni.find(a => a.email === selectedEmail);

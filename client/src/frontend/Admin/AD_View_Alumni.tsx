@@ -20,25 +20,90 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-const formatAddress = (address) => {
+const formatAddress = (address: any) => {
   if (!address || typeof address !== 'object') return 'N/A';
   const parts = [address.street, address.city, address.pinCode].filter(Boolean);
   return parts.length > 0 ? parts.join(', ') : 'N/A';
 };
 
-const Admin_View_Alumni = ({ onLogout }) => {
+interface AlumniData {
+  _id: string;
+  name: string;
+  registerNumber: string;
+  email: string;
+  branch: string;
+  degree: string;
+  yearFrom: string;
+  yearTo: string;
+  dob?: string;
+  fatherName?: string;
+  maritalStatus?: string;
+  isActive: boolean;
+  profilePhoto?: string;
+  designation?: string;
+  placementType?: string;
+  companyAddress?: string;
+  employmentRemarks?: string;
+  isEntrepreneur: boolean;
+  hasCompetitiveExams: boolean;
+  presentAddress?: {
+    street: string;
+    city: string;
+    pinCode: string;
+    mobile: string;
+  };
+  permanentAddress?: {
+    street: string;
+    city: string;
+    pinCode: string;
+    mobile: string;
+  };
+  spouseDetails?: {
+    name: string;
+    qualification: string;
+    numberOfChildren: string;
+  };
+  entrepreneurDetails?: {
+    organizationName: string;
+    natureOfWork: string;
+    annualTurnover: string;
+    numberOfEmployees: string;
+  };
+  competitiveExams?: Array<{
+    examName: string;
+    marks: string;
+  }>;
+  collegeQualifications?: Array<{
+    course: string;
+    institution: string;
+    yearOfPassing: string;
+    percentage: string;
+    boardUniversity: string;
+  }>;
+  knownAlumni?: Array<{
+    name: string;
+    degree: string;
+    batch: string;
+    email: string;
+    phone: string;
+  }>;
+  extraCurricular?: string;
+  otherInfo?: string;
+}
+
+const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const [alumniData, setAlumniData] = useState(null);
+  const [alumniData, setAlumniData] = useState<AlumniData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -69,7 +134,7 @@ const Admin_View_Alumni = ({ onLogout }) => {
         } else {
           setError(data.message || 'Alumni not found');
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -108,7 +173,7 @@ const Admin_View_Alumni = ({ onLogout }) => {
       } else {
         alert(data.message || 'Failed to delete alumni');
       }
-    } catch (err) {
+    } catch (err: any) {
       alert('Error deleting alumni: ' + err.message);
       console.error('Error deleting alumni:', err);
     } finally {

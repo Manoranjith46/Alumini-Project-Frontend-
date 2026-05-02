@@ -7,9 +7,40 @@ import { useAdminContext } from '../../context/adminContext/adminContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-const Admin_Profile = ({ onLogout }) => {
+interface Address {
+  street: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
+interface InstituteDetails {
+  logo: string | null;
+  banner: string | null;
+  name: string;
+  address: string;
+  mobile: string;
+}
+
+interface ProfileData {
+  registerNumber: string;
+  name: string;
+  username: string;
+  email: string;
+  mobile: string;
+  dateOfBirth: string;
+  degree: string;
+  branch: string;
+  presentAddress: Address;
+  permanentAddress: Address;
+  designation: string;
+  profilePhoto: string | null;
+  instituteDetails: InstituteDetails;
+}
+
+const Admin_Profile = ({ onLogout }: { onLogout?: () => void }) => {
   // Profile data state
-  const [profileData, setProfileData] = useState({
+  const [profileData, setProfileData] = useState<ProfileData>({
     registerNumber: '',
     name: '',
     username: '',
@@ -34,33 +65,44 @@ const Admin_Profile = ({ onLogout }) => {
     profilePhoto: null,
     instituteDetails: {
       logo: null,
-      banner: null
+      banner: null,
+      name: '',
+      address: '',
+      mobile: ''
     }
   });
 
   // Image preview states
-  const [profilePhotoPreview, setProfilePhotoPreview] = useState(null);
-  const [logoPreview, setLogoPreview] = useState(null);
-  const [bannerPreview, setBannerPreview] = useState(null);
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
 
   // Track previous image IDs for deletion of replaced images
-  const [previousImages, setPreviousImages] = useState({
+  const [previousImages, setPreviousImages] = useState<{
+    profilePhoto: string | null;
+    logo: string | null;
+    banner: string | null;
+  }>({
     profilePhoto: null,
     logo: null,
     banner: null
   });
 
   // Pending files - selected but not yet uploaded to GridFS
-  const [pendingFiles, setPendingFiles] = useState({
+  const [pendingFiles, setPendingFiles] = useState<{
+    profilePhoto: File | null;
+    logo: File | null;
+    banner: File | null;
+  }>({
     profilePhoto: null,
     logo: null,
     banner: null
   });
 
   // File refs
-  const profilePhotoRef = useRef(null);
-  const logoRef = useRef(null);
-  const bannerRef = useRef(null);
+  const profilePhotoRef = useRef<HTMLInputElement>(null);
+  const logoRef = useRef<HTMLInputElement>(null);
+  const bannerRef = useRef<HTMLInputElement>(null);
 
   // Upload states
   const [uploading, setUploading] = useState({
@@ -102,7 +144,7 @@ const Admin_Profile = ({ onLogout }) => {
   const [otpVerified, setOtpVerified] = useState(false);
 
   // Messages
-  const [message, setMessage] = useState({ type: '', text: '' });
+  const [message, setMessage] = useState<{ type: string; text: string }>({ type: '', text: '' });
 
   // Same address checkbox
   const [sameAsPresent, setSameAsPresent] = useState(false);
@@ -200,7 +242,7 @@ const Admin_Profile = ({ onLogout }) => {
       } else {
         showMessage('error', data.message || 'Failed to load profile');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching profile:', error);
       showMessage('error', 'Failed to load profile. Please check your connection.');
     } finally {
@@ -208,19 +250,19 @@ const Admin_Profile = ({ onLogout }) => {
     }
   };
 
-  const showMessage = (type, text) => {
+  const showMessage = (type: string, text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  const handleProfileChange = (field, value) => {
+  const handleProfileChange = (field: string, value: any) => {
     if (field.includes('.')) {
-      const [parent, child] = field.split('.');
+      const [parent, child] = field.split('.') as [keyof ProfileData, string];
       setProfileData(prev => {
         const newData = {
           ...prev,
           [parent]: {
-            ...prev[parent],
+            ...(prev[parent] as any),
             [child]: value
           }
         };
@@ -329,7 +371,7 @@ const Admin_Profile = ({ onLogout }) => {
       } else {
         showMessage('error', data.message || 'Failed to update profile');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating profile:', error);
       showMessage('error', 'Failed to update profile');
     } finally {
@@ -363,7 +405,7 @@ const Admin_Profile = ({ onLogout }) => {
       } else {
         showMessage('error', data.message || 'Failed to update password');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating password:', error);
       showMessage('error', 'Failed to update password');
     } finally {
@@ -392,7 +434,7 @@ const Admin_Profile = ({ onLogout }) => {
       } else {
         showMessage('error', data.message || 'Failed to send OTP');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending OTP:', error);
       showMessage('error', 'Failed to send OTP');
     } finally {
@@ -421,7 +463,7 @@ const Admin_Profile = ({ onLogout }) => {
       } else {
         showMessage('error', data.message || 'Invalid OTP');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying OTP:', error);
       showMessage('error', 'Failed to verify OTP');
     } finally {
@@ -461,7 +503,7 @@ const Admin_Profile = ({ onLogout }) => {
       } else {
         showMessage('error', data.message || 'Failed to reset password');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error resetting password:', error);
       showMessage('error', 'Failed to reset password');
     } finally {
@@ -469,11 +511,11 @@ const Admin_Profile = ({ onLogout }) => {
     }
   };
 
-  const togglePasswordVisibility = (field) => {
+  const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
     setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
   };
 
-  const handleSameAddressChange = (checked) => {
+  const handleSameAddressChange = (checked: boolean) => {
     setSameAsPresent(checked);
     if (checked) {
       // Copy present address to permanent address
@@ -496,7 +538,7 @@ const Admin_Profile = ({ onLogout }) => {
   };
 
   // Handle image upload
-  const handleImageUpload = async (file, type) => {
+  const handleImageUpload = async (file: File, type: string) => {
     if (!file) return null;
 
     setUploading(prev => ({ ...prev, [type]: true }));
@@ -522,7 +564,7 @@ const Admin_Profile = ({ onLogout }) => {
         showMessage('error', data.message || 'Failed to upload image');
         return null;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error);
       showMessage('error', 'Failed to upload image');
       return null;
@@ -532,8 +574,8 @@ const Admin_Profile = ({ onLogout }) => {
   };
 
   // Delete images that were replaced with new ones
-  const deleteReplacedImages = async (newProfileData) => {
-    const imagesToDelete = [];
+  const deleteReplacedImages = async (newProfileData: ProfileData) => {
+    const imagesToDelete: string[] = [];
 
     // Check profilePhoto
     if (previousImages.profilePhoto && previousImages.profilePhoto !== newProfileData.profilePhoto) {
@@ -557,12 +599,12 @@ const Admin_Profile = ({ onLogout }) => {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${user?.token}` }
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Error deleting image ${imageId}:`, error);
       }
     }
   };
-  const handleProfilePhotoChange = (e) => {
+  const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -571,12 +613,12 @@ const Admin_Profile = ({ onLogout }) => {
 
     // Show preview immediately (base64)
     const reader = new FileReader();
-    reader.onload = (e) => setProfilePhotoPreview(e.target.result);
+    reader.onload = (e) => setProfilePhotoPreview(e.target?.result as string);
     reader.readAsDataURL(file);
   };
 
   // Handle logo change
-  const handleLogoChange = (e) => {
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -584,12 +626,12 @@ const Admin_Profile = ({ onLogout }) => {
     setPendingFiles(prev => ({ ...prev, logo: file }));
 
     const reader = new FileReader();
-    reader.onload = (e) => setLogoPreview(e.target.result);
+    reader.onload = (e) => setLogoPreview(e.target?.result as string);
     reader.readAsDataURL(file);
   };
 
   // Handle banner change
-  const handleBannerChange = (e) => {
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -597,12 +639,12 @@ const Admin_Profile = ({ onLogout }) => {
     setPendingFiles(prev => ({ ...prev, banner: file }));
 
     const reader = new FileReader();
-    reader.onload = (e) => setBannerPreview(e.target.result);
+    reader.onload = (e) => setBannerPreview(e.target?.result as string);
     reader.readAsDataURL(file);
   };
 
   // Remove image
-  const handleRemoveImage = (type) => {
+  const handleRemoveImage = (type: 'profilePhoto' | 'logo' | 'banner') => {
     // First, clear any pending file for this type
     setPendingFiles(prev => ({ ...prev, [type]: null }));
 
@@ -629,7 +671,7 @@ const Admin_Profile = ({ onLogout }) => {
   };
 
   // Handle institute details change
-  const handleInstituteChange = (field, value) => {
+  const handleInstituteChange = (field: keyof InstituteDetails, value: string) => {
     setProfileData(prev => ({
       ...prev,
       instituteDetails: {

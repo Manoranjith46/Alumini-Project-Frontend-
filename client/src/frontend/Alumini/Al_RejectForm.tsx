@@ -2,14 +2,24 @@ import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
+interface TokenInfo {
+  recipientEmail?: string;
+  mail?: {
+    senderName?: string;
+    senderEmail?: string;
+    title?: string;
+    content?: string;
+  };
+}
+
 export default function TokenBasedRejectForm() {
-  const { token } = useParams();
+  const { token } = useParams<{ token: string }>();
   const location = useLocation();
 
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState(null);
-  const [tokenInfo, setTokenInfo] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -28,8 +38,8 @@ export default function TokenBasedRejectForm() {
       if (response.data.success) {
         setTokenInfo(response.data.tokenInfo);
       }
-    } catch (error) {
-      console.error('Error fetching token info:', error);
+    } catch (err: any) {
+      console.error('Error fetching token info:', err);
       setError('Unable to load invitation details');
     }
   };
@@ -53,12 +63,12 @@ export default function TokenBasedRejectForm() {
       } else {
         setError(response.data.message || 'Failed to submit rejection');
       }
-    } catch (error) {
-      console.error('Rejection submission error:', error);
+    } catch (err: any) {
+      console.error('Rejection submission error:', err);
 
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else if (error.response?.status === 404) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.response?.status === 404) {
         setError('This invitation link has expired or been used already');
       } else {
         setError('Unable to submit your response. Please try again later.');

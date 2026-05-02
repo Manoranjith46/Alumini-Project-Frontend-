@@ -7,10 +7,10 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
-  const diffMs = now - date;
+  const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / (1000 * 60));
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -22,15 +22,33 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-const Admin_View_Job_and_Reference = ({ onLogout }) => {
+interface JobReferenceDetail {
+  _id: string;
+  status: string;
+  createdAt: string;
+  companyName: string;
+  role: string;
+  targetBranch: string;
+  vacancies: number;
+  location: string;
+  workMode: string;
+  submittedBy?: {
+    _id: string;
+    name: string;
+    jobRole?: string;
+    profilePhoto?: string;
+  };
+}
+
+const Admin_View_Job_and_Reference = ({ onLogout }: { onLogout?: () => void }) => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [jobReference, setJobReference] = useState(null);
+  const [jobReference, setJobReference] = useState<JobReferenceDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const getBorderClassByStatus = (status) => {
+  const getBorderClassByStatus = (status: string | undefined) => {
     switch (status) {
       case 'approved':
         return styles.borderGreen;
@@ -70,7 +88,7 @@ const Admin_View_Job_and_Reference = ({ onLogout }) => {
         if (data.success && data.jobReference) {
           setJobReference(data.jobReference);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);

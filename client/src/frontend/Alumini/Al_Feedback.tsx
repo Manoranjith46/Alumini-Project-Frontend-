@@ -9,8 +9,28 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
+interface FeedbackSection {
+  rating: string;
+  comment: string;
+}
+
+interface Sections {
+  visionIV: FeedbackSection;
+  missionIM: FeedbackSection;
+  visionDV: FeedbackSection;
+  missionDM: FeedbackSection;
+  peos: FeedbackSection;
+}
+
+interface FeedbackCardProps {
+  title: string;
+  sectionKey: keyof Sections;
+  sections: Sections;
+  updateSection: (key: keyof Sections, field: keyof FeedbackSection, value: string) => void;
+}
+
 // Defined outside to avoid remounting on parent re-render
-const FeedbackCard = ({ title, sectionKey, sections, updateSection }) => (
+const FeedbackCard = ({ title, sectionKey, sections, updateSection }: FeedbackCardProps) => (
   <div className={styles.feedbackCard}>
     <h5 className={styles.cardTitle}>{title}</h5>
     <div className={styles.radioGroup}>
@@ -37,13 +57,17 @@ const FeedbackCard = ({ title, sectionKey, sections, updateSection }) => (
   </div>
 );
 
-const Alumini_Feedback = ({ onLogout }) => {
+interface AluminiFeedbackProps {
+  onLogout?: () => void;
+}
+
+const Alumini_Feedback = ({ onLogout }: AluminiFeedbackProps) => {
   const { user } = useAuth();
 
-  const [signatureFile, setSignatureFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [tempPreviewUrl, setTempPreviewUrl] = useState(null);
+  const [tempPreviewUrl, setTempPreviewUrl] = useState<string | any | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Form fields
@@ -56,7 +80,7 @@ const Alumini_Feedback = ({ onLogout }) => {
     const now = new Date();
     return now.toTimeString().slice(0, 5); // HH:MM format
   });
-  const [sections, setSections] = useState({
+  const [sections, setSections] = useState<Sections>({
     visionIV:  { rating: '', comment: '' },
     missionIM: { rating: '', comment: '' },
     visionDV:  { rating: '', comment: '' },
@@ -70,7 +94,7 @@ const Alumini_Feedback = ({ onLogout }) => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
 
   // Update a feedback section (rating or comment)
-  const updateSection = (key, field, value) => {
+  const updateSection = (key: keyof Sections, field: keyof FeedbackSection, value: string) => {
     setSections(prev => ({ ...prev, [key]: { ...prev[key], [field]: value } }));
   };
 
@@ -130,7 +154,7 @@ const Alumini_Feedback = ({ onLogout }) => {
       });
       setPreviewUrl(null);
       setSignatureFile(null);
-    } catch (err) {
+    } catch (err: any) {
       alert(err.message);
     } finally {
       setSubmitting(false);
@@ -143,8 +167,8 @@ const Alumini_Feedback = ({ onLogout }) => {
     fileInput.type = 'file';
     fileInput.accept = 'image/png, image/jpeg'; 
     
-    fileInput.onchange = (e) => {
-      const file = e.target.files[0];
+    fileInput.onchange = (e: any) => {
+      const file = e.target.files?.[0];
       
       if (file) {
         if (file.size > 5 * 1024 * 1024) { 
@@ -155,7 +179,7 @@ const Alumini_Feedback = ({ onLogout }) => {
         setSignatureFile(file);
         
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = (event: any) => {
           setTempPreviewUrl(event.target.result);
           setShowModal(true);
         };
@@ -172,7 +196,7 @@ const Alumini_Feedback = ({ onLogout }) => {
     setZoom(1);
   };
 
-  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+  const onCropComplete = useCallback((_croppedArea: any, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
@@ -198,7 +222,7 @@ const Alumini_Feedback = ({ onLogout }) => {
   };
 
   // Block wheel scroll when modal is active
-  const handlePageWheel = (e) => {
+  const handlePageWheel = (e: React.WheelEvent) => {
     if (showModal) {
       e.preventDefault();
     }

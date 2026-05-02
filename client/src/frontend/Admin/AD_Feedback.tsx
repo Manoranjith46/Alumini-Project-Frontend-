@@ -6,17 +6,24 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
 };
 
-const Admin_Feedback = ({ onLogout }) => {
+interface FeedbackSummary {
+  id: string;
+  name: string;
+  quote: string;
+  date: string;
+}
+
+const Admin_Feedback = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [feedbackData, setFeedbackData] = useState([]);
+  const [feedbackData, setFeedbackData] = useState<FeedbackSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
@@ -40,7 +47,7 @@ const Admin_Feedback = ({ onLogout }) => {
         const data = await response.json();
 
         if (data.success && data.feedbacks) {
-          const formattedData = data.feedbacks.map((fb) => ({
+          const formattedData: FeedbackSummary[] = data.feedbacks.map((fb: any) => ({
             id: fb._id,
             name: fb.submittedBy?.name || fb.reviewedBy || 'Anonymous',
             quote: `"${fb.visionIV?.comment || fb.missionIM?.comment || fb.peos?.comment || 'No comments provided.'}"`,
@@ -48,7 +55,7 @@ const Admin_Feedback = ({ onLogout }) => {
           }));
           setFeedbackData(formattedData);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);

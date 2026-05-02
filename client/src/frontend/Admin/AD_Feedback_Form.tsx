@@ -9,19 +9,38 @@ import { useAuth } from '../../context/authContext/authContext';
 const API_BASE = import.meta.env.VITE_API_URL;
 
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-const Admin_Feedback_Form = ({ onLogout }) => {
+interface FeedbackSection {
+  rating: string;
+  comment: string;
+}
+
+interface FeedbackData {
+  reviewedBy: string;
+  submittedBy: {
+    name: string;
+  };
+  date: string;
+  visionIV: FeedbackSection;
+  missionIM: FeedbackSection;
+  visionDV: FeedbackSection;
+  missionDM: FeedbackSection;
+  peos: FeedbackSection;
+  signature: string;
+}
+
+const Admin_Feedback_Form = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
-  const formCardRef = useRef(null);
-  const { id } = useParams();
+  const formCardRef = useRef<HTMLDivElement>(null);
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const [feedback, setFeedback] = useState(null);
+  const [feedback, setFeedback] = useState<FeedbackData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFeedback = async () => {
@@ -47,7 +66,7 @@ const Admin_Feedback_Form = ({ onLogout }) => {
         if (data.success && data.feedback) {
           setFeedback(data.feedback);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);

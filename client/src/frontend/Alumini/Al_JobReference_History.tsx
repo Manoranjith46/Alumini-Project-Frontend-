@@ -6,12 +6,12 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
-const mapStatus = (status) => {
+const mapStatus = (status: string) => {
   switch (status) {
     case 'approved': return 'ACTIVE';
     case 'pending': return 'PENDING';
@@ -20,7 +20,7 @@ const mapStatus = (status) => {
   }
 };
 
-const getIconForRole = (role, index) => {
+const getIconForRole = (role: string, index: number) => {
   const icons = ['work_outline', 'person_search', 'school', 'terminal', 'account_tree', 'support_agent', 'security', 'campaign'];
   const iconClasses = [styles.iconBlue, styles.iconPurple, styles.iconPurpleAlt, styles.iconTeal, styles.iconPink, styles.iconLightBlue, styles.iconGreen, styles.iconOrange];
 
@@ -30,15 +30,45 @@ const getIconForRole = (role, index) => {
   };
 };
 
-const Alumini_JobReference_History = ({ onLogout }) => {
+interface JobRecord {
+  id: string;
+  title: string;
+  company: string;
+  date: string;
+  status: string;
+  icon: string;
+  iconClass: string;
+  targetBranch: string;
+  vacancies: number;
+  location: string;
+  workMode: string;
+}
+
+interface ApiJob {
+  _id: string;
+  role: string;
+  companyName: string;
+  createdAt: string;
+  status: string;
+  targetBranch: string;
+  vacancies: number;
+  location: string;
+  workMode: string;
+}
+
+interface AluminiJobReferenceHistoryProps {
+  onLogout?: () => void;
+}
+
+const Alumini_JobReference_History = ({ onLogout }: AluminiJobReferenceHistoryProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const menuRef = useRef(null);
 
-  const [activeMenuId, setActiveMenuId] = useState(null);
-  const [jobsData, setJobsData] = useState([]);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [jobsData, setJobsData] = useState<JobRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchJobReferences = async () => {
@@ -62,7 +92,7 @@ const Alumini_JobReference_History = ({ onLogout }) => {
         const data = await response.json();
 
         if (data.success && data.jobReferences) {
-          const formattedData = data.jobReferences.map((job, index) => {
+          const formattedData: JobRecord[] = data.jobReferences.map((job: ApiJob, index: number) => {
             const { icon, iconClass } = getIconForRole(job.role, index);
             return {
               id: job._id,
@@ -81,7 +111,7 @@ const Alumini_JobReference_History = ({ onLogout }) => {
 
           setJobsData(formattedData);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -91,7 +121,7 @@ const Alumini_JobReference_History = ({ onLogout }) => {
     fetchJobReferences();
   }, [user]);
 
-  const toggleCardMenu = (id, event) => {
+  const toggleCardMenu = (id: string, event: React.MouseEvent) => {
     event.stopPropagation();
     setActiveMenuId(activeMenuId === id ? null : id);
   };
@@ -119,7 +149,7 @@ const Alumini_JobReference_History = ({ onLogout }) => {
       setJobsData(prevJobs => prevJobs.filter(job => job.id !== jobId));
       setActiveMenuId(null);
       alert('Job reference removed successfully');
-    } catch (err) {
+    } catch (err: any) {
       alert(err.message);
     }
   };

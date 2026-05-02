@@ -128,7 +128,7 @@ export const updateEventStatus = async (req: Request, res: Response): Promise<vo
     const event = await Event.findByIdAndUpdate(
       id,
       { status },
-      { new: true }
+      { returnDocument: 'after' }
     )
       .populate('organizer', 'branch deptCode')
       .populate('coOrganizers', 'branch deptCode');
@@ -161,7 +161,7 @@ export const updateEvent = async (req: Request, res: Response): Promise<void> =>
     const { id } = req.params;
     const updateData = req.body;
 
-    const event = await Event.findByIdAndUpdate(id, updateData, { new: true })
+    const event = await Event.findByIdAndUpdate(id, updateData, { returnDocument: 'after' })
       .populate('organizer', 'branch deptCode')
       .populate('coOrganizers', 'branch deptCode');
 

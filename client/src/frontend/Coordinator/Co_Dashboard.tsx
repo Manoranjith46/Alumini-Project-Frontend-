@@ -1,8 +1,13 @@
+import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Co_Dashboard.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 
-const Coordinator_Dashboard = ( { onLogout } ) => {
+interface CoordinatorDashboardProps {
+    onLogout: () => void;
+}
+
+const Coordinator_Dashboard: FC<CoordinatorDashboardProps> = ({ onLogout }) => {
     return (
         <div className="bg-[#F8FAFC] font-display text-slate-900 min-h-screen flex overflow-hidden font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
             <Sidebar currentView="dashboard" onLogout={onLogout} />

@@ -6,12 +6,18 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const Admin_Job_and_Reference = ({ onLogout }) => {
+interface JobReference {
+  _id: string;
+  companyName: string;
+  role: string;
+}
+
+const Admin_Job_and_Reference = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [jobsData, setJobsData] = useState([]);
+  const [jobsData, setJobsData] = useState<JobReference[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -37,7 +43,7 @@ const Admin_Job_and_Reference = ({ onLogout }) => {
         if (data.success && data.jobReferences) {
           setJobsData(data.jobReferences);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -69,14 +75,14 @@ const Admin_Job_and_Reference = ({ onLogout }) => {
       if (data.success && data.jobReferences) {
         setJobsData(data.jobReferences);
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const getInitials = (name) => {
+  const getInitials = (name: string) => {
     if (!name) return 'CO';
     return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
   };
@@ -136,8 +142,8 @@ const Admin_Job_and_Reference = ({ onLogout }) => {
                     transition: 'all 0.2s ease',
                     fontSize: '0.875rem'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#228B22'}
-                  onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                  onFocus={(e: React.FocusEvent<HTMLInputElement>) => (e.target as HTMLInputElement).style.borderColor = '#228B22'}
+                  onBlur={(e: React.FocusEvent<HTMLInputElement>) => (e.target as HTMLInputElement).style.borderColor = '#e2e8f0'}
                 />
               </div>
               <button onClick={handleRefresh} style={{ padding: '0.5rem', borderRadius: '0.5rem', background: '#fff', border: '1px solid #e2e8f0', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }}>
@@ -180,8 +186,8 @@ const Admin_Job_and_Reference = ({ onLogout }) => {
                       fontSize: '0.85rem',
                       transition: 'all 0.2s ease'
                     }}
-                    onMouseEnter={(e) => e.target.style.background = '#1a6b1a'}
-                    onMouseLeave={(e) => e.target.style.background = '#228B22'}
+                    onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => (e.currentTarget as HTMLButtonElement).style.background = '#1a6b1a'}
+                    onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => (e.currentTarget as HTMLButtonElement).style.background = '#228B22'}
                   >
                     View Details
                   </button>

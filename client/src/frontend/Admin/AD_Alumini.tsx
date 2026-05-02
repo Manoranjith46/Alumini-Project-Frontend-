@@ -104,7 +104,7 @@ const Admin_Alumini = ({ onLogout }: AdminAlumniProps) => {
   };
 
   // Handle Enter key in input
-  const handleEmailKeyPress = (e: React.KeyboardEvent) => {
+  const handleEmailKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddEmail();
@@ -252,7 +252,7 @@ const Admin_Alumini = ({ onLogout }: AdminAlumniProps) => {
         } else {
           setError(data.message || 'Failed to fetch alumni');
         }
-      } catch (err) {
+      } catch (err: any) {
         setError('Unable to connect to server');
       } finally {
         setLoading(false);

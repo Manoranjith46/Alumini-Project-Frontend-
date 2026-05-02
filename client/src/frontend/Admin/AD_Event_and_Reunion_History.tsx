@@ -6,12 +6,12 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
-const formatTime = (timeStr) => {
+const formatTime = (timeStr: string | undefined) => {
   if (!timeStr) return '';
   const [h, m] = timeStr.split(':').map(Number);
   const period = h >= 12 ? 'PM' : 'AM';
@@ -19,7 +19,7 @@ const formatTime = (timeStr) => {
   return `${displayH}:${String(m).padStart(2, '0')} ${period}`;
 };
 
-const getStatusBadgeClass = (status) => {
+const getStatusBadgeClass = (status: string | undefined) => {
   switch (status) {
     case 'completed': return styles.statusCompleted;
     case 'cancelled': return styles.statusCancelled;
@@ -28,13 +28,27 @@ const getStatusBadgeClass = (status) => {
   }
 };
 
-const Admin_Event_and_Reunion_History = ({ onLogout }) => {
+interface EventHistory {
+  id: string;
+  title: string;
+  organizer: string;
+  organizerCode: string;
+  coOrganizers: string;
+  date: string;
+  day: string;
+  time: string;
+  venue: string;
+  status: string;
+  createdAt: string;
+}
+
+const Admin_Event_and_Reunion_History = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
-  const [eventsData, setEventsData] = useState([]);
+  const [eventsData, setEventsData] = useState<EventHistory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const cardsPerPage = 9;
 
   useEffect(() => {
@@ -59,12 +73,12 @@ const Admin_Event_and_Reunion_History = ({ onLogout }) => {
         const data = await response.json();
 
         if (data.success && data.data) {
-          const formattedData = data.data.map((event) => ({
+          const formattedData: EventHistory[] = data.data.map((event: any) => ({
             id: event._id,
             title: event.eventName,
             organizer: event.organizer?.branch || 'N/A',
             organizerCode: event.organizer?.deptCode || '',
-            coOrganizers: event.coOrganizers?.map(co => co.deptCode).join(', ') || '',
+            coOrganizers: event.coOrganizers?.map((co: { deptCode: string }) => co.deptCode).join(', ') || '',
             date: formatDate(event.eventDate),
             day: event.eventDay,
             time: formatTime(event.eventTime),
@@ -74,7 +88,7 @@ const Admin_Event_and_Reunion_History = ({ onLogout }) => {
           }));
           setEventsData(formattedData);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -88,7 +102,7 @@ const Admin_Event_and_Reunion_History = ({ onLogout }) => {
   const startIndex = (currentPage - 1) * cardsPerPage;
   const paginatedEvents = eventsData.slice(startIndex, startIndex + cardsPerPage);
 
-  const handlePageClick = (page) => {
+  const handlePageClick = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }

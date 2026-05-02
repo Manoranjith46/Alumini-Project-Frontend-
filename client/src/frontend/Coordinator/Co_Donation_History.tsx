@@ -1,5 +1,5 @@
+import { FC, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import styles from './Co_Donation_History.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 import Back from './Components/BackButton/Back';
@@ -9,35 +9,72 @@ import * as XLSX from 'xlsx';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+interface User {
+    name: string;
+    email?: string;
+    userId?: string;
+}
+
+interface ApiPayment {
+    _id: string;
+    status: string;
+    user?: User;
+    purpose: string;
+    amount: number;
+    paidAt?: string;
+    createdAt: string;
+}
+
+interface DonationRecord {
+    id: string;
+    sno: number;
+    name: string;
+    initials: string;
+    details: string;
+    amount: string;
+    rawAmount: number;
+    date: string;
+    type: string;
+}
+
+interface LatestDonor {
+    name: string;
+    amount: string;
+}
+
+interface CoordinatorDonationHistoryProps {
+    onLogout: () => void;
+}
+
+const formatDate = (dateString: string | number | Date): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
-const formatAmount = (amount) => {
+const formatAmount = (amount: number): string => {
     return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
-const getInitials = (name) => {
+const getInitials = (name: string): string => {
     if (!name) return 'NA';
     return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
 };
 
-const CoordinatorDonationHistory = ({ onLogout }) => {
+const CoordinatorDonationHistory: FC<CoordinatorDonationHistoryProps> = ({ onLogout }) => {
     const { user } = useAuth();
-    const [donationData, setDonationData] = useState([]);
-    const [filteredData, setFilteredData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [latestDonor, setLatestDonor] = useState(null);
+    const [donationData, setDonationData] = useState<DonationRecord[]>([]);
+    const [filteredData, setFilteredData] = useState<DonationRecord[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [latestDonor, setLatestDonor] = useState<LatestDonor | null>(null);
 
     // Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState<number>(1);
     const itemsPerPage = 10;
 
     useEffect(() => {
-        const fetchPayments = async () => {
+        const fetchPayments = async (): Promise<void> => {
             if (!user?.token) {
                 setError('Please login to view donations');
                 setLoading(false);
@@ -58,13 +95,13 @@ const CoordinatorDonationHistory = ({ onLogout }) => {
                 const data = await response.json();
 
                 if (data.success && data.payments) {
-                    const formattedData = data.payments
-                        .filter(payment => payment.status === 'paid')
-                        .map((payment, index) => ({
+                    const formattedData: DonationRecord[] = data.payments
+                        .filter((payment: ApiPayment) => payment.status === 'paid')
+                        .map((payment: ApiPayment, index: number) => ({
                             id: payment._id,
                             sno: index + 1,
                             name: payment.user?.name || 'Unknown',
-                            initials: getInitials(payment.user?.name),
+                            initials: getInitials(payment.user?.name || 'Unknown'),
                             details: payment.purpose,
                             amount: formatAmount(payment.amount),
                             rawAmount: payment.amount,
@@ -83,8 +120,8 @@ const CoordinatorDonationHistory = ({ onLogout }) => {
                         });
                     }
                 }
-            } catch (err) {
-                setError(err.message);
+            } catch (err: any) {
+                setError(err.message || 'An unknown error occurred');
             } finally {
                 setLoading(false);
             }
@@ -114,19 +151,19 @@ const CoordinatorDonationHistory = ({ onLogout }) => {
     const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
     const paginatedData = filteredData.slice(startIndex, endIndex);
 
-    const handlePreviousPage = () => {
+    const handlePreviousPage = (): void => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
 
-    const handleNextPage = () => {
+    const handleNextPage = (): void => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
 
-    const handlePageClick = (pageNumber) => {
+    const handlePageClick = (pageNumber: number): void => {
         setCurrentPage(pageNumber);
     };
 
-    const handleExportReport = () => {
+    const handleExportReport = (): void => {
         if (donationData.length === 0) {
             alert('No donation data to export');
             return;
@@ -159,7 +196,7 @@ const CoordinatorDonationHistory = ({ onLogout }) => {
         XLSX.writeFile(wb, filename);
     };
 
-    const getTypeStyle = (type) => {
+    const getTypeStyle = (type: string): string => {
         switch (type) {
             case 'UPI': return styles.typeUpi;
             case 'Net Banking': return styles.typeNetBanking;
@@ -277,7 +314,7 @@ const CoordinatorDonationHistory = ({ onLogout }) => {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="7" className="px-6 py-12 text-center text-slate-500">
+                                                <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                                                     No donations found
                                                 </td>
                                             </tr>

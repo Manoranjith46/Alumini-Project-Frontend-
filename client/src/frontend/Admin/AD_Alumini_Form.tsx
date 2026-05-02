@@ -10,11 +10,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 const createClientTraceId = () => `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
 
 const logClientStep = (traceId: string, flow: string, step: number, details: any = {}) => {
-  console.log(`[RegistrationMailClient:${traceId}][${flow}][Step ${step}]`, details);
+  // Disabled in production
 };
 
 const logClientBreak = (traceId: string, flow: string, step: number, reason: string, details: any = {}) => {
-  console.warn(`[RegistrationMailClient:${traceId}][${flow}][BREAK at Step ${step}] ${reason}`, details);
+  // Disabled in production
 };
 
 // Helper to convert base64 to Blob for upload
@@ -131,7 +131,7 @@ const Admin_Alumini_Form = ({ onLogout }: AdminAluminiFormProps) => {
             setDepartments(data.departments);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching departments:', error);
       }
     };
@@ -315,7 +315,7 @@ const Admin_Alumini_Form = ({ onLogout }: AdminAluminiFormProps) => {
           alert('Failed to upload signature. Please try again.');
         }
         setShowSignatureModal(false);
-      } catch (e) {
+      } catch (e: any) {
         console.error('Error cropping/uploading image:', e);
         alert('Error processing image. Please try again.');
       }
@@ -373,8 +373,7 @@ const Admin_Alumini_Form = ({ onLogout }: AdminAluminiFormProps) => {
       return;
     }
 
-    // Build competitive exams array
-    const competitiveExams = [];
+    const competitiveExams: Array<{ examName: string; marks: string }> = [];
     if (formData.hasCompetitiveExams) {
       Object.entries(formData.exams).forEach(([examName, marks]) => {
         if (marks) {

@@ -6,7 +6,13 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const Admin_Event_and_Reunion_Form1 = ( { onLogout } ) => {
+interface Department {
+  _id: string;
+  branch: string;
+  deptCode: string;
+}
+
+const Admin_Event_and_Reunion_Form1 = ({ onLogout }: { onLogout?: () => void }) => {
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -17,12 +23,12 @@ const Admin_Event_and_Reunion_Form1 = ( { onLogout } ) => {
   const [eventTime, setEventTime] = useState('');
   const [venue, setVenue] = useState('');
   const [organizer, setOrganizer] = useState('');
-  const [coOrganizers, setCoOrganizers] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [errors, setErrors] = useState({});
+  const [coOrganizers, setCoOrganizers] = useState<string[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [isCoOrgDropdownOpen, setIsCoOrgDropdownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch departments
   useEffect(() => {
@@ -35,7 +41,7 @@ const Admin_Event_and_Reunion_Form1 = ( { onLogout } ) => {
         if (data.success) {
           setDepartments(data.departments);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to fetch departments:', err);
       }
     };
@@ -58,8 +64,8 @@ const Admin_Event_and_Reunion_Form1 = ( { onLogout } ) => {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsCoOrgDropdownOpen(false);
       }
     };
@@ -68,7 +74,7 @@ const Admin_Event_and_Reunion_Form1 = ( { onLogout } ) => {
   }, []);
 
   // Toggle co-organizer selection
-  const toggleCoOrganizer = (deptId) => {
+  const toggleCoOrganizer = (deptId: string) => {
     if (coOrganizers.includes(deptId)) {
       setCoOrganizers(coOrganizers.filter(id => id !== deptId));
     } else {
@@ -83,9 +89,9 @@ const Admin_Event_and_Reunion_Form1 = ( { onLogout } ) => {
     return selectedDepts.map(d => d.deptCode).join(', ');
   };
 
-  const handleFormSubmit = async (e) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors = {};
+    const newErrors: Partial<Record<string, string>> = {};
     if (!eventName.trim()) newErrors.eventName = 'Event name is required';
     if (!eventDate) newErrors.eventDate = 'Event date is required';
     if (!eventTime) newErrors.eventTime = 'Event time is required';
@@ -126,7 +132,7 @@ const Admin_Event_and_Reunion_Form1 = ( { onLogout } ) => {
       } else {
         alert(data.message || 'Failed to create event');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating event:', error);
       alert('Failed to create event. Please try again.');
     } finally {

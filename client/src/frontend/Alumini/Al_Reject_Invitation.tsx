@@ -12,7 +12,7 @@ export default function Al_Reject_Invitation() {
   const { loginWithToken, isTokenLoggedIn, tokenSession, markTokenUsed, loading: authLoading } = useTokenAuth();
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -70,7 +70,7 @@ export default function Al_Reject_Invitation() {
         alert('Invalid invitation link. Please contact the alumni office.');
         navigate('/');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Token validation error:', error);
 
       if (error.response?.status === 404) {
@@ -121,7 +121,7 @@ export default function Al_Reject_Invitation() {
         setError(response.data.message || 'Failed to submit rejection');
         setIsSubmitting(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Rejection submission error:', error);
 
       if (error.response?.data?.message) {

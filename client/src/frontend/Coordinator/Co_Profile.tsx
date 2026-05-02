@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, FC } from 'react';
 import { User, Lock, Eye, EyeOff, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import styles from './Co_Profile.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
@@ -6,9 +6,40 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-const emptyEducationRow = { degree: '', institution: '', year: '' };
+interface Education {
+  degree: string;
+  institution: string;
+  year: string;
+}
 
-const mapProfileFromApi = (profile) => ({
+interface PersonalInfo {
+  dob: string;
+  gender: string;
+  bloodGroup: string;
+  address: string;
+}
+
+interface ProfileState {
+  name: string;
+  email: string;
+  phone: string;
+  staffId: string;
+  designation: string;
+  department: string;
+  role: string;
+  location: string;
+  status: string;
+  joinDate: string;
+  experience: string | number;
+  publications: number;
+  patents: number;
+  personalInfo: PersonalInfo;
+  education: Education[];
+}
+
+const emptyEducationRow: Education = { degree: '', institution: '', year: '' };
+
+const mapProfileFromApi = (profile: any): ProfileState => ({
   name: profile?.name || '',
   email: profile?.email || '',
   phone: profile?.phone || '',
@@ -30,7 +61,7 @@ const mapProfileFromApi = (profile) => ({
   },
   education:
     Array.isArray(profile?.education) && profile.education.length > 0
-      ? profile.education.map((row) => ({
+      ? profile.education.map((row: any) => ({
           degree: row?.degree || '',
           institution: row?.institution || '',
           year: row?.year || '',
@@ -40,19 +71,23 @@ const mapProfileFromApi = (profile) => ({
 
 const initialProfileState = mapProfileFromApi(null);
 
-const CoordinatorProfile = ({ onLogout }) => {
+interface CoordinatorProfileProps {
+  onLogout: () => void;
+}
+
+const CoordinatorProfile: FC<CoordinatorProfileProps> = ({ onLogout }) => {
   const { user } = useAuth();
 
-  const [profileData, setProfileData] = useState(initialProfileState);
-  const [originalProfile, setOriginalProfile] = useState(initialProfileState);
+  const [profileData, setProfileData] = useState<ProfileState>(initialProfileState);
+  const [originalProfile, setOriginalProfile] = useState<ProfileState>(initialProfileState);
 
-  const [loading, setLoading] = useState(true);
-  const [savingProfile, setSavingProfile] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [savingProfile, setSavingProfile] = useState<boolean>(false);
+  const [actionLoading, setActionLoading] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  const [showUpdatePassword, setShowUpdatePassword] = useState(false);
-  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showUpdatePassword, setShowUpdatePassword] = useState<boolean>(false);
+  const [showResetPassword, setShowResetPassword] = useState<boolean>(false);
 
   const [showPasswords, setShowPasswords] = useState({
     old: false,
@@ -74,13 +109,13 @@ const CoordinatorProfile = ({ onLogout }) => {
     newPassword: '',
     confirmPassword: '',
   });
-  const [resetStep, setResetStep] = useState('none');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
+  const [resetStep, setResetStep] = useState<string>('none');
+  const [otpSent, setOtpSent] = useState<boolean>(false);
+  const [otpVerified, setOtpVerified] = useState<boolean>(false);
 
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  const showMessage = (type, text) => {
+  const showMessage = (type: string, text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: '', text: '' }), 4000);
   };
@@ -124,13 +159,13 @@ const CoordinatorProfile = ({ onLogout }) => {
     }
   }, [user?.token, fetchProfile]);
 
-  const handleProfileChange = (field, value) => {
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
+  const handleProfileChange = (field: string, value: string | number) => {
+    if (field.startsWith('personalInfo.')) {
+      const child = field.split('.')[1];
       setProfileData((prev) => ({
         ...prev,
-        [parent]: {
-          ...prev[parent],
+        personalInfo: {
+          ...prev.personalInfo,
           [child]: value,
         },
       }));
@@ -140,7 +175,7 @@ const CoordinatorProfile = ({ onLogout }) => {
     setProfileData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleEducationChange = (index, field, value) => {
+  const handleEducationChange = (index: number, field: keyof Education, value: string) => {
     setProfileData((prev) => {
       const updated = [...prev.education];
       updated[index] = { ...updated[index], [field]: value };
@@ -155,7 +190,7 @@ const CoordinatorProfile = ({ onLogout }) => {
     }));
   };
 
-  const removeEducationRow = (index) => {
+  const removeEducationRow = (index: number) => {
     setProfileData((prev) => {
       if (prev.education.length <= 1) return prev;
       return {
@@ -240,7 +275,7 @@ const CoordinatorProfile = ({ onLogout }) => {
     showMessage('success', 'Changes discarded');
   };
 
-  const togglePasswordVisibility = (field) => {
+  const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
     setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
@@ -414,7 +449,7 @@ const CoordinatorProfile = ({ onLogout }) => {
           </header>
 
           {message.text && (
-            <div className={`${styles.message} ${styles[message.type]}`}>
+            <div className={`${styles.message} ${styles[message.type as keyof typeof styles] || ''}`}>
               {message.text}
             </div>
           )}
@@ -619,7 +654,7 @@ const CoordinatorProfile = ({ onLogout }) => {
                       <label className={styles.inputLabel}>Address</label>
                       <textarea
                         className={`${styles.inputField} ${styles.textArea}`}
-                        rows="3"
+                        rows={3}
                         value={profileData.personalInfo.address}
                         onChange={(e) => handleProfileChange('personalInfo.address', e.target.value)}
                         disabled={!isEditing}

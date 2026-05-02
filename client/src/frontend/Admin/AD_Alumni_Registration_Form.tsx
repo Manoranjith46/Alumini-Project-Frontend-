@@ -7,15 +7,19 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const createClientTraceId = () => `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
 
-const logClientStep = (traceId, flow, step, details = {}) => {
+const logClientStep = (traceId: string, flow: string, step: number, details: object = {}) => {
   console.log(`[RegistrationMailClient:${traceId}][${flow}][Step ${step}]`, details);
 };
 
-const logClientBreak = (traceId, flow, step, reason, details = {}) => {
+const logClientBreak = (traceId: string, flow: string, step: number, reason: string, details: object = {}) => {
   console.warn(`[RegistrationMailClient:${traceId}][${flow}][BREAK at Step ${step}] ${reason}`, details);
 };
 
-const Admin_Alumni_Registration_Form = ({ onLogout }) => {
+interface AdminAlumniRegistrationFormProps {
+  onLogout?: () => void;
+}
+
+const Admin_Alumni_Registration_Form = ({ onLogout }: AdminAlumniRegistrationFormProps) => {
   const { user } = useAuth();
 
   // Form state - only email required
@@ -28,7 +32,7 @@ const Admin_Alumni_Registration_Form = ({ onLogout }) => {
   const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
 
   // Handle input change
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -136,7 +140,7 @@ const Admin_Alumni_Registration_Form = ({ onLogout }) => {
           text: data?.message || 'Failed to send registration link',
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       logClientBreak(clientTraceId, 'send-single-link', 8, 'Fetch failed', {
         error,
         message: error?.message,

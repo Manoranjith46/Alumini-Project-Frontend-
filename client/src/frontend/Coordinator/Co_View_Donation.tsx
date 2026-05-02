@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { FC, useState, useEffect, useRef } from 'react';
 import styles from './Co_View_Donation.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
 import Back from './Components/BackButton/Back';
@@ -9,25 +9,52 @@ import { jsPDF } from 'jspdf';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
-const formatAmount = (amount) => {
+const formatAmount = (amount: number): string => {
     return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
-const CoordinatorViewDonation = ({ onLogout }) => {
-    const { id } = useParams();
+interface PaymentUser {
+    name: string;
+    email: string;
+}
+
+interface Payment {
+    _id: string;
+    status: string;
+    user?: PaymentUser;
+    purpose: string;
+    razorpayOrderId?: string;
+    razorpayPaymentId?: string;
+    amount: number;
+    paidAt?: string;
+    createdAt: string;
+}
+
+interface StatusStyle {
+    bgColor: string;
+    textColor: string;
+    label: string;
+}
+
+interface CoordinatorViewDonationProps {
+    onLogout: () => void;
+}
+
+const CoordinatorViewDonation: FC<CoordinatorViewDonationProps> = ({ onLogout }) => {
+    const { id } = useParams<{ id: string }>();
     const { user } = useAuth();
-    const [donation, setDonation] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const donationCardRef = useRef(null);
+    const [donation, setDonation] = useState<Payment | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const donationCardRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const fetchPayment = async () => {
+        const fetchPayment = async (): Promise<void> => {
             if (!user?.token) {
                 setError('Please login to view donation details');
                 setLoading(false);
@@ -50,8 +77,8 @@ const CoordinatorViewDonation = ({ onLogout }) => {
                 if (data.success && data.payment) {
                     setDonation(data.payment);
                 }
-            } catch (err) {
-                setError(err.message);
+            } catch (err: any) {
+                setError(err.message || 'An unknown error occurred');
             } finally {
                 setLoading(false);
             }
@@ -62,7 +89,7 @@ const CoordinatorViewDonation = ({ onLogout }) => {
         }
     }, [id, user]);
 
-    const getStatusStyle = (status) => {
+    const getStatusStyle = (status: string): StatusStyle => {
         switch (status) {
             case 'paid':
                 return { bgColor: 'bg-emerald-50', textColor: 'text-emerald-600', label: 'Successful' };
@@ -80,6 +107,7 @@ const CoordinatorViewDonation = ({ onLogout }) => {
     };
 
     const handleShare = async () => {
+        if (!donation) return;
         const shareText = `Donation: ${donation.purpose} - Amount: ₹${donation.amount}`;
         if (navigator.share) {
             try {
@@ -102,7 +130,7 @@ const CoordinatorViewDonation = ({ onLogout }) => {
 
         try {
             // Clone the card to avoid modifying the original
-            const clonedCard = donationCardRef.current.cloneNode(true);
+            const clonedCard = donationCardRef.current.cloneNode(true) as HTMLDivElement;
 
             // Remove the buttons section from the clone (last flex-gap-3 div with buttons)
             const buttonsDiv = clonedCard.querySelector('div.flex.gap-3');

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 import {
   Mail,
   Phone,
@@ -19,29 +19,105 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string): string => {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-const formatAddress = (address) => {
+interface Address {
+    street?: string;
+    city?: string;
+    pinCode?: string;
+    mobile?: string;
+}
+
+const formatAddress = (address: Address): string => {
   if (!address || typeof address !== 'object') return 'N/A';
   const parts = [address.street, address.city, address.pinCode].filter(Boolean);
   return parts.length > 0 ? parts.join(', ') : 'N/A';
 };
 
-const Coordinator_View_Alumni = ({ onLogout }) => {
+interface SpouseDetails {
+    name?: string;
+    qualification?: string;
+    numberOfChildren?: string | number;
+}
+
+interface EntrepreneurDetails {
+    organizationName?: string;
+    natureOfWork?: string;
+    annualTurnover?: string;
+    numberOfEmployees?: string | number;
+}
+
+interface CompetitiveExam {
+    examName: string;
+    marks: string | number;
+}
+
+interface Qualification {
+    course: string;
+    institution: string;
+    yearOfPassing?: string | number;
+    percentage?: string | number;
+    boardUniversity?: string;
+}
+
+interface KnownAlumni {
+    name: string;
+    degree: string;
+    batch: string;
+    email?: string;
+    phone?: string;
+}
+
+interface Alumni {
+    _id: string;
+    name: string;
+    yearFrom: string | number;
+    yearTo: string | number;
+    profilePhoto?: string;
+    isActive: boolean;
+    placementType?: string;
+    designation?: string;
+    branch: string;
+    email: string;
+    presentAddress?: Address;
+    permanentAddress?: Address;
+    registerNumber: string;
+    fatherName?: string;
+    dob: string;
+    maritalStatus?: string;
+    spouseDetails?: SpouseDetails;
+    degree: string;
+    companyAddress?: string;
+    employmentRemarks?: string;
+    isEntrepreneur: boolean;
+    entrepreneurDetails?: EntrepreneurDetails;
+    hasCompetitiveExams: boolean;
+    competitiveExams?: CompetitiveExam[];
+    collegeQualifications?: Qualification[];
+    knownAlumni?: KnownAlumni[];
+    extraCurricular?: string;
+    otherInfo?: string;
+}
+
+interface CoordinatorViewAlumniProps {
+  onLogout: () => void;
+}
+
+const Coordinator_View_Alumni: FC<CoordinatorViewAlumniProps> = ({ onLogout }) => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const [alumniData, setAlumniData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [imageError, setImageError] = useState(false);
+  const [alumniData, setAlumniData] = useState<Alumni | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchAlumni = async () => {
+    const fetchAlumni = async (): Promise<void> => {
       if (!user?.token) {
         setError('Please login to view alumni details');
         setLoading(false);
@@ -67,8 +143,8 @@ const Coordinator_View_Alumni = ({ onLogout }) => {
         } else {
           setError(data.message || 'Alumni not found');
         }
-      } catch (err) {
-        setError(err.message);
+      } catch (err: any) {
+        setError(err.message || 'An unknown error occurred');
       } finally {
         setLoading(false);
       }
@@ -166,7 +242,7 @@ const Coordinator_View_Alumni = ({ onLogout }) => {
                     }
                     alt={alumniData.name}
                     className={styles.avatarImage}
-                    onError={(e) => {
+                    onError={() => {
                       console.error('Failed to load profile photo:', alumniData.profilePhoto);
                       setImageError(true);
                     }}
@@ -288,14 +364,14 @@ const Coordinator_View_Alumni = ({ onLogout }) => {
                   <div className={`${styles.infoRow} ${styles.fullWidth}`}>
                     <span className={styles.infoLabel}>Present Address</span>
                     <span className={styles.infoValue}>
-                      {formatAddress(alumniData.presentAddress)}
+                      {formatAddress(alumniData.presentAddress || {})}
                       {alumniData.presentAddress?.mobile && ` | Mobile: ${alumniData.presentAddress.mobile}`}
                     </span>
                   </div>
                   <div className={`${styles.infoRow} ${styles.fullWidth}`}>
                     <span className={styles.infoLabel}>Permanent Address</span>
                     <span className={styles.infoValue}>
-                      {formatAddress(alumniData.permanentAddress)}
+                      {formatAddress(alumniData.permanentAddress || {})}
                       {alumniData.permanentAddress?.mobile && ` | Mobile: ${alumniData.permanentAddress.mobile}`}
                     </span>
                   </div>
@@ -359,14 +435,14 @@ const Coordinator_View_Alumni = ({ onLogout }) => {
               )}
 
               {/* Competitive Exams (if applicable) */}
-              {alumniData.hasCompetitiveExams && alumniData.competitiveExams?.length > 0 && (
+              {alumniData.hasCompetitiveExams && alumniData.competitiveExams && alumniData.competitiveExams.length > 0 && (
                 <div className={styles.infoCard}>
                   <div className={styles.cardHeader}>
                     <Award size={20} className={styles.cardIcon} />
                     <h3>Competitive Exams</h3>
                   </div>
                   <div className={styles.cardBody}>
-                    {alumniData.competitiveExams.map((exam, index) => (
+                    {alumniData.competitiveExams.map((exam: CompetitiveExam, index: number) => (
                       <div key={index} className={styles.infoRow}>
                         <span className={styles.infoLabel}>{exam.examName}</span>
                         <span className={styles.infoValue}>{exam.marks}</span>
@@ -377,7 +453,7 @@ const Coordinator_View_Alumni = ({ onLogout }) => {
               )}
 
               {/* College Qualifications (if applicable) */}
-              {alumniData.collegeQualifications?.length > 0 && (
+              {alumniData.collegeQualifications && alumniData.collegeQualifications.length > 0 && (
                 <div className={`${styles.infoCard} ${styles.fullSection}`}>
                   <div className={styles.cardHeader}>
                     <GraduationCap size={20} className={styles.cardIcon} />
@@ -385,7 +461,7 @@ const Coordinator_View_Alumni = ({ onLogout }) => {
                   </div>
                   <div className={styles.cardBody}>
                     <div className={styles.timeline}>
-                      {alumniData.collegeQualifications.map((qual, index) => (
+                      {alumniData.collegeQualifications.map((qual: Qualification, index: number) => (
                         <div key={index} className={styles.timelineItem}>
                           <div className={styles.timelineDot}></div>
                           <div className={styles.timelineContent}>
@@ -411,7 +487,7 @@ const Coordinator_View_Alumni = ({ onLogout }) => {
               )}
 
               {/* Known Alumni (if applicable) */}
-              {alumniData.knownAlumni?.length > 0 && (
+              {alumniData.knownAlumni && alumniData.knownAlumni.length > 0 && (
                 <div className={`${styles.infoCard} ${styles.fullSection}`}>
                   <div className={styles.cardHeader}>
                     <Users size={20} className={styles.cardIcon} />
@@ -419,7 +495,7 @@ const Coordinator_View_Alumni = ({ onLogout }) => {
                   </div>
                   <div className={styles.cardBody}>
                     <div className={styles.knownAlumniGrid}>
-                      {alumniData.knownAlumni.map((known, index) => (
+                      {alumniData.knownAlumni.map((known: KnownAlumni, index: number) => (
                         <div key={index} className={styles.knownAlumniCard}>
                           <div className={styles.knownAlumniAvatar}>
                             {known.name?.charAt(0).toUpperCase() || 'A'}

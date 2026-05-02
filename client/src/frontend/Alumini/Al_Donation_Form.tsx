@@ -9,7 +9,13 @@ const API_BASE = import.meta.env.VITE_API_URL;
 
 const isTestMode = true;
 
-const parseApiResponse = async (response) => {
+declare global {
+    interface Window {
+        Razorpay: any;
+    }
+}
+
+const parseApiResponse = async (response: Response) => {
     const raw = await response.text();
 
     if (!raw) {
@@ -38,7 +44,11 @@ const loadRazorpayScript = () => {
     });
 };
 
-const Alumini_DonationFormPage = ({ onLogout }) => {
+interface AluminiDonationFormPageProps {
+    onLogout?: () => void;
+}
+
+const Alumini_DonationFormPage = ({ onLogout }: AluminiDonationFormPageProps) => {
     const { user } = useAuth();
         const navigate = useNavigate();
   const [amount, setAmount] = useState('1000');
@@ -113,7 +123,7 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
                     name: user.name || '',
                     email: user.email || '',
                 },
-                handler: async (response) => {
+                handler: async (response: any) => {
                     try {
                         console.log('Payment response received:', response);
 
@@ -135,7 +145,7 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
 
                         alert('Payment successful! Thank you for your donation.');
                         navigate('/alumini/donation_history');
-                    } catch (error) {
+                    } catch (error: any) {
                         console.error('Verification error:', error);
                         alert(error.message || 'Payment verification failed');
                     } finally {
@@ -154,13 +164,13 @@ const Alumini_DonationFormPage = ({ onLogout }) => {
             };
 
             const razorpayCheckout = new window.Razorpay(options);
-            razorpayCheckout.on('payment.failed', (error) => {
+            razorpayCheckout.on('payment.failed', (error: any) => {
                 console.error('Payment failed:', error);
                 setIsPaying(false);
                 alert('Payment failed: ' + (error.reason || 'Please try again.'));
             });
             razorpayCheckout.open();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Payment error:', error);
             setIsPaying(false);
             alert(error.message || 'Failed to start payment');

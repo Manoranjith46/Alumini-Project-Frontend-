@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Eye, Building2 } from 'lucide-react';
 import styles from './Co_Alumni.module.css';
@@ -33,7 +33,18 @@ interface CoordinatorData {
   [key: string]: any;
 }
 
-const formatAddress = (address: string | Address | null | undefined) => {
+interface ApiAlumniResponse {
+  success: boolean;
+  alumni?: Alumni[];
+  message?: string;
+}
+
+interface ApiCoordinatorResponse {
+  success: boolean;
+  data?: CoordinatorData;
+}
+
+const formatAddress = (address: string | Address | null | undefined): string => {
   if (!address) return '-';
   if (typeof address === 'string') return address;
   const parts = [address.street, address.city, address.pinCode].filter(Boolean);
@@ -41,31 +52,31 @@ const formatAddress = (address: string | Address | null | undefined) => {
 };
 
 interface CoordinatorAlumniProps {
-  onLogout?: () => void;
+  onLogout: () => void;
 }
 
-const Coordinator_Alumni = ({ onLogout }: CoordinatorAlumniProps) => {
+const Coordinator_Alumni: FC<CoordinatorAlumniProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [coordinatorData, setCoordinatorData] = useState<CoordinatorData | null>(null);
   const [alumniData, setAlumniData] = useState<Alumni[]>([]);
   const [filteredData, setFilteredData] = useState<Alumni[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
 
   // Search/filter states
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('');
-  const [batchFilter, setBatchFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filterType, setFilterType] = useState<string>('');
+  const [batchFilter, setBatchFilter] = useState<string>('');
 
   // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
 
   // Fetch coordinator profile and department alumni
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (): Promise<void> => {
       if (!user?.token) {
         setError('Please login to view alumni');
         setLoading(false);
@@ -78,7 +89,7 @@ const Coordinator_Alumni = ({ onLogout }: CoordinatorAlumniProps) => {
             Authorization: `Bearer ${user.token}`,
           },
         });
-        const coordData = await coordRes.json();
+        const coordData: ApiCoordinatorResponse = await coordRes.json();
 
         if (!coordData.success || !coordData.data) {
           setError('Failed to fetch coordinator profile');
@@ -94,7 +105,7 @@ const Coordinator_Alumni = ({ onLogout }: CoordinatorAlumniProps) => {
             Authorization: `Bearer ${user.token}`,
           },
         });
-        const alumniResponse = await alumniRes.json();
+        const alumniResponse: ApiAlumniResponse = await alumniRes.json();
 
         if (alumniResponse.success && alumniResponse.alumni) {
           setAlumniData(alumniResponse.alumni);
@@ -154,7 +165,7 @@ const Coordinator_Alumni = ({ onLogout }: CoordinatorAlumniProps) => {
     setCurrentPage(1);
   }, [searchTerm, filterType, batchFilter, alumniData]);
 
-  const getBadgeClass = (type: string | null | undefined) => {
+  const getBadgeClass = (type: string | null | undefined): string => {
     if (!type) return styles.badgeGray;
     const t = type.toLowerCase();
     if (t.includes('product')) return styles.badgeBlue;
@@ -266,7 +277,7 @@ const Coordinator_Alumni = ({ onLogout }: CoordinatorAlumniProps) => {
                     <tbody className={styles.tableBody}>
                       {paginatedData.length === 0 ? (
                         <tr>
-                          <td colSpan="7" className={styles.textCenter}>
+                          <td colSpan={7} className={styles.textCenter}>
                             No alumni found
                           </td>
                         </tr>

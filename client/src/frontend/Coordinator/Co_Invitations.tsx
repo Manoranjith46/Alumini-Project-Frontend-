@@ -1,154 +1,293 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, FC } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './Co_Invitations.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
-import Back from './Components/BackButton/Back';
 import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+interface Department {
+  _id: string;
+  branch: string;
+  deptCode: string;
+}
 
-    if (diffHours < 1) return 'Just now';
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    if (diffDays === 1) return 'Yesterday';
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+interface ApiEvent {
+  _id: string;
+  eventName: string;
+  eventDate: string;
+  eventDay: string;
+  eventTime: string;
+  venue: string;
+  status: 'pending' | 'completed' | 'cancelled';
+  organizer: Department;
+  coOrganizers: Department[];
+  createdAt: string;
+}
+
+interface EventData {
+  id: string;
+  title: string;
+  organizer: string;
+  organizerCode: string;
+  coOrganizers: string;
+  date: string;
+  day: string;
+  time: string;
+  venue: string;
+  status: 'pending' | 'completed' | 'cancelled';
+  createdAt: string;
+}
+
+interface CoordinatorInvitationsProps {
+  onLogout: () => void;
+}
+
+const formatDate = (dateString: string | number | Date): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
-const getInitials = (name) => {
-    if (!name) return '??';
-    return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+const formatTime = (timeStr: string | undefined): string => {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const displayH = h % 12 || 12;
+  return `${displayH}:${String(m).padStart(2, '0')} ${period}`;
 };
 
-const CoordinatorInvitations = ({ onLogout }) => {
-    const { user } = useAuth();
-    const [invitations, setInvitations] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+const getStatusBadgeClass = (status: string): string => {
+  switch (status) {
+    case 'completed': return styles.statusCompleted;
+    case 'cancelled': return styles.statusCancelled;
+    case 'pending': return styles.statusPending;
+    default: return styles.statusPending;
+  }
+};
 
-    useEffect(() => {
-        const fetchInvitations = async () => {
-            if (!user?.token) {
-                setError('Please login to view invitations');
-                setLoading(false);
-                return;
-            }
+const CoordinatorInvitations: FC<CoordinatorInvitationsProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [eventsData, setEventsData] = useState<EventData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const cardsPerPage = 9;
 
-            try {
-                const response = await fetch(`${API_BASE}/api/invitations/department/all`, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+  useEffect(() => {
+    const fetchEvents = async (): Promise<void> => {
+      if (!user?.token) {
+        setError('Please login to view events');
+        setLoading(false);
+        return;
+      }
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch invitations');
-                }
+      try {
+        const response = await fetch(`${API_BASE}/api/events`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
 
-                const data = await response.json();
-                if (data.success && data.invitations) {
-                    setInvitations(data.invitations);
-                }
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
+        if (!response.ok) {
+          throw new Error('Failed to fetch events');
+        }
 
-        fetchInvitations();
-    }, [user]);
+        const data = await response.json();
 
-    if (loading) {
-        return (
-            <div className="bg-[#F8FAFC] font-display text-slate-900 h-screen flex overflow-hidden">
-                <Sidebar currentView="invitations" onLogout={onLogout} />
-                <main className="flex-1 ml-[70px] h-screen flex flex-col overflow-hidden">
-                    <div className="flex-1 flex items-center justify-center">
-                        <p className="text-slate-500">Loading invitations...</p>
-                    </div>
-                </main>
-            </div>
-        );
+        if (data.success && data.data) {
+          // Filter events by coordinator's department
+          const filteredEvents = data.data.filter((event: ApiEvent) => {
+            const isOrganizer = event.organizer?.deptCode === user.department || event.organizer?.branch === user.department;
+            const isCoOrganizer = event.coOrganizers?.some(co => co.deptCode === user.department || co.branch === user.department);
+            return isOrganizer || isCoOrganizer;
+          });
+
+          const formattedData: EventData[] = filteredEvents.map((event: ApiEvent) => ({
+            id: event._id,
+            title: event.eventName,
+            organizer: event.organizer?.branch || 'N/A',
+            organizerCode: event.organizer?.deptCode || '',
+            coOrganizers: event.coOrganizers?.map(co => co.deptCode).join(', ') || '',
+            date: formatDate(event.eventDate),
+            day: event.eventDay,
+            time: formatTime(event.eventTime),
+            venue: event.venue,
+            status: event.status,
+            createdAt: event.createdAt,
+          }));
+          setEventsData(formattedData);
+        }
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [user]);
+
+  const totalPages = Math.ceil(eventsData.length / cardsPerPage) || 1;
+  const startIndex = (currentPage - 1) * cardsPerPage;
+  const paginatedEvents = eventsData.slice(startIndex, startIndex + cardsPerPage);
+
+  const handlePageClick = (page: number): void => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handlePrevPage = (): void => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleNextPage = (): void => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const getPageNumbers = (): number[] => {
+    const pages: number[] = [];
+    const maxButtonsToShow = 3;
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtonsToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxButtonsToShow - 1);
+
+    if (endPage - startPage < maxButtonsToShow - 1) {
+      startPage = Math.max(1, endPage - maxButtonsToShow + 1);
     }
 
-    if (error) {
-        return (
-            <div className="bg-[#F8FAFC] font-display text-slate-900 h-screen flex overflow-hidden">
-                <Sidebar currentView="invitations" onLogout={onLogout} />
-                <main className="flex-1 ml-[70px] h-screen flex flex-col overflow-hidden">
-                    <div className="flex-1 flex items-center justify-center">
-                        <p className="text-red-500">{error}</p>
-                    </div>
-                </main>
-            </div>
-        );
+    for (let i = startPage; i <= endPage; i += 1) {
+      pages.push(i);
     }
+    return pages;
+  };
 
+  if (loading) {
     return (
-        <div className="bg-[#F8FAFC] font-display text-slate-900 h-screen flex overflow-hidden">
-            {/* Sidebar */}
-            <Sidebar currentView="invitations" onLogout={onLogout} />
-            {/* Main Content Area */}
-            <main className="flex-1 ml-[70px] h-screen flex flex-col overflow-hidden">
-                <div className="sticky top-0 bg-[#F8FAFC] px-8 pt-6 pb-2 z-10 border-b border-slate-200">
-                    <Back to={'/coordinator/dashboard'} />
-                </div>
-                <div className={`flex-1 overflow-y-auto ${styles.mainScrollable} p-7 bg-[#F9FAFB]`}>
-                    <div className="max-w-7xl mx-auto">
-                        <header className="flex justify-between items-start mb-10">
-                            <div>
-                                <h2 className="text-3xl font-bold text-slate-900">Welcome back, Coordinator!</h2>
-                                <p className="text-slate-500 mt-2">Check out what's happening in your alma mater today.</p>
-                            </div>
-                        </header>
-
-                        <section className="pb-10">
-                            <div className="flex justify-between items-center mb-6">
-                                <div className="flex items-center space-x-2 text-[#FF3D00]">
-                                    <span className="material-symbols-outlined">email</span>
-                                    <h3 className="font-bold text-lg text-slate-900">Received Emails</h3>
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                            {invitations.length > 0 ? (
-                                invitations.map((invitation) => (
-                                    <div key={invitation._id} className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
-                                        <div className="flex items-center space-x-4">
-                                            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 font-bold">
-                                                {getInitials(invitation.sender)}
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-slate-900">{invitation.sender || 'Unknown Sender'}</h4>
-                                                <p className="text-sm text-slate-500 mt-0.5">
-                                                    {invitation.subject || 'No subject'} - {(invitation.description || '').substring(0, 50)}...
-                                                    <span className="text-slate-400 ml-1">• {formatDate(invitation.createdAt)}</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <Link className="bg-[#FF3D00] hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-lg transition-colors text-sm shadow-lg shadow-red-500/20" to={`/coordinator/view_invitations/${invitation._id}`}>
-                                            View Details
-                                        </Link>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="bg-white p-10 rounded-xl border border-slate-100 shadow-sm text-center">
-                                    <span className="material-symbols-outlined text-4xl text-slate-300 mb-3">mail</span>
-                                    <p className="text-slate-500">No invitations received yet.</p>
-                                </div>
-                            )}
-                        </div>
-                    </section>
-                    </div>
-                </div>
-            </main>
-        </div>
+      <div className={styles.pageContainer}>
+        <Sidebar onLogout={onLogout} currentView={'Events_and_Reunions'} />
+        <main className={styles.mainContent}>
+          <div className={styles.contentMaxWidth}>
+            <div className={styles.loadingState}>Loading events...</div>
+          </div>
+        </main>
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.pageContainer}>
+        <Sidebar onLogout={onLogout} currentView={'Events_and_Reunions'} />
+        <main className={styles.mainContent}>
+          <div className={styles.contentMaxWidth}>
+            <div className={styles.errorState}>{error}</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.pageContainer}>
+
+      {/* Sidebar Navigation */}
+      <Sidebar onLogout={onLogout} currentView={'Events_and_Reunions'} />
+
+
+      {/* Main Content Area */}
+      <main className={styles.mainContent}>
+        <div className={styles.contentMaxWidth}>
+
+          {/* Header Section */}
+          <header className={styles.pageHeader}>
+            <div className={styles.headerText}>
+              <h2 className={styles.pageTitle}>Events & Reunion History</h2>
+              <p className={styles.pageSubtitle}>
+                Viewing events and reunions organized by your department ({user?.department}).
+              </p>
+            </div>
+          </header>
+
+          {/* Event History Grid */}
+          <section className={styles.eventsGrid}>
+            {paginatedEvents.length > 0 ? (
+              paginatedEvents.map((event) => (
+                <article key={event.id} className={styles.eventCard}>
+                  <div className={styles.cardContent}>
+                    <div className={styles.cardHeader}>
+                      <span className={`${styles.statusBadge} ${getStatusBadgeClass(event.status)}`}>
+                        {event.status}
+                      </span>
+                    </div>
+                    <div className={styles.cardText}>
+                      <h3 className={styles.eventTitle}>{event.title}</h3>
+                      <div className={styles.eventOrganizer}>
+                        <span className="material-symbols-outlined">business</span>
+                        {event.organizer} ({event.organizerCode})
+                      </div>
+                      <div className={styles.eventMeta}>
+                        <span className={styles.eventDate}>
+                          <span className="material-symbols-outlined">calendar_month</span>
+                          {event.date} ({event.day})
+                        </span>
+                        <span className={styles.eventTime}>
+                          <span className="material-symbols-outlined">schedule</span>
+                          {event.time}
+                        </span>
+                      </div>
+
+                    </div>
+                    <button className={styles.viewDetailsBtn} onClick={() => { navigate(`/coordinator/view_invitations/${event.id}`) }} >View Details</button>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <div className={styles.emptyState}>
+                <span className="material-symbols-outlined">event_busy</span>
+                <p>No events found for your department.</p>
+              </div>
+            )}
+          </section>
+
+          {/* Pagination */}
+          {eventsData.length > 0 && (
+            <footer className={styles.pagination}>
+              <button
+                className={styles.pageArrowBtn}
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+              >
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              {getPageNumbers().map((page) => (
+                <button
+                  key={page}
+                  className={`${styles.pageNumberBtn} ${currentPage === page ? styles.activePage : ''}`}
+                  onClick={() => handlePageClick(page)}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                className={styles.pageArrowBtn}
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </footer>
+          )}
+
+        </div>
+      </main>
+
+    </div>
+  );
 };
 
 export default CoordinatorInvitations;

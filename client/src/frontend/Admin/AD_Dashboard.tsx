@@ -8,15 +8,47 @@ import { useAuth } from '../../context/authContext/authContext';
 const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 
-const Admin_Dashboard = ( { onLogout } ) => {
+interface DashboardStats {
+  totalAlumni: number;
+  activeCoordinators: number;
+  upcomingEvents: number;
+  totalBroadcasts: number;
+  [key: string]: number;
+}
+
+interface DashboardCards {
+  mail?: {
+    newCount: number;
+    recentMails: any[];
+  };
+  jobs?: {
+    activeCount: number;
+    recentJobs: any[];
+  };
+  donation?: {
+    amount: number;
+    purpose: string;
+    paidAt: string;
+  };
+  event?: {
+    name: string;
+    venue: string;
+    day: string;
+    time: string;
+    daysUntil: number;
+    hoursUntil: number;
+  };
+}
+
+const Admin_Dashboard = ( { onLogout }: { onLogout?: () => void } ) => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   // Analytics KPI state
-  const [stats, setStats] = useState(null);
-  const [cards, setCards] = useState(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [cards, setCards] = useState<DashboardCards | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * Fetch dashboard statistics from the API
@@ -42,7 +74,7 @@ const Admin_Dashboard = ( { onLogout } ) => {
 
       setStats(data.stats);
       setCards(data.cards);
-    } catch (err) {
+    } catch (err: any) {
       console.error('[Admin_Dashboard] Analytics fetch error:', err);
       setError(err.message || 'An error occurred while fetching analytics data');
     } finally {
@@ -53,11 +85,11 @@ const Admin_Dashboard = ( { onLogout } ) => {
   /**
    * Format time ago for display
    */
-  const formatTimeAgo = (date) => {
+  const formatTimeAgo = (date: string | Date | null | undefined) => {
     if (!date) return '';
     const now = new Date();
     const then = new Date(date);
-    const diffMs = now - then;
+    const diffMs = now.getTime() - then.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffHours / 24);
 
@@ -121,8 +153,8 @@ const Admin_Dashboard = ( { onLogout } ) => {
     <div className={styles.kpiGrid}>
       {kpiConfig.map((kpi) => {
         const Icon = kpi.icon;
-        const value = stats?.[kpi.key] ?? 0;
-        const colorClass = styles[`kpiCard${kpi.color.charAt(0).toUpperCase() + kpi.color.slice(1)}`];
+        const value = stats ? stats[kpi.key as keyof DashboardStats] : 0;
+        const colorClass = styles[`kpiCard${kpi.color.charAt(0).toUpperCase() + kpi.color.slice(1)}` as keyof typeof styles];
 
         return (
           <div key={kpi.key} className={`${styles.kpiCard} ${colorClass}`}>
@@ -130,7 +162,7 @@ const Admin_Dashboard = ( { onLogout } ) => {
               <Icon size={24} className={styles.kpiIcon} />
             </div>
             <span className={styles.kpiLabel}>{kpi.label}</span>
-            <span className={styles.kpiValue}>{value.toLocaleString()}</span>
+            <span className={styles.kpiValue}>{value?.toLocaleString()}</span>
           </div>
         );
       })}

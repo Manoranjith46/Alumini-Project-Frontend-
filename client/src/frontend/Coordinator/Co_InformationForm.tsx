@@ -1,59 +1,82 @@
+import { FC, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import styles from './Co_ViewMail.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
-import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-const Coordinator_ViewMail = ({ onLogout }) => {
+interface BatchYear {
+    startYear: number;
+    endYear: number;
+}
+
+interface AlumniInfo {
+    fullName?: string;
+    contactInfo?: {
+        personalEmail?: string;
+        mobile?: string;
+        officialEmail?: string;
+        location?: string;
+    };
+    batch?: BatchYear;
+    designation?: string;
+    companyName?: string;
+}
+
+interface ResponseData {
+    fullName?: string;
+    personalEmail?: string;
+    mobileNo?: string;
+    batchYear?: BatchYear;
+    designation?: string;
+    companyName?: string;
+    officialEmail?: string;
+    location?: string;
+    rejectionReason?: string;
+}
+
+interface MailResponse {
+    recipientEmail: string;
+    action: 'accept' | 'reject' | 'pending';
+    responseData?: ResponseData;
+    alumniInfo?: AlumniInfo;
+    rejectionReason?: string;
+    submittedAt: string;
+}
+
+interface ResponseStats {
+    total: number;
+    accept: number;
+    reject: number;
+    pending: number;
+}
+
+interface Mail {
+    _id: string;
+    title: string;
+    content: string;
+    recipientCount: number;
+    isBroadcast: boolean;
+    createdAt: string;
+    responseStats?: ResponseStats;
+}
+
+interface CoordinatorViewMailProps {
+    onLogout: () => void;
+}
+
+const Coordinator_ViewMail: FC<CoordinatorViewMailProps> = ({ onLogout }) => {
     const { user } = useAuth();
-    const [mail, setMail] = useState(null);
-    const [responses, setResponses] = useState([]);
-    const [responseStats, setResponseStats] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [mail, setMail] = useState<Mail | null>(null);
+    const [responses, setResponses] = useState<MailResponse[]>([]);
+    const [responseStats, setResponseStats] = useState<ResponseStats | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
     const location = useLocation();
     const mailId = location.state?.mailId;
-    const passedMailData = location.state?.mailData;
+    const passedMailData = location.state?.mailData as Mail | undefined;
 
-    useEffect(() => {
-        if (passedMailData) {
-            setMail(passedMailData);
-            setResponseStats(passedMailData.responseStats);
-            fetchMailResponses();
-        } else if (mailId && user?.token) {
-            fetchMailDetails();
-        } else {
-            setLoading(false);
-        }
-    }, [mailId, passedMailData, user?.token]);
-
-    const fetchMailDetails = async () => {
-        try {
-            setLoading(true);
-            setMail(null);
-            setResponses([]);
-            setResponseStats(null);
-            const response = await fetch(`${API_BASE_URL}/api/mail/${mailId}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${user.token}`
-                }
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                setMail(data.mail);
-                fetchMailResponses();
-            }
-        } catch (err) {
-            console.error('Error fetching mail:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchMailResponses = async () => {
+    const fetchMailResponses = async (id: string) => {
         try {
             if (!user?.token) {
                 return;
@@ -61,13 +84,11 @@ const Coordinator_ViewMail = ({ onLogout }) => {
 
             setResponses([]);
 
-            // Use department-specific endpoint if coordinator has department
             let apiUrl;
             if (user?.department) {
-                apiUrl = `${API_BASE_URL}/api/mail/${mailId}/responses/department/${encodeURIComponent(user.department)}`;
+                apiUrl = `${API_BASE_URL}/api/mail/${id}/responses/department/${encodeURIComponent(user.department)}`;
             } else {
-                // Fallback to general responses endpoint
-                apiUrl = `${API_BASE_URL}/api/mail/${mailId}/responses`;
+                apiUrl = `${API_BASE_URL}/api/mail/${id}/responses`;
             }
 
             const response = await fetch(apiUrl, {
@@ -91,7 +112,46 @@ const Coordinator_ViewMail = ({ onLogout }) => {
         }
     };
 
-    const formatDate = (dateString) => {
+    const fetchMailDetails = async () => {
+        if (!mailId || !user?.token) return;
+
+        try {
+            setLoading(true);
+            setMail(null);
+            setResponses([]);
+            setResponseStats(null);
+            const response = await fetch(`${API_BASE_URL}/api/mail/${mailId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${user.token}`
+                }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setMail(data.mail);
+                fetchMailResponses(mailId);
+            }
+        } catch (err) {
+            console.error('Error fetching mail:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (passedMailData) {
+            setMail(passedMailData);
+            setResponseStats(passedMailData.responseStats || null);
+            fetchMailResponses(passedMailData._id);
+        } else if (mailId && user?.token) {
+            fetchMailDetails();
+        } else {
+            setLoading(false);
+        }
+    }, [mailId, passedMailData, user?.token]);
+
+    const formatDate = (dateString: string): string => {
         if (!dateString) return 'No date set';
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
@@ -101,7 +161,7 @@ const Coordinator_ViewMail = ({ onLogout }) => {
         });
     };
 
-    const formatDateTime = (dateString) => {
+    const formatDateTime = (dateString: string): string => {
         if (!dateString) return 'No date';
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
@@ -113,7 +173,7 @@ const Coordinator_ViewMail = ({ onLogout }) => {
         });
     };
 
-    const getStatusColor = (status) => {
+    const getStatusColor = (status: string): string => {
         switch (status) {
             case 'accept':
                 return '#22c55e'; // Green

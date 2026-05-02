@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Co_JobHistory.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
@@ -7,19 +7,39 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const getInitials = (name) => {
+interface SubmittedBy {
+    name: string;
+    email?: string;
+}
+
+interface JobReference {
+    _id: string;
+    submittedBy?: SubmittedBy;
+    companyName: string;
+    role: string;
+    status: 'pending' | 'approved' | 'rejected';
+    location?: string;
+    description?: string;
+    requirements?: string;
+}
+
+const getInitials = (name: string): string => {
     if (!name) return '??';
     return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
 };
 
-const CoordinatorJobHistory = ({ onLogout }) => {
+interface CoordinatorJobHistoryProps {
+    onLogout: () => void;
+}
+
+const CoordinatorJobHistory: FC<CoordinatorJobHistoryProps> = ({ onLogout }) => {
     const { user } = useAuth();
-    const [jobReferences, setJobReferences] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [jobReferences, setJobReferences] = useState<JobReference[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchJobReferences = async () => {
+        const fetchJobReferences = async (): Promise<void> => {
             if (!user?.token) {
                 setError('Please login to view job references');
                 setLoading(false);
@@ -41,8 +61,8 @@ const CoordinatorJobHistory = ({ onLogout }) => {
                 if (data.success && data.jobReferences) {
                     setJobReferences(data.jobReferences);
                 }
-            } catch (err) {
-                setError(err.message);
+            } catch (err: any) {
+                setError(err.message || 'An unknown error occurred');
             } finally {
                 setLoading(false);
             }
@@ -104,7 +124,7 @@ const CoordinatorJobHistory = ({ onLogout }) => {
                                     <div className="flex flex-col items-center text-center">
                                         <div className="relative">
                                             <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xl border-2 border-slate-50">
-                                                {getInitials(job.submittedBy?.name)}
+                                                {getInitials(job.submittedBy?.name || 'Unknown')}
                                             </div>
                                             <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${job.status === 'approved' ? 'bg-green-500' : job.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
                                         </div>

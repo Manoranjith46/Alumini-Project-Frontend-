@@ -7,28 +7,52 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | Date) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
-const formatAmount = (amount) => {
+const formatAmount = (amount: number) => {
   return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
-const getInitials = (name) => {
+const getInitials = (name: string | undefined | null) => {
   if (!name) return 'NA';
   return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
 };
 
-const Admin_Donation_History = ({ onLogout }) => {
+interface DonationRecord {
+  id: string;
+  initials: string;
+  name: string;
+  batch: string;
+  amount: string;
+  rawAmount: number;
+  date: string;
+  type: string;
+  typeClass: string;
+}
+
+interface ApiPayment {
+  _id: string;
+  status: string;
+  amount: number;
+  paidAt?: string;
+  createdAt: string;
+  purpose?: string;
+  user?: {
+    name?: string;
+  };
+}
+
+const Admin_Donation_History = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
-  const [donationsData, setDonationsData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+  const [donationsData, setDonationsData] = useState<DonationRecord[]>([]);
+  const [filteredData, setFilteredData] = useState<DonationRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const entriesPerPage = 7;
 
@@ -54,7 +78,7 @@ const Admin_Donation_History = ({ onLogout }) => {
         const data = await response.json();
 
         if (data.success && data.payments) {
-          const formattedData = data.payments
+          const formattedData: DonationRecord[] = (data.payments as ApiPayment[])
             .filter(payment => payment.status === 'paid')
             .map((payment) => ({
               id: payment._id,
@@ -71,7 +95,7 @@ const Admin_Donation_History = ({ onLogout }) => {
           setDonationsData(formattedData);
           setFilteredData(formattedData);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -103,7 +127,7 @@ const Admin_Donation_History = ({ onLogout }) => {
   const rangeStart = totalEntries === 0 ? 0 : startIndex + 1;
   const rangeEnd = Math.min(startIndex + entriesPerPage, totalEntries);
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }

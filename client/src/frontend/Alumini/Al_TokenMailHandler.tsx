@@ -2,12 +2,20 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+interface TokenInfo {
+    recipientEmail?: string;
+    mailTitle?: string;
+    mailId?: string;
+    mailContent?: string;
+    expiresAt?: string;
+}
+
 const TokenMailHandler = () => {
-    const { token } = useParams();
+    const { token } = useParams<{ token: string }>();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [tokenInfo, setTokenInfo] = useState(null);
+    const [error, setError] = useState<string | null>(null);
+    const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
 
     const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -39,7 +47,7 @@ const TokenMailHandler = () => {
                 setError('Invalid token response from server');
                 setLoading(false);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Token validation error:', error);
 
             if (error.response?.data?.message) {

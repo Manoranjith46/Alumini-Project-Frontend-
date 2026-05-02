@@ -7,7 +7,21 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const Admin_View_Department = ( { onLogout } ) => {
+interface Department {
+  _id: string;
+  branch: string;
+  deptCode: string;
+}
+
+interface Staff {
+  _id: string;
+  name: string;
+  designation: string;
+  email: string;
+  phone?: string;
+}
+
+const Admin_View_Department = ( { onLogout }: { onLogout?: () => void } ) => {
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -18,13 +32,13 @@ const Admin_View_Department = ( { onLogout } ) => {
   const [filterRole, setFilterRole] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [department, setDepartment] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [department, setDepartment] = useState<Department | null>(null);
   const [deleting, setDeleting] = useState(false);
   const ENTRIES_PER_PAGE = 10;
 
   // Complete Staff Data
-  const [staffList, setStaffList] = useState([]);
+  const [staffList, setStaffList] = useState<Staff[]>([]);
 
   // Fetch department and faculty data
   useEffect(() => {
@@ -76,7 +90,7 @@ const Admin_View_Department = ( { onLogout } ) => {
         } else {
           setError(coordinatorData.message || 'Failed to load coordinator data');
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -111,7 +125,7 @@ const Admin_View_Department = ( { onLogout } ) => {
   const totalPages = Math.ceil(filteredStaff.length / ENTRIES_PER_PAGE);
 
   // Event handlers
-  const handleNameFilterChange = (e) => {
+  const handleNameFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilterName(e.target.value);
     setCurrentPage(1); // Reset to first page when filtering by name
   };
@@ -170,7 +184,7 @@ const Admin_View_Department = ( { onLogout } ) => {
       } else {
         setError(data.message || 'Failed to delete department');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError('Error deleting department');
       console.error('Error deleting department:', err);
     } finally {

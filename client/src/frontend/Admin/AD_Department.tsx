@@ -7,15 +7,23 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const Admin_Department = ( { onLogout } ) => {
+interface Department {
+  _id: string;
+  stream: string;
+  branch: string;
+  deptCode: string;
+  coordinatorCount: number;
+}
+
+const Admin_Department = ( { onLogout }: { onLogout?: () => void } ) => {
 
     const navigate = useNavigate();
     const { user } = useAuth();
 
   // State Management
-  const [departments, setDepartments] = useState([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,7 +63,7 @@ const Admin_Department = ( { onLogout } ) => {
         } else {
           setError('Failed to load departments');
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
         console.error('Error fetching departments:', err);
       } finally {
@@ -78,13 +86,13 @@ const Admin_Department = ( { onLogout } ) => {
     setFormData({ stream: '', branch: '', deptCode: '' });
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   // Add Department Only
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
@@ -114,7 +122,7 @@ const Admin_Department = ( { onLogout } ) => {
       } else {
         setError(data.message || 'Failed to create department');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError('Error creating department');
       console.error('Error creating department:', err);
     } finally {
@@ -122,7 +130,7 @@ const Admin_Department = ( { onLogout } ) => {
     }
   };
 
-  const handleView = (deptCode) => {
+  const handleView = (deptCode: string) => {
     navigate(`/admin/department/view_department/${deptCode}`);
   };
 

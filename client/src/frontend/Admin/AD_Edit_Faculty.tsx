@@ -31,11 +31,11 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
     dateOfJoining: '',
   });
 
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Partial<Record<keyof FacultyFormData, string>>>({});
   const [loading, setLoading] = useState(true);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
-  const [departments, setDepartments] = useState([]);
-  const [submitError, setSubmitError] = useState('');
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [submitError, setSubmitError] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -107,7 +107,7 @@ const Admin_Edit_Faculty = ({ onLogout }) => {
         if (data.success && Array.isArray(data.departments)) {
           setDepartments(data.departments);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching departments:', err);
       } finally {
         setDepartmentsLoading(false);

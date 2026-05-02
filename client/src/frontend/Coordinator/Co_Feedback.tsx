@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Co_Feedback.module.css';
 import Sidebar from './Components/Sidebar/Sidebar';
@@ -7,19 +7,41 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+interface FeedbackItem {
+  id: string;
+  name: string;
+  content: string;
+  date: string;
+}
+
+interface ApiFeedback {
+  _id: string;
+  submittedBy?: { name: string };
+  reviewedBy?: string;
+  visionIV?: { comment: string };
+  missionIM?: { comment: string };
+  peos?: { comment: string };
+  date?: string;
+  createdAt: string;
+}
+
+const formatDate = (dateString: string | number | Date): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
 };
 
-const CoordinatorFeedbackHistory = ({ onLogout }) => {
+interface CoordinatorFeedbackHistoryProps {
+  onLogout: () => void;
+}
+
+const CoordinatorFeedbackHistory: FC<CoordinatorFeedbackHistoryProps> = ({ onLogout }) => {
   const { user } = useAuth();
-  const [feedbackData, setFeedbackData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [feedbackData, setFeedbackData] = useState<FeedbackItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchFeedbacks = async () => {
+    const fetchFeedbacks = async (): Promise<void> => {
       if (!user?.token) {
         setError('Please login to view feedbacks');
         setLoading(false);
@@ -40,7 +62,7 @@ const CoordinatorFeedbackHistory = ({ onLogout }) => {
         const data = await response.json();
 
         if (data.success && data.feedbacks) {
-          const formattedData = data.feedbacks.map((fb) => ({
+          const formattedData: FeedbackItem[] = data.feedbacks.map((fb: ApiFeedback) => ({
             id: fb._id,
             name: fb.submittedBy?.name || fb.reviewedBy || 'Anonymous',
             content: `"${fb.visionIV?.comment || fb.missionIM?.comment || fb.peos?.comment || 'No comments provided.'}"`,
@@ -48,8 +70,8 @@ const CoordinatorFeedbackHistory = ({ onLogout }) => {
           }));
           setFeedbackData(formattedData);
         }
-      } catch (err) {
-        setError(err.message);
+      } catch (err: any) {
+        setError(err.message || 'An unknown error occurred');
       } finally {
         setLoading(false);
       }

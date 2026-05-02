@@ -3,20 +3,47 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './Al_AcceptForm.module.css';
 
+interface BatchYear {
+  startYear: number;
+  endYear: number;
+}
+
+interface FormData {
+  fullName: string;
+  designation: string;
+  companyName: string;
+  mobileNo: string;
+  personalEmail: string;
+  officialEmail: string;
+  location: string;
+  startYear: string;
+  endYear: string;
+  batchYear?: BatchYear;
+}
+
+interface TokenInfo {
+  recipientEmail?: string;
+  mail?: {
+    senderName?: string;
+    senderEmail?: string;
+    title?: string;
+    content?: string;
+  };
+}
+
 export default function TokenBasedAcceptForm() {
-  const { token } = useParams();
+  const { token } = useParams<{ token: string }>();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [startYear, setStartYear] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState(null);
-  const [tokenInfo, setTokenInfo] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
 
   // Form data
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     fullName: '',
     designation: '',
     companyName: '',
@@ -53,13 +80,13 @@ export default function TokenBasedAcceptForm() {
           personalEmail: response.data.tokenInfo.recipientEmail || ''
         }));
       }
-    } catch (error) {
-      console.error('Error fetching token info:', error);
+    } catch (err: any) {
+      console.error('Error fetching token info:', err);
       setError('Unable to load invitation details');
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -91,8 +118,11 @@ export default function TokenBasedAcceptForm() {
   };
 
   const validateForm = () => {
-    const required = ['fullName', 'mobileNo', 'personalEmail'];
-    const missing = required.filter(field => !formData[field].trim());
+    const required: (keyof FormData)[] = ['fullName', 'mobileNo', 'personalEmail'];
+    const missing = required.filter(field => {
+      const val = formData[field];
+      return typeof val === 'string' ? !val.trim() : !val;
+    });
 
     if (missing.length > 0) {
       setError(`Please fill in: ${missing.join(', ').replace(/([A-Z])/g, ' $1').toLowerCase()}`);
@@ -121,7 +151,7 @@ export default function TokenBasedAcceptForm() {
     return true;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -166,14 +196,14 @@ export default function TokenBasedAcceptForm() {
       } else {
         setError(response.data.message || 'Failed to submit response');
       }
-    } catch (error) {
-      console.error('Form submission error:', error);
+    } catch (err: any) {
+      console.error('Form submission error:', err);
 
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else if (error.code === 'ECONNABORTED') {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.code === 'ECONNABORTED') {
         setError('Request timed out. Please try again.');
-      } else if (error.response?.status === 404) {
+      } else if (err.response?.status === 404) {
         setError('This invitation link has expired or been used already');
       } else {
         setError('Unable to submit your response. Please try again later.');

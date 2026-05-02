@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { FC, useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -9,22 +9,47 @@ import { useAuth } from '../../context/authContext/authContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const formatDate = (dateString) => {
+interface Assessment {
+  rating: 'needs_improvement' | 'satisfied' | 'best';
+  comment: string;
+}
+
+interface Feedback {
+  _id: string;
+  reviewedBy?: string;
+  submittedBy?: {
+    name: string;
+    email?: string;
+  };
+  date: string;
+  visionIV: Assessment;
+  missionIM: Assessment;
+  visionDV: Assessment;
+  missionDM: Assessment;
+  peos: Assessment;
+  signature: any;
+}
+
+const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-const CoordinatorFeedbackForm = ({ onLogout }) => {
-  const { id } = useParams();
+interface CoordinatorFeedbackFormProps {
+  onLogout: () => void;
+}
+
+const CoordinatorFeedbackForm: FC<CoordinatorFeedbackFormProps> = ({ onLogout }) => {
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const formCardRef = useRef(null);
-  const [feedback, setFeedback] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [imageError, setImageError] = useState(false);
+  const formCardRef = useRef<HTMLDivElement>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchFeedback = async () => {
+    const fetchFeedback = async (): Promise<void> => {
       if (!user?.token) {
         setError('Please login to view feedback details');
         setLoading(false);
@@ -47,8 +72,8 @@ const CoordinatorFeedbackForm = ({ onLogout }) => {
         if (data.success && data.feedback) {
           setFeedback(data.feedback);
         }
-      } catch (err) {
-        setError(err.message);
+      } catch (err: any) {
+        setError(err.message || 'An unknown error occurred');
       } finally {
         setLoading(false);
       }
@@ -189,7 +214,7 @@ const CoordinatorFeedbackForm = ({ onLogout }) => {
                 </div>
                 <div className="flex flex-col">
                   <label className="text-xs font-bold text-slate-400 uppercase mb-1 tracking-wider">Date:</label>
-                  <input className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-700 focus:ring-[#FF3D00] focus:border-[#FF3D00] cursor-not-allowed" readOnly type="text" value={formatDate(feedback.date)} />
+                  <input className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-700 focus:ring-[#FF3D00] focus:border-[#FF3D00] cursor-not-allowed" readOnly type="text" value={feedback.date ? formatDate(feedback.date) : ''} />
                 </div>
               </div>
             </div>
@@ -267,7 +292,7 @@ const CoordinatorFeedbackForm = ({ onLogout }) => {
                     <textarea
                       className="w-full border border-slate-200 rounded-lg text-sm focus:ring-[#FF3D00] focus:border-[#FF3D00] p-3 cursor-not-allowed"
                       placeholder="Comments/Suggestions"
-                      rows="2"
+                      rows={2}
                       readOnly
                       value={item.comment}
                     />

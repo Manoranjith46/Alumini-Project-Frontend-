@@ -15,6 +15,28 @@ const formatAmount = (amount: number) => {
   return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
+interface PaymentRecord {
+  id: string;
+  cause: string;
+  type: string;
+  txId: string;
+  amount: string;
+  date: string;
+  status: string;
+  paymentId: string;
+  rawStatus: string;
+}
+
+interface ApiPayment {
+  _id: string;
+  purpose: string;
+  amount: number;
+  createdAt: string;
+  status: string;
+  razorpayOrderId?: string;
+  currency?: string;
+}
+
 const mapStatus = (status: string | null | undefined) => {
   switch (status) {
     case 'paid': return 'Sent';
@@ -32,12 +54,12 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [donationData, setDonationData] = useState<any[]>([]);
-  const [rawPayments, setRawPayments] = useState<any[]>([]);
+  const [donationData, setDonationData] = useState<PaymentRecord[]>([]);
+  const [rawPayments, setRawPayments] = useState<ApiPayment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [actionLoading, setActionLoading] = useState(null);
-  const [viewModal, setViewModal] = useState({ isOpen: false, donation: null });
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [viewModal, setViewModal] = useState<{ isOpen: boolean; donation: PaymentRecord | null }>({ isOpen: false, donation: null });
 
   // Summary statistics
   const [totalDonated, setTotalDonated] = useState(0);
@@ -65,7 +87,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
         const data = await response.json();
 
         if (data.success && data.payments) {
-          const formattedData = data.payments.map((payment, index) => ({
+          const formattedData: PaymentRecord[] = data.payments.map((payment: ApiPayment, index: number) => ({
             id: String(index + 1).padStart(2, '0'),
             cause: payment.purpose,
             type: 'Online',
@@ -81,12 +103,12 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
           setRawPayments(data.payments);
 
           // Calculate summary stats
-          const paidPayments = data.payments.filter(p => p.status === 'paid');
+          const paidPayments = (data.payments as ApiPayment[]).filter(p => p.status === 'paid');
           const total = paidPayments.reduce((sum, p) => sum + p.amount, 0);
           setTotalDonated(total);
           setCompletedCount(paidPayments.length);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -119,11 +141,11 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
     }
   };
 
-  const handlePageClick = (pageNumber) => {
+  const handlePageClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
-  const handleRetryPayment = async (row) => {
+  const handleRetryPayment = async (row: PaymentRecord) => {
     const payment = rawPayments.find(p => p._id === row.paymentId);
     if (!payment) {
       alert('Payment record not found');
@@ -153,9 +175,9 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
     }
   };
 
-  const openRazorpayCheckout = (payment) => {
+  const openRazorpayCheckout = (payment: ApiPayment) => {
     const options = {
-      key: process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_SSwNZtauzpeLMb',
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_SSwNZtauzpeLMb',
       amount: Math.round(payment.amount * 100),
       currency: payment.currency || 'INR',
       name: 'KSR Alumni Portal',
@@ -165,7 +187,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
         name: user.name || '',
         email: user.email || '',
       },
-      handler: async (response) => {
+      handler: async (response: any) => {
         try {
           const verifyRes = await fetch(`${API_BASE}/api/payments/verify`, {
             method: 'POST',
@@ -184,7 +206,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
           alert('Payment successful! Your donation has been received.');
           // Refresh the donation list
           window.location.reload();
-        } catch (error) {
+        } catch (error: any) {
           console.error('Verification error:', error);
           alert(error.message || 'Payment verification failed');
         }
@@ -200,14 +222,14 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
     };
 
     const razorpayCheckout = new window.Razorpay(options);
-    razorpayCheckout.on('payment.failed', (error) => {
+    razorpayCheckout.on('payment.failed', (error: any) => {
       console.error('Payment failed:', error);
       alert('Payment failed: ' + (error.reason || 'Please try again.'));
     });
     razorpayCheckout.open();
   };
 
-  const handleDeletePayment = async (row) => {
+  const handleDeletePayment = async (row: PaymentRecord) => {
     if (!window.confirm('Are you sure you want to delete this pending donation?')) {
       return;
     }
@@ -232,7 +254,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
       // Remove from local state immediately for better UX
       setDonationData(prev => prev.filter(d => d.paymentId !== row.paymentId));
       setRawPayments(prev => prev.filter(p => p._id !== row.paymentId));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete payment error:', error);
       alert(error.message || 'Failed to delete donation');
     } finally {
@@ -240,7 +262,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
     }
   };
 
-  const handleViewDonation = (row) => {
+  const handleViewDonation = (row: PaymentRecord) => {
     const payment = rawPayments.find(p => p._id === row.paymentId);
     if (payment) {
       setViewModal({ isOpen: true, donation: { ...row, ...payment } });
@@ -265,7 +287,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
       } else {
         openRazorpayCheckout(viewModal.donation);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Pay from modal error:', error);
       alert('Failed to start payment');
     } finally {
