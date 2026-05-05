@@ -52,6 +52,7 @@ const Admin_Event_and_Reunion_History = ({ onLogout }: { onLogout?: () => void }
   const cardsPerPage = 9;
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchEvents = async () => {
       if (!user?.token) {
         setError('Please login to view events');
@@ -61,6 +62,7 @@ const Admin_Event_and_Reunion_History = ({ onLogout }: { onLogout?: () => void }
 
       try {
         const response = await fetch(`${API_BASE}/api/events`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -89,6 +91,7 @@ const Admin_Event_and_Reunion_History = ({ onLogout }: { onLogout?: () => void }
           setEventsData(formattedData);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -96,6 +99,8 @@ const Admin_Event_and_Reunion_History = ({ onLogout }: { onLogout?: () => void }
     };
 
     fetchEvents();
+
+    return () => controller.abort();
   }, [user]);
 
   const totalPages = Math.ceil(eventsData.length / cardsPerPage) || 1;

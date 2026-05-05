@@ -118,8 +118,10 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
 
   // Initialize guests from mail data on mount
   useEffect(() => {
+    const controller = new AbortController();
+
     // Fetch events for dropdown
-    fetchEvents();
+    fetchEvents(controller.signal);
 
     // Helper to format date to YYYY-MM-DD
     const formatDateForInput = (dateValue: any) => {
@@ -161,6 +163,8 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
       setGeminiVenue(initialEventLocation);
       setGeminiGuestName(alumniName);
     }
+
+    return () => controller.abort();
   }, []);
 
   // Load logo and banner from adminBranding on component mount
@@ -174,19 +178,21 @@ const Admin_Event_and_Reunion_Form2 = ({ onLogout }: { onLogout?: () => void }) 
   }, [adminBranding]);
 
   // Fetch events from collection
-  const fetchEvents = async () => {
+  const fetchEvents = async (signal?: AbortSignal) => {
     try {
       setEventsLoading(true);
       const res = await fetch(`${API_BASE}/api/events`, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
         },
+        signal,
       });
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         setEvents(data.data);
       }
     } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.error('Failed to fetch events:', err);
     } finally {
       setEventsLoading(false);

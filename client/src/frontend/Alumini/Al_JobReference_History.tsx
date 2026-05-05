@@ -71,6 +71,7 @@ const Alumini_JobReference_History = ({ onLogout }: AluminiJobReferenceHistoryPr
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchJobReferences = async () => {
       if (!user?.token) {
         setError('Please login to view job references');
@@ -80,6 +81,7 @@ const Alumini_JobReference_History = ({ onLogout }: AluminiJobReferenceHistoryPr
 
       try {
         const response = await fetch(`${API_BASE}/api/jobs/my`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -112,6 +114,7 @@ const Alumini_JobReference_History = ({ onLogout }: AluminiJobReferenceHistoryPr
           setJobsData(formattedData);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -119,6 +122,8 @@ const Alumini_JobReference_History = ({ onLogout }: AluminiJobReferenceHistoryPr
     };
 
     fetchJobReferences();
+
+    return () => controller.abort();
   }, [user]);
 
   const toggleCardMenu = (id: string, event: React.MouseEvent) => {

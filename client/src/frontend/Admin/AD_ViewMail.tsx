@@ -20,49 +20,56 @@ const Admin_ViewMail = ({ onLogout }: { onLogout?: () => void }) => {
   const passedMailData = location.state?.mailData;
 
   useEffect(() => {
+    const controller = new AbortController();
+
     // Always fetch fresh mail details to get recipients with photos
     if (mailId) {
-      fetchMailDetails();
+      fetchMailDetails(controller.signal);
     } else if (passedMailData) {
       // Fallback if no mailId but have passed data
       setMail(passedMailData);
       setResponseStats(passedMailData.responseStats);
-      fetchMailResponses();
+      fetchMailResponses(controller.signal);
       setLoading(false);
     } else {
       setLoading(false);
     }
+
+    return () => controller.abort();
   }, [mailId, user?.token]);
 
-  const fetchMailDetails = async () => {
+  const fetchMailDetails = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/mail/${mailId}`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${user?.token}`,
-        }
+        },
+        signal,
       });
 
       const data = await response.json();
       if (data.success) {
         setMail(data.mail);
-        fetchMailResponses();
+        fetchMailResponses(signal);
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.error('Error fetching mail:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchMailResponses = async () => {
+  const fetchMailResponses = async (signal?: AbortSignal) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/mail/${mailId}/responses`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${user?.token}`,
-        }
+        },
+        signal,
       });
 
       const data = await response.json();
@@ -72,7 +79,8 @@ const Admin_ViewMail = ({ onLogout }: { onLogout?: () => void }) => {
           setResponseStats(data.stats);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.error('Error fetching mail responses:', err);
     } finally {
       setLoading(false);

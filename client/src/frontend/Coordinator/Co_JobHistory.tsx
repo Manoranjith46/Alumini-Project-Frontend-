@@ -39,6 +39,7 @@ const CoordinatorJobHistory: FC<CoordinatorJobHistoryProps> = ({ onLogout }) => 
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+      const controller = new AbortController();
         const fetchJobReferences = async (): Promise<void> => {
             if (!user?.token) {
                 setError('Please login to view job references');
@@ -48,6 +49,7 @@ const CoordinatorJobHistory: FC<CoordinatorJobHistoryProps> = ({ onLogout }) => 
 
             try {
                 const response = await fetch(`${API_BASE}/api/jobs/department/all`, {
+              signal: controller.signal,
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
@@ -62,6 +64,7 @@ const CoordinatorJobHistory: FC<CoordinatorJobHistoryProps> = ({ onLogout }) => 
                     setJobReferences(data.jobReferences);
                 }
             } catch (err: any) {
+            if (err.name === 'AbortError') return;
                 setError(err.message || 'An unknown error occurred');
             } finally {
                 setLoading(false);
@@ -69,6 +72,8 @@ const CoordinatorJobHistory: FC<CoordinatorJobHistoryProps> = ({ onLogout }) => 
         };
 
         fetchJobReferences();
+
+      return () => controller.abort();
     }, [user]);
 
     if (loading) {

@@ -75,6 +75,8 @@ const CoordinatorInvitations: FC<CoordinatorInvitationsProps> = ({ onLogout }) =
   const cardsPerPage = 9;
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchEvents = async (): Promise<void> => {
       if (!user?.token) {
         setError('Please login to view events');
@@ -87,6 +89,7 @@ const CoordinatorInvitations: FC<CoordinatorInvitationsProps> = ({ onLogout }) =
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
+          signal: controller.signal,
         });
 
         if (!response.ok) {
@@ -119,6 +122,7 @@ const CoordinatorInvitations: FC<CoordinatorInvitationsProps> = ({ onLogout }) =
           setEventsData(formattedData);
         }
       } catch (err: any) {
+        if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -126,6 +130,7 @@ const CoordinatorInvitations: FC<CoordinatorInvitationsProps> = ({ onLogout }) =
     };
 
     fetchEvents();
+    return () => controller.abort();
   }, [user]);
 
   const totalPages = Math.ceil(eventsData.length / cardsPerPage) || 1;

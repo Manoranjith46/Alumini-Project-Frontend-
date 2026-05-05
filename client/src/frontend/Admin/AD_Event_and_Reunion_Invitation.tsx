@@ -61,6 +61,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
 
   // Fetch event and departments
   useEffect(() => {
+    const controller = new AbortController();
     const fetchData = async () => {
       if (!user?.token) {
         setError('Please login to view event details');
@@ -71,6 +72,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
       try {
         // Fetch event
         const eventRes = await fetch(`${API_BASE}/api/events/${id}`, {
+            signal: controller.signal,
           headers: { Authorization: `Bearer ${user.token}` },
         });
         const eventData = await eventRes.json();
@@ -93,6 +95,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
 
         // Fetch departments
         const deptRes = await fetch(`${API_BASE}/api/departments`, {
+            signal: controller.signal,
           headers: { Authorization: `Bearer ${user.token}` },
         });
         const deptData = await deptRes.json();
@@ -100,6 +103,7 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
           setDepartments(deptData.departments);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -107,6 +111,8 @@ const Admin_Event_and_Reunion_Invitation = ({ onLogout }: { onLogout?: () => voi
     };
 
     if (id) fetchData();
+
+    return () => controller.abort();
   }, [id, user]);
 
   // Calculate day when date changes

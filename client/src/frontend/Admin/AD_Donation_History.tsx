@@ -57,6 +57,7 @@ const Admin_Donation_History = ({ onLogout }: { onLogout?: () => void }) => {
   const entriesPerPage = 7;
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchPayments = async () => {
       if (!user?.token) {
         setError('Please login to view donations');
@@ -66,6 +67,7 @@ const Admin_Donation_History = ({ onLogout }: { onLogout?: () => void }) => {
 
       try {
         const response = await fetch(`${API_BASE}/api/payments/all`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -96,6 +98,7 @@ const Admin_Donation_History = ({ onLogout }: { onLogout?: () => void }) => {
           setFilteredData(formattedData);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -103,6 +106,8 @@ const Admin_Donation_History = ({ onLogout }: { onLogout?: () => void }) => {
     };
 
     fetchPayments();
+
+    return () => controller.abort();
   }, [user]);
 
   // Filter data based on search term

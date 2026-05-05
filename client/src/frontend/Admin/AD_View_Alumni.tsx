@@ -95,6 +95,7 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchAlumni = async () => {
       if (!user?.token) {
         setError('Please login to view alumni details');
@@ -105,6 +106,7 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
       try {
         setImageError(false); // Reset image error state
         const response = await fetch(`${API_BASE_URL}/api/alumni/${id}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user?.token}`,
           },
@@ -122,6 +124,7 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
           setError(data.message || 'Alumni not found');
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -131,6 +134,8 @@ const Admin_View_Alumni = ({ onLogout }: { onLogout?: () => void }) => {
     if (id) {
       fetchAlumni();
     }
+
+    return () => controller.abort();
   }, [id, user]);
 
   const handleBack = () => {

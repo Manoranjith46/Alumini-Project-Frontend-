@@ -50,7 +50,7 @@ const CoordinatorMail: FC<CoordinatorMailProps> = ({ onLogout }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const fetchDepartmentMails = async (): Promise<void> => {
+    const fetchDepartmentMails = async (signal?: AbortSignal): Promise<void> => {
         try {
             setLoading(true);
             setMailHistory([]);
@@ -65,7 +65,8 @@ const CoordinatorMail: FC<CoordinatorMailProps> = ({ onLogout }) => {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${user.token}`
-                }
+                },
+                signal,
             });
 
             const data = await response.json();
@@ -88,7 +89,8 @@ const CoordinatorMail: FC<CoordinatorMailProps> = ({ onLogout }) => {
             } else {
                 setMailHistory([]);
             }
-        } catch (err) {
+        } catch (err: any) {
+            if (err.name === 'AbortError') return;
             setMailHistory([]);
             console.error('Error fetching department mails:', err);
         } finally {
@@ -97,11 +99,15 @@ const CoordinatorMail: FC<CoordinatorMailProps> = ({ onLogout }) => {
     };
 
     useEffect(() => {
+        const controller = new AbortController();
+
         if (user?.token) {
-            fetchDepartmentMails();
+            fetchDepartmentMails(controller.signal);
         } else {
             setLoading(false);
         }
+
+        return () => controller.abort();
     }, [user?.token]);
 
     const handleRefresh = () => {

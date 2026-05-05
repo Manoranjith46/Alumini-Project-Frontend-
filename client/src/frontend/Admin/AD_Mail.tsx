@@ -25,8 +25,53 @@ export default function Admin_Mail({ onLogout }: { onLogout?: () => void }) {
 
   // Fetch sent messages and draft count from backend
   useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchSentMessages = async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch(`${API_BASE_URL}/api/mail/all`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${user?.token}`
+          },
+          signal: controller.signal,
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setMailData(data.mails);
+        }
+      } catch (err: any) {
+        if (err.name === 'AbortError') return;
+        console.error('Error fetching messages:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchDraftCount = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/drafts/count`, {
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setDraftCount(data.count);
+        }
+      } catch (err: any) {
+        if (err.name === 'AbortError') return;
+        console.error('Error fetching draft count:', err);
+      }
+    };
+
     fetchSentMessages();
     fetchDraftCount();
+    return () => controller.abort();
   }, []);
 
   const fetchSentMessages = async () => {

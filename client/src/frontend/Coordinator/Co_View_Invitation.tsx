@@ -45,6 +45,7 @@ const CoordinatorViewInvitation: FC<CoordinatorViewInvitationProps> = ({ onLogou
 
   // Fetch event details
   useEffect(() => {
+    const controller = new AbortController();
     const fetchData = async (): Promise<void> => {
       if (!user?.token) {
         setError('Please login to view event details');
@@ -54,6 +55,7 @@ const CoordinatorViewInvitation: FC<CoordinatorViewInvitationProps> = ({ onLogou
 
       try {
         const response = await fetch(`${API_BASE}/api/events/${id}`, {
+            signal: controller.signal,
           headers: { Authorization: `Bearer ${user.token}` },
         });
         const data = await response.json();
@@ -64,6 +66,7 @@ const CoordinatorViewInvitation: FC<CoordinatorViewInvitationProps> = ({ onLogou
           setError('Event not found');
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -71,6 +74,8 @@ const CoordinatorViewInvitation: FC<CoordinatorViewInvitationProps> = ({ onLogou
     };
 
     if (id) fetchData();
+
+    return () => controller.abort();
   }, [id, user]);
 
   // Group photos for display

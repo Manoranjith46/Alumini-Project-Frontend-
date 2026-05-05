@@ -73,11 +73,13 @@ const Admin_Add_Faculty = ({ onLogout }: AdminAddFacultyProps) => {
 
   // Fetch department details to get the department name
   useEffect(() => {
+    const controller = new AbortController();
     const fetchDepartment = async () => {
       if (!deptCode || !user?.token) return;
 
       try {
         const response = await fetch(`${API_BASE}/api/departments/code/${deptCode}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -90,12 +92,15 @@ const Admin_Add_Faculty = ({ onLogout }: AdminAddFacultyProps) => {
             setFormData(prev => ({ ...prev, department: data.department.branch })); // Store full name, not code
           }
         }
-      } catch (error) {
+      } catch (error: any) {
+          if (error.name === 'AbortError') return;
         console.error('Error fetching department:', error);
       }
     };
 
     fetchDepartment();
+
+    return () => controller.abort();
   }, [deptCode, user?.token]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

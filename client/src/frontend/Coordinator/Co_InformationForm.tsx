@@ -76,7 +76,7 @@ const Coordinator_ViewMail: FC<CoordinatorViewMailProps> = ({ onLogout }) => {
     const mailId = location.state?.mailId;
     const passedMailData = location.state?.mailData as Mail | undefined;
 
-    const fetchMailResponses = async (id: string) => {
+    const fetchMailResponses = async (id: string, signal?: AbortSignal) => {
         try {
             if (!user?.token) {
                 return;
@@ -95,7 +95,8 @@ const Coordinator_ViewMail: FC<CoordinatorViewMailProps> = ({ onLogout }) => {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${user.token}`
-                }
+                },
+                signal,
             });
 
             const data = await response.json();
@@ -105,14 +106,15 @@ const Coordinator_ViewMail: FC<CoordinatorViewMailProps> = ({ onLogout }) => {
                     setResponseStats(data.stats);
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
+            if (err.name === 'AbortError') return;
             console.error('Error fetching mail responses:', err);
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchMailDetails = async () => {
+    const fetchMailDetails = async (signal?: AbortSignal) => {
         if (!mailId || !user?.token) return;
 
         try {
@@ -124,15 +126,17 @@ const Coordinator_ViewMail: FC<CoordinatorViewMailProps> = ({ onLogout }) => {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${user.token}`
-                }
+                },
+                signal,
             });
 
             const data = await response.json();
             if (data.success) {
                 setMail(data.mail);
-                fetchMailResponses(mailId);
+                fetchMailResponses(mailId, signal);
             }
-        } catch (err) {
+        } catch (err: any) {
+            if (err.name === 'AbortError') return;
             console.error('Error fetching mail:', err);
         } finally {
             setLoading(false);
@@ -140,15 +144,19 @@ const Coordinator_ViewMail: FC<CoordinatorViewMailProps> = ({ onLogout }) => {
     };
 
     useEffect(() => {
+        const controller = new AbortController();
+
         if (passedMailData) {
             setMail(passedMailData);
             setResponseStats(passedMailData.responseStats || null);
-            fetchMailResponses(passedMailData._id);
+            fetchMailResponses(passedMailData._id, controller.signal);
         } else if (mailId && user?.token) {
-            fetchMailDetails();
+            fetchMailDetails(controller.signal);
         } else {
             setLoading(false);
         }
+
+        return () => controller.abort();
     }, [mailId, passedMailData, user?.token]);
 
     const formatDate = (dateString: string): string => {

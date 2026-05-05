@@ -42,6 +42,7 @@ const Admin_View_Department = ( { onLogout }: { onLogout?: () => void } ) => {
 
   // Fetch department and faculty data
   useEffect(() => {
+    const controller = new AbortController();
     const fetchData = async () => {
       if (!user?.token) {
         setError('Please login to view department details');
@@ -58,6 +59,7 @@ const Admin_View_Department = ( { onLogout }: { onLogout?: () => void } ) => {
       try {
         // Fetch department details
         const deptResponse = await fetch(`${API_BASE}/api/departments/code/${deptCode}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -73,6 +75,7 @@ const Admin_View_Department = ( { onLogout }: { onLogout?: () => void } ) => {
         // Fetch coordinators by department
         const upperCaseDeptCode = deptCode.toUpperCase();
         const coordinatorResponse = await fetch(`${API_BASE}/api/coordinators/department/${upperCaseDeptCode}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -91,6 +94,7 @@ const Admin_View_Department = ( { onLogout }: { onLogout?: () => void } ) => {
           setError(coordinatorData.message || 'Failed to load coordinator data');
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -98,6 +102,8 @@ const Admin_View_Department = ( { onLogout }: { onLogout?: () => void } ) => {
     };
 
     fetchData();
+
+    return () => controller.abort();
   }, [user?.token, deptCode]);
 
   // Get unique designations for filter

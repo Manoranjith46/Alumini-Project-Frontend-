@@ -60,6 +60,7 @@ const Admin_View_Job_and_Reference = ({ onLogout }: { onLogout?: () => void }) =
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchJobReference = async () => {
       if (!user?.token) {
         setError('Please login to view job reference');
@@ -75,6 +76,7 @@ const Admin_View_Job_and_Reference = ({ onLogout }: { onLogout?: () => void }) =
 
       try {
         const response = await fetch(`${API_BASE}/api/jobs/${id}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -89,6 +91,7 @@ const Admin_View_Job_and_Reference = ({ onLogout }: { onLogout?: () => void }) =
           setJobReference(data.jobReference);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -96,6 +99,8 @@ const Admin_View_Job_and_Reference = ({ onLogout }: { onLogout?: () => void }) =
     };
 
     fetchJobReference();
+
+    return () => controller.abort();
   }, [user, id]);
 
   if (loading) {

@@ -14,18 +14,24 @@ export default function Sidebar({ onLogout, currentView }: SidebarProps) {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchBranding = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/admin/branding`);
+        const res = await fetch(`${API_BASE}/api/admin/branding`, {
+          signal: controller.signal,
+        });
         const data = await res.json();
         if (data.success && data.data?.logo) {
           setLogoUrl(`${API_BASE}${data.data.logo}`);
         }
-      } catch (err) {
+      } catch (err: any) {
+          if (err.name === 'AbortError') return;
         console.error('Failed to fetch branding:', err);
       }
     };
     fetchBranding();
+
+    return () => controller.abort();
   }, []);
 
   const handleLogout = (e: React.MouseEvent) => {

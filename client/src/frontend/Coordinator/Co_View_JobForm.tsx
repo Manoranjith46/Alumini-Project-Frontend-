@@ -66,6 +66,7 @@ const CoordinatorViewJobForm: FC<CoordinatorViewJobFormProps> = ({ onLogout }) =
     };
 
     useEffect(() => {
+      const controller = new AbortController();
         const fetchJobReference = async (): Promise<void> => {
             if (!user?.token) {
                 setError('Please login to view job reference');
@@ -81,6 +82,7 @@ const CoordinatorViewJobForm: FC<CoordinatorViewJobFormProps> = ({ onLogout }) =
 
             try {
                 const response = await fetch(`${API_BASE}/api/jobs/${id}`, {
+              signal: controller.signal,
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
@@ -95,6 +97,7 @@ const CoordinatorViewJobForm: FC<CoordinatorViewJobFormProps> = ({ onLogout }) =
                     setJobReference(data.jobReference);
                 }
             } catch (err: any) {
+            if (err.name === 'AbortError') return;
                 setError(err.message || 'An unknown error occurred');
             } finally {
                 setLoading(false);
@@ -102,6 +105,8 @@ const CoordinatorViewJobForm: FC<CoordinatorViewJobFormProps> = ({ onLogout }) =
         };
 
         fetchJobReference();
+
+      return () => controller.abort();
     }, [user, id]);
 
     if (loading) {

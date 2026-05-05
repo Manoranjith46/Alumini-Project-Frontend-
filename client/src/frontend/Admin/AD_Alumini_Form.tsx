@@ -115,11 +115,13 @@ const Admin_Alumini_Form = ({ onLogout }: AdminAluminiFormProps) => {
 
   // Fetch departments for degree and branch dropdowns
   useEffect(() => {
+    const controller = new AbortController();
     const fetchDepartments = async () => {
       if (!user?.token) return;
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/departments`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -132,11 +134,14 @@ const Admin_Alumini_Form = ({ onLogout }: AdminAluminiFormProps) => {
           }
         }
       } catch (error: any) {
+          if (error.name === 'AbortError') return;
         console.error('Error fetching departments:', error);
       }
     };
 
     fetchDepartments();
+
+    return () => controller.abort();
   }, [user?.token]);
 
   // Get unique streams (degrees) from departments

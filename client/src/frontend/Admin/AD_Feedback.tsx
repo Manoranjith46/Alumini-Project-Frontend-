@@ -26,6 +26,7 @@ const Admin_Feedback = ({ onLogout }: { onLogout?: () => void }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchFeedbacks = async () => {
       if (!user?.token) {
         setError('Please login to view feedbacks');
@@ -35,6 +36,7 @@ const Admin_Feedback = ({ onLogout }: { onLogout?: () => void }) => {
 
       try {
         const response = await fetch(`${API_BASE}/api/feedback/all`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -56,6 +58,7 @@ const Admin_Feedback = ({ onLogout }: { onLogout?: () => void }) => {
           setFeedbackData(formattedData);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -63,6 +66,8 @@ const Admin_Feedback = ({ onLogout }: { onLogout?: () => void }) => {
     };
 
     fetchFeedbacks();
+
+    return () => controller.abort();
   }, [user]);
 
   if (loading) {

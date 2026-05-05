@@ -155,14 +155,18 @@ const Admin_Profile = ({ onLogout }: { onLogout?: () => void }) => {
 
   // Fetch profile data when user is available
   useEffect(() => {
+    const controller = new AbortController();
+
     if (!authLoading && user?.token) {
-      fetchProfile();
+      fetchProfile(controller.signal);
     } else if (!authLoading && !user?.token) {
       setLoading(false);
     }
+
+    return () => controller.abort();
   }, [user, authLoading]);
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
 
@@ -177,7 +181,8 @@ const Admin_Profile = ({ onLogout }: { onLogout?: () => void }) => {
         headers: {
           'Authorization': `Bearer ${user?.token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        signal,
       });
 
       const data = await response.json();
@@ -243,6 +248,7 @@ const Admin_Profile = ({ onLogout }: { onLogout?: () => void }) => {
         showMessage('error', data.message || 'Failed to load profile');
       }
     } catch (error: any) {
+      if (error.name === 'AbortError') return;
       console.error('Error fetching profile:', error);
       showMessage('error', 'Failed to load profile. Please check your connection.');
     } finally {
@@ -250,9 +256,12 @@ const Admin_Profile = ({ onLogout }: { onLogout?: () => void }) => {
     }
   };
 
+  const messageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const showMessage = (type: string, text: string) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+    if (messageTimerRef.current) clearTimeout(messageTimerRef.current);
+    messageTimerRef.current = setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
   const handleProfileChange = (field: string, value: string) => {

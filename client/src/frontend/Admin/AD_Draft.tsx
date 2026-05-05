@@ -94,11 +94,13 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }: { onLogout?: () => voi
 
   // Fetch events from the database
   useEffect(() => {
+    const controller = new AbortController();
     const fetchEvents = async () => {
       setLoadingEvents(true);
       try {
         const token = getCookie('token') || user?.token;
         const response = await fetch(`${API_BASE_URL}/api/events`, {
+            signal: controller.signal,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -108,7 +110,8 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }: { onLogout?: () => voi
         if (data.success) {
           setEvents(data.events || []);
         }
-      } catch (error) {
+      } catch (error: any) {
+          if (error.name === 'AbortError') return;
         console.error('Error fetching events:', error);
       } finally {
         setLoadingEvents(false);
@@ -118,6 +121,8 @@ const Admin_Draft = ({ onLogout, adminName, adminEmail }: { onLogout?: () => voi
     if (user) {
       fetchEvents();
     }
+
+    return () => controller.abort();
   }, [user]);
 
   const fetchDraft = async () => {

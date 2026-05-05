@@ -243,6 +243,7 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
 
   // Fetch profile on mount
   useEffect(() => {
+    const controller = new AbortController();
     const fetchProfile = async () => {
       if (!user?.token) {
         setError('Please login to view your profile');
@@ -252,6 +253,7 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/alumni/me`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -274,6 +276,7 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
           setError(data.message || 'Failed to load profile');
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         console.error('Error fetching profile:', err);
         setError('Network error. Please try again.');
       } finally {
@@ -282,6 +285,8 @@ const Alumini_Profile = ({ onLogout }: ProfileProps) => {
     };
 
     fetchProfile();
+
+    return () => controller.abort();
   }, [user?.token]);
 
   const handleChange = (field: keyof ProfileData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

@@ -157,11 +157,13 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
 
   // Fetch draft data when editing a draft
   useEffect(() => {
+    const controller = new AbortController();
     if (draftId) {
       const fetchDraft = async () => {
         try {
           setInitialLoading(true);
           const response = await fetch(`${API_BASE_URL}/api/drafts/${draftId}`, {
+            signal: controller.signal,
             headers: { 'Content-Type': 'application/json' }
           });
 
@@ -210,6 +212,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
             });
           }
         } catch (error: any) {
+          if (error.name === 'AbortError') return;
           console.error('Error fetching draft:', error);
           showAlert('Failed to load draft', 'error');
         } finally {
@@ -219,15 +222,19 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
 
       fetchDraft();
     }
+
+    return () => controller.abort();
   }, [draftId]);
 
   // Fetch events from the database
   useEffect(() => {
+    const controller = new AbortController();
     const fetchEvents = async () => {
       setLoadingEvents(true);
       try {
         const token = getCookie('token') || user?.token;
         const response = await fetch(`${API_BASE_URL}/api/events`, {
+            signal: controller.signal,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -238,6 +245,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
           setEvents(data.data || []);
         }
       } catch (error: any) {
+          if (error.name === 'AbortError') return;
         console.error('Error fetching events:', error);
       } finally {
         setLoadingEvents(false);
@@ -248,15 +256,19 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
     if (user) {
       fetchEvents();
     }
+
+    return () => controller.abort();
   }, [user]);
 
   // Fetch departments from the database
   useEffect(() => {
+    const controller = new AbortController();
     const fetchDepartments = async () => {
       setLoadingDepartments(true);
       try {
         const token = getCookie('token') || user?.token;
         const response = await fetch(`${API_BASE_URL}/api/departments`, {
+            signal: controller.signal,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -267,6 +279,7 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
           setDepartments(data.departments || []);
         }
       } catch (error: any) {
+          if (error.name === 'AbortError') return;
         console.error('Error fetching departments:', error);
       } finally {
         setLoadingDepartments(false);
@@ -277,6 +290,8 @@ const Admin_BroadcastMessage = ({ onLogout, adminName, adminEmail }: AdminBroadc
     if (user) {
       fetchDepartments();
     }
+
+    return () => controller.abort();
   }, [user]);
 
   // Handle event selection from dropdown

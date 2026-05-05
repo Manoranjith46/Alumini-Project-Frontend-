@@ -39,10 +39,12 @@ export default function Alumini_Mail({ onLogout }: AluminiMailProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchAlumniMails();
+    const controller = new AbortController();
+    fetchAlumniMails(controller.signal);
+    return () => controller.abort();
   }, []);
 
-  const fetchAlumniMails = async () => {
+  const fetchAlumniMails = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
 
@@ -58,7 +60,8 @@ export default function Alumini_Mail({ onLogout }: AluminiMailProps) {
       const response = await fetch(apiUrl, {
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        signal,
       });
 
       const data = await response.json();
@@ -79,7 +82,8 @@ export default function Alumini_Mail({ onLogout }: AluminiMailProps) {
       } else {
         setMailHistory([]);
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.error('Error fetching alumni mails:', err);
       setMailHistory([]);
     } finally {

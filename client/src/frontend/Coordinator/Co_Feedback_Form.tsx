@@ -49,6 +49,7 @@ const CoordinatorFeedbackForm: FC<CoordinatorFeedbackFormProps> = ({ onLogout })
   const [imageError, setImageError] = useState<boolean>(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchFeedback = async (): Promise<void> => {
       if (!user?.token) {
         setError('Please login to view feedback details');
@@ -58,6 +59,7 @@ const CoordinatorFeedbackForm: FC<CoordinatorFeedbackFormProps> = ({ onLogout })
 
       try {
         const response = await fetch(`${API_BASE}/api/feedback/${id}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -73,6 +75,7 @@ const CoordinatorFeedbackForm: FC<CoordinatorFeedbackFormProps> = ({ onLogout })
           setFeedback(data.feedback);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message || 'An unknown error occurred');
       } finally {
         setLoading(false);
@@ -82,6 +85,8 @@ const CoordinatorFeedbackForm: FC<CoordinatorFeedbackFormProps> = ({ onLogout })
     if (id) {
       fetchFeedback();
     }
+
+    return () => controller.abort();
   }, [id, user]);
 
   const handleDownload = async () => {

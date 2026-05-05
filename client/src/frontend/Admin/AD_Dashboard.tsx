@@ -53,7 +53,7 @@ const Admin_Dashboard = ( { onLogout }: { onLogout?: () => void } ) => {
   /**
    * Fetch dashboard statistics from the API
    */
-  const fetchStats = async () => {
+  const fetchStats = async (signal?: AbortSignal) => {
     setLoading(true);
     setError(null);
 
@@ -64,6 +64,7 @@ const Admin_Dashboard = ( { onLogout }: { onLogout?: () => void } ) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${user?.token}`,
         },
+        signal,
       });
 
       const data = await response.json();
@@ -75,6 +76,7 @@ const Admin_Dashboard = ( { onLogout }: { onLogout?: () => void } ) => {
       setStats(data.stats);
       setCards(data.cards);
     } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.error('[Admin_Dashboard] Analytics fetch error:', err);
       setError(err.message || 'An error occurred while fetching analytics data');
     } finally {
@@ -99,7 +101,9 @@ const Admin_Dashboard = ( { onLogout }: { onLogout?: () => void } ) => {
   };
 
   useEffect(() => {
-    fetchStats();
+    const controller = new AbortController();
+    fetchStats(controller.signal);
+    return () => controller.abort();
   }, []);
 
   /**
@@ -139,7 +143,7 @@ const Admin_Dashboard = ( { onLogout }: { onLogout?: () => void } ) => {
   const renderError = () => (
     <div className={styles.errorContainer}>
       <p className={styles.errorMessage}>{error}</p>
-      <button className={styles.retryButton} onClick={fetchStats}>
+      <button className={styles.retryButton} onClick={() => fetchStats()}>
         <RefreshCw size={16} />
         Retry
       </button>
@@ -291,7 +295,7 @@ const Admin_Dashboard = ( { onLogout }: { onLogout?: () => void } ) => {
                 {!loading && !error && (
                   <button
                     className={styles.refreshButton}
-                    onClick={fetchStats}
+                    onClick={() => fetchStats()}
                     title="Refresh analytics data"
                   >
                     <RefreshCw size={16} />

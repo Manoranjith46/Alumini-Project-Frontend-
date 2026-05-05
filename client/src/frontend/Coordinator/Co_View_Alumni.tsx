@@ -117,6 +117,7 @@ const Coordinator_View_Alumni: FC<CoordinatorViewAlumniProps> = ({ onLogout }) =
   const [imageError, setImageError] = useState<boolean>(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchAlumni = async (): Promise<void> => {
       if (!user?.token) {
         setError('Please login to view alumni details');
@@ -127,6 +128,7 @@ const Coordinator_View_Alumni: FC<CoordinatorViewAlumniProps> = ({ onLogout }) =
       try {
         setImageError(false);
         const response = await fetch(`${API_BASE_URL}/api/alumni/${id}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -144,6 +146,7 @@ const Coordinator_View_Alumni: FC<CoordinatorViewAlumniProps> = ({ onLogout }) =
           setError(data.message || 'Alumni not found');
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message || 'An unknown error occurred');
       } finally {
         setLoading(false);
@@ -153,6 +156,8 @@ const Coordinator_View_Alumni: FC<CoordinatorViewAlumniProps> = ({ onLogout }) =
     if (id) {
       fetchAlumni();
     }
+
+    return () => controller.abort();
   }, [id, user]);
 
   const handleBack = () => {

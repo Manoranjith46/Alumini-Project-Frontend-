@@ -74,6 +74,7 @@ const CoordinatorDonationHistory: FC<CoordinatorDonationHistoryProps> = ({ onLog
     const itemsPerPage = 10;
 
     useEffect(() => {
+      const controller = new AbortController();
         const fetchPayments = async (): Promise<void> => {
             if (!user?.token) {
                 setError('Please login to view donations');
@@ -83,6 +84,7 @@ const CoordinatorDonationHistory: FC<CoordinatorDonationHistoryProps> = ({ onLog
 
             try {
                 const response = await fetch(`${API_BASE}/api/payments/department/all`, {
+              signal: controller.signal,
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
@@ -121,6 +123,7 @@ const CoordinatorDonationHistory: FC<CoordinatorDonationHistoryProps> = ({ onLog
                     }
                 }
             } catch (err: any) {
+            if (err.name === 'AbortError') return;
                 setError(err.message || 'An unknown error occurred');
             } finally {
                 setLoading(false);
@@ -128,6 +131,8 @@ const CoordinatorDonationHistory: FC<CoordinatorDonationHistoryProps> = ({ onLog
         };
 
         fetchPayments();
+
+      return () => controller.abort();
     }, [user]);
 
     // Filter data based on search term

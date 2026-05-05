@@ -32,9 +32,11 @@ const Admin_Event_and_Reunion_Form1 = ({ onLogout }: { onLogout?: () => void }) 
 
   // Fetch departments
   useEffect(() => {
+    const controller = new AbortController();
     const fetchDepartments = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/departments`, {
+            signal: controller.signal,
           headers: { Authorization: `Bearer ${user?.token}` }
         });
         const data = await res.json();
@@ -42,10 +44,13 @@ const Admin_Event_and_Reunion_Form1 = ({ onLogout }: { onLogout?: () => void }) 
           setDepartments(data.departments);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         console.error('Failed to fetch departments:', err);
       }
     };
     if (user?.token) fetchDepartments();
+
+    return () => controller.abort();
   }, [user?.token]);
 
   // Calculate day when date changes

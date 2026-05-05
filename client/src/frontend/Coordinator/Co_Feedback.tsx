@@ -41,6 +41,7 @@ const CoordinatorFeedbackHistory: FC<CoordinatorFeedbackHistoryProps> = ({ onLog
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchFeedbacks = async (): Promise<void> => {
       if (!user?.token) {
         setError('Please login to view feedbacks');
@@ -50,6 +51,7 @@ const CoordinatorFeedbackHistory: FC<CoordinatorFeedbackHistoryProps> = ({ onLog
 
       try {
         const response = await fetch(`${API_BASE}/api/feedback/department/all`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -71,6 +73,7 @@ const CoordinatorFeedbackHistory: FC<CoordinatorFeedbackHistoryProps> = ({ onLog
           setFeedbackData(formattedData);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message || 'An unknown error occurred');
       } finally {
         setLoading(false);
@@ -78,6 +81,8 @@ const CoordinatorFeedbackHistory: FC<CoordinatorFeedbackHistoryProps> = ({ onLog
     };
 
     fetchFeedbacks();
+
+    return () => controller.abort();
   }, [user]);
 
   if (loading) {

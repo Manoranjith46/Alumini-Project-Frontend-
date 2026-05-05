@@ -76,6 +76,7 @@ const Coordinator_Alumni: FC<CoordinatorAlumniProps> = ({ onLogout }) => {
 
   // Fetch coordinator profile and department alumni
   useEffect(() => {
+    const controller = new AbortController();
     const fetchData = async (): Promise<void> => {
       if (!user?.token) {
         setError('Please login to view alumni');
@@ -85,6 +86,7 @@ const Coordinator_Alumni: FC<CoordinatorAlumniProps> = ({ onLogout }) => {
 
       try {
         const coordRes = await fetch(`${API_BASE_URL}/api/coordinators/profile/me`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -101,6 +103,7 @@ const Coordinator_Alumni: FC<CoordinatorAlumniProps> = ({ onLogout }) => {
         const department = coordData.data.department;
 
         const alumniRes = await fetch(`${API_BASE_URL}/api/alumni/all?branch=${encodeURIComponent(department)}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -121,6 +124,8 @@ const Coordinator_Alumni: FC<CoordinatorAlumniProps> = ({ onLogout }) => {
     };
 
     fetchData();
+
+    return () => controller.abort();
   }, [user?.token]);
 
   // Apply search and filters

@@ -49,6 +49,7 @@ const Admin_View_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchCoordinator = async () => {
       if (!user?.token) {
         setError('Please login to view coordinator details');
@@ -58,6 +59,7 @@ const Admin_View_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
 
       try {
         const response = await fetch(`${API_BASE}/api/coordinators/${id}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user?.token}`,
           },
@@ -73,6 +75,7 @@ const Admin_View_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
           setCoordinatorData(data.coordinator);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -82,6 +85,8 @@ const Admin_View_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
     if (id) {
       fetchCoordinator();
     }
+
+    return () => controller.abort();
   }, [id, user]);
 
   const handleBack = () => {

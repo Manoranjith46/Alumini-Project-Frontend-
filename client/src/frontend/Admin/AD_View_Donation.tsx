@@ -41,6 +41,7 @@ const Admin_View_Donation = ({ onLogout }: { onLogout?: () => void }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchPayment = async () => {
       if (!user?.token) {
         setError('Please login to view donation details');
@@ -50,6 +51,7 @@ const Admin_View_Donation = ({ onLogout }: { onLogout?: () => void }) => {
 
       try {
         const response = await fetch(`${API_BASE}/api/payments/${id}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -65,6 +67,7 @@ const Admin_View_Donation = ({ onLogout }: { onLogout?: () => void }) => {
           setDonation(data.payment);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -74,6 +77,8 @@ const Admin_View_Donation = ({ onLogout }: { onLogout?: () => void }) => {
     if (id) {
       fetchPayment();
     }
+
+    return () => controller.abort();
   }, [id, user]);
 
   const getStatusLabel = (status: string | undefined) => {

@@ -152,6 +152,7 @@ const Admin_Alumni_Registration = () => {
 
   // Validate token on mount
   useEffect(() => {
+    const controller = new AbortController();
     const validateToken = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/registration/validate/${token}`);
@@ -172,6 +173,7 @@ const Admin_Alumni_Registration = () => {
           setTokenError(data.message || 'Invalid or expired registration link');
         }
       } catch (error: any) {
+          if (error.name === 'AbortError') return;
         setTokenError('Failed to validate registration link. Please try again.');
         console.error('Token validation error:', error);
       } finally {
@@ -185,10 +187,13 @@ const Admin_Alumni_Registration = () => {
       setTokenError('No registration token provided');
       setValidating(false);
     }
+
+    return () => controller.abort();
   }, [token]);
 
   // Fetch departments
   useEffect(() => {
+    const controller = new AbortController();
     const fetchDepartments = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/departments/public`);
@@ -199,6 +204,7 @@ const Admin_Alumni_Registration = () => {
           }
         }
       } catch (error: any) {
+          if (error.name === 'AbortError') return;
         console.error('Error fetching departments:', error);
       }
     };
@@ -206,6 +212,8 @@ const Admin_Alumni_Registration = () => {
     if (tokenValid) {
       fetchDepartments();
     }
+
+    return () => controller.abort();
   }, [tokenValid]);
 
   const uniqueStreams = [...new Set(departments.map((dept: Department) => dept.stream))];

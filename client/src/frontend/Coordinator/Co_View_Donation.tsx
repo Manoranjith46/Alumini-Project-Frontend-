@@ -54,6 +54,7 @@ const CoordinatorViewDonation: FC<CoordinatorViewDonationProps> = ({ onLogout })
     const donationCardRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+      const controller = new AbortController();
         const fetchPayment = async (): Promise<void> => {
             if (!user?.token) {
                 setError('Please login to view donation details');
@@ -63,6 +64,7 @@ const CoordinatorViewDonation: FC<CoordinatorViewDonationProps> = ({ onLogout })
 
             try {
                 const response = await fetch(`${API_BASE}/api/payments/${id}`, {
+              signal: controller.signal,
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
@@ -78,6 +80,7 @@ const CoordinatorViewDonation: FC<CoordinatorViewDonationProps> = ({ onLogout })
                     setDonation(data.payment);
                 }
             } catch (err: any) {
+            if (err.name === 'AbortError') return;
                 setError(err.message || 'An unknown error occurred');
             } finally {
                 setLoading(false);
@@ -87,6 +90,8 @@ const CoordinatorViewDonation: FC<CoordinatorViewDonationProps> = ({ onLogout })
         if (id) {
             fetchPayment();
         }
+
+      return () => controller.abort();
     }, [id, user]);
 
     const getStatusStyle = (status: string): StatusStyle => {

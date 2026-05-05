@@ -238,12 +238,15 @@ const Admin_Alumini = ({ onLogout }: AdminAlumniProps) => {
 
   // Fetch alumni data
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchAlumni = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/alumni/all`, {
           headers: {
             'Authorization': `Bearer ${user?.token}`,
           },
+          signal: controller.signal,
         });
         const data = await res.json();
         if (data.success) {
@@ -253,6 +256,7 @@ const Admin_Alumini = ({ onLogout }: AdminAlumniProps) => {
           setError(data.message || 'Failed to fetch alumni');
         }
       } catch (err: any) {
+        if (err.name === 'AbortError') return;
         setError('Unable to connect to server');
       } finally {
         setLoading(false);
@@ -262,6 +266,8 @@ const Admin_Alumini = ({ onLogout }: AdminAlumniProps) => {
     if (user?.token) {
       fetchAlumni();
     }
+
+    return () => controller.abort();
   }, [user?.token]);
 
   // Filter alumni based on search criteria

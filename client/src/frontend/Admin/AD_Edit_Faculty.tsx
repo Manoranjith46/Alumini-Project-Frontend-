@@ -64,6 +64,7 @@ const Admin_Edit_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
 
   // Fetch coordinator details on mount
   useEffect(() => {
+    const controller = new AbortController();
     const fetchCoordinator = async () => {
       if (!id || !user?.token) {
         setLoading(false);
@@ -72,6 +73,7 @@ const Admin_Edit_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
 
       try {
         const response = await fetch(`${API_BASE}/api/coordinators/${id}`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -104,6 +106,7 @@ const Admin_Edit_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
           setSubmitError('Coordinator not found');
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         console.error('Error fetching coordinator:', err);
         setSubmitError(err.message || 'Error loading coordinator data');
       } finally {
@@ -117,6 +120,7 @@ const Admin_Edit_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
       try {
         setDepartmentsLoading(true);
         const response = await fetch(`${API_BASE}/api/departments`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -131,6 +135,7 @@ const Admin_Edit_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
           setDepartments(data.departments);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         console.error('Error fetching departments:', err);
       } finally {
         setDepartmentsLoading(false);
@@ -139,6 +144,8 @@ const Admin_Edit_Faculty = ({ onLogout }: { onLogout?: () => void }) => {
 
     fetchCoordinator();
     fetchDepartments();
+
+    return () => controller.abort();
   }, [id, user?.token]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

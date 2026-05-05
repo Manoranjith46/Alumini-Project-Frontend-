@@ -115,12 +115,15 @@ const CoordinatorProfile: FC<CoordinatorProfileProps> = ({ onLogout }) => {
 
   const [message, setMessage] = useState({ type: '', text: '' });
 
+  const messageTimerRef = { current: null as ReturnType<typeof setTimeout> | null };
+
   const showMessage = (type: string, text: string) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage({ type: '', text: '' }), 4000);
+    if (messageTimerRef.current) clearTimeout(messageTimerRef.current);
+    messageTimerRef.current = setTimeout(() => setMessage({ type: '', text: '' }), 4000);
   };
 
-  const fetchProfile = useCallback(async () => {
+  const fetchProfile = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
 
@@ -129,6 +132,7 @@ const CoordinatorProfile: FC<CoordinatorProfileProps> = ({ onLogout }) => {
           Authorization: `Bearer ${user?.token}`,
           'Content-Type': 'application/json',
         },
+        signal,
       });
 
       const data = await response.json();
@@ -143,7 +147,8 @@ const CoordinatorProfile: FC<CoordinatorProfileProps> = ({ onLogout }) => {
       } else {
         showMessage('error', data.message || 'Failed to load profile');
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
       console.error('Error fetching coordinator profile:', error);
       showMessage('error', 'Failed to load profile');
     } finally {
@@ -152,11 +157,15 @@ const CoordinatorProfile: FC<CoordinatorProfileProps> = ({ onLogout }) => {
   }, [user?.token]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     if (user?.token) {
-      fetchProfile();
+      fetchProfile(controller.signal);
     } else {
       setLoading(false);
     }
+
+    return () => controller.abort();
   }, [user?.token, fetchProfile]);
 
   const handleProfileChange = (field: string, value: string | number) => {

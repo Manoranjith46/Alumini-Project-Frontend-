@@ -19,26 +19,31 @@ const Admin_Draft_History = ({ onLogout }: { onLogout?: () => void }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDrafts();
-  }, []);
+    const controller = new AbortController();
 
-  const fetchDrafts = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/drafts/all`, {
-        headers: { 'Content-Type': 'application/json' }
-      });
+    const fetchDrafts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/api/drafts/all`, {
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+        });
 
-      const data = await response.json();
-      if (data.success) {
-        setDrafts(data.drafts);
+        const data = await response.json();
+        if (data.success) {
+          setDrafts(data.drafts);
+        }
+      } catch (err: any) {
+        if (err.name === 'AbortError') return;
+        console.error('Error fetching drafts:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      console.error('Error fetching drafts:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchDrafts();
+    return () => controller.abort();
+  }, []);
 
   const formatDate = (dateString: string | Date) => {
     const date = new Date(dateString);

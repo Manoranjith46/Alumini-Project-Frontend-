@@ -38,6 +38,7 @@ const Admin_Department = ( { onLogout }: { onLogout?: () => void } ) => {
 
   // Fetch departments from backend
   useEffect(() => {
+    const controller = new AbortController();
     const fetchDepartments = async () => {
       if (!user?.token) {
         setError('Please login to view departments');
@@ -47,6 +48,7 @@ const Admin_Department = ( { onLogout }: { onLogout?: () => void } ) => {
 
       try {
         const response = await fetch(`${API_BASE}/api/departments`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -64,6 +66,7 @@ const Admin_Department = ( { onLogout }: { onLogout?: () => void } ) => {
           setError('Failed to load departments');
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
         console.error('Error fetching departments:', err);
       } finally {
@@ -72,6 +75,8 @@ const Admin_Department = ( { onLogout }: { onLogout?: () => void } ) => {
     };
 
     fetchDepartments();
+
+    return () => controller.abort();
   }, [user?.token]);
 
   // Simple Modal Handlers

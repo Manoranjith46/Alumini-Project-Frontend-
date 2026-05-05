@@ -71,6 +71,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
   const [completedCount, setCompletedCount] = useState(0);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchPayments = async () => {
       if (!user?.token) {
         setError('Please login to view donation history');
@@ -80,6 +81,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
 
       try {
         const response = await fetch(`${API_BASE}/api/payments/my`, {
+            signal: controller.signal,
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -114,6 +116,7 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
           setCompletedCount(paidPayments.length);
         }
       } catch (err: any) {
+          if (err.name === 'AbortError') return;
         setError(err.message);
       } finally {
         setLoading(false);
@@ -121,6 +124,8 @@ const Alumini_Donation_History = ({ onLogout }: AluminiDonationHistoryProps) => 
     };
 
     fetchPayments();
+
+    return () => controller.abort();
   }, [user]);
 
   // Pagination state

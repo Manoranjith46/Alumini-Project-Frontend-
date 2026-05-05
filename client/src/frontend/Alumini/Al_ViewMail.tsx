@@ -19,28 +19,34 @@ const Alumini_ViewMail = ({ onLogout }: AluminiViewMailProps) => {
   const passedMailData = location.state?.mailData;
 
   useEffect(() => {
+    const controller = new AbortController();
+
     if (passedMailData) {
       setMailData(passedMailData);
       setLoading(false);
     } else if (mailId) {
-      fetchMailDetails();
+      fetchMailDetails(controller.signal);
     } else {
       setLoading(false);
     }
+
+    return () => controller.abort();
   }, [mailId, passedMailData]);
 
-  const fetchMailDetails = async () => {
+  const fetchMailDetails = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/mail/${mailId}`, {
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        signal,
       });
 
       const data = await response.json();
       if (data.success) {
         setMailData(data.mail);
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.error('Error fetching mail:', err);
     } finally {
       setLoading(false);
