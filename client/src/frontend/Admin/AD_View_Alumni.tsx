@@ -1,18 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Briefcase,
-  GraduationCap,
-  User,
-  Building2,
-  ArrowLeft,
-  Trash2,
-  Users,
-  Award,
-  Heart
-} from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, GraduationCap, User, Building2, ArrowLeft, Trash2, Users, Award, Heart} from 'lucide-react';
 import styles from './AD_View_Alumni.module.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from './Components/Sidebar/Sidebar';
