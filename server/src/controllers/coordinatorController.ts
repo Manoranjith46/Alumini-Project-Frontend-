@@ -285,7 +285,7 @@ export const getAllCoordinators = async (req: Request, res: Response): Promise<v
 // Get coordinators by department
 export const getCoordinatorsByDepartment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { department } = req.params;
+    const department = req.params.department as string;
     const upperDept = department.toUpperCase();
 
     const deptRecord = await Department.findOne({
@@ -779,7 +779,7 @@ export const resetCoordinatorPassword = async (req: Request, res: Response): Pro
 // Get coordinator by ID
 export const getCoordinatorById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({ success: false, message: 'Invalid coordinator ID' });
       return;
@@ -802,7 +802,7 @@ export const getCoordinatorById = async (req: Request, res: Response): Promise<v
 // Update coordinator
 export const updateCoordinator = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({ success: false, message: 'Invalid coordinator ID' });
       return;
@@ -849,7 +849,7 @@ export const updateCoordinator = async (req: Request, res: Response): Promise<vo
 // Hard delete coordinator and associated user
 export const deleteCoordinator = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({ success: false, message: 'Invalid coordinator ID' });
       return;

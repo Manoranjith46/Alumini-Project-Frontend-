@@ -31,6 +31,10 @@ const connectDB = async (): Promise<void> => {
         const conn = await mongoose.connect(mongoUri);
         console.log(`🛰️  MongoDB Connected: ${conn.connection.host}`);
 
+        if (!conn.connection.db) {
+            throw new Error("Database connection database is not defined");
+        }
+
         gfsBucket = new mongoose.mongo.GridFSBucket(conn.connection.db, {
             bucketName: 'uploads',
         });

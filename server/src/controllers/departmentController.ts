@@ -118,7 +118,7 @@ export const getPublicDepartments = async (_: Request, res: Response): Promise<v
 // Get department by ID
 export const getDepartmentById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({
@@ -153,7 +153,7 @@ export const getDepartmentById = async (req: Request, res: Response): Promise<vo
 // Get department by department code
 export const getDepartmentByCode = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { deptCode } = req.params;
+    const { deptCode } = req.params as { deptCode: string };
 
     const department = await Department.findOne({
       deptCode: deptCode.toUpperCase(),
@@ -183,7 +183,7 @@ export const getDepartmentByCode = async (req: Request, res: Response): Promise<
 // Update department
 export const updateDepartment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const { stream, branch, deptCode } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {

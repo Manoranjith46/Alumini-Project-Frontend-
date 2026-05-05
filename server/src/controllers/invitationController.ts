@@ -111,7 +111,7 @@ export const getInvitationById = async (req: Request, res: Response): Promise<vo
 
 export const getFlyerImage = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const { id } = req.params;
+		const { id } = req.params as { id: string };
 		if (!mongoose.Types.ObjectId.isValid(id)) {
 			res.status(400).json({ success: false, message: 'Invalid image ID' });
 			return;

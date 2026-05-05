@@ -208,7 +208,7 @@ export const getMyProfile = async (req: Request, res: Response): Promise<void> =
 // Get alumni by ID
 export const getAlumniById = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const { id } = req.params;
+		const { id } = req.params as { id: string };
 		if (!mongoose.Types.ObjectId.isValid(id)) {
 			res.status(400).json({ success: false, message: 'Invalid alumni ID' });
 			return;
@@ -340,7 +340,7 @@ export const updateMyProfile = async (req: Request, res: Response): Promise<void
 // Update alumni
 export const updateAlumni = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const { id } = req.params;
+		const { id } = req.params as { id: string };
 		if (!mongoose.Types.ObjectId.isValid(id)) {
 			res.status(400).json({ success: false, message: 'Invalid alumni ID' });
 			return;
@@ -373,7 +373,7 @@ export const updateAlumni = async (req: Request, res: Response): Promise<void> =
 // Soft delete alumni and associated user
 export const deleteAlumni = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const { id } = req.params;
+		const { id } = req.params as { id: string };
 		if (!mongoose.Types.ObjectId.isValid(id)) {
 			res.status(400).json({ success: false, message: 'Invalid alumni ID' });
 			return;

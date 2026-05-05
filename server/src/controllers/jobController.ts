@@ -80,7 +80,7 @@ export const getAllJobReferences = async (req: Request, res: Response): Promise<
 
 export const getJobReferenceById = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const { id } = req.params;
+		const { id } = req.params as { id: string };
 		if (!mongoose.Types.ObjectId.isValid(id)) {
 			res.status(400).json({ success: false, message: 'Invalid job reference ID' });
 			return;
@@ -102,7 +102,7 @@ export const getJobReferenceById = async (req: Request, res: Response): Promise<
 
 export const deleteJobReference = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const { id } = req.params;
+		const { id } = req.params as { id: string };
 
 		if (!req.user) {
 			res.status(401).json({ success: false, message: 'Unauthorized' });
