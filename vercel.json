@@ -4,6 +4,9 @@
   "installCommand": "npm install",
   "rewrites": [
     {
+      "handle": "filesystem"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
