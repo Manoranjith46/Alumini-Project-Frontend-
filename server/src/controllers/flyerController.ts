@@ -118,7 +118,7 @@ export const generateFlyer = async (req: Request, res: Response): Promise<void> 
 
 export const getFlyerImage = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id: fileId } = req.params;
+    const { id: fileId } = req.params as { id: string };
 
     if (!mongoose.Types.ObjectId.isValid(fileId)) {
       res.status(400).json({
@@ -137,7 +137,7 @@ export const getFlyerImage = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const objectId = new mongoose.Types.ObjectId(fileId);
+    const objectId = new mongoose.Types.ObjectId(fileId as string);
     const files = await bucket.find({ _id: objectId }).toArray();
 
     if (!files.length) {
@@ -149,7 +149,7 @@ export const getFlyerImage = async (req: Request, res: Response): Promise<void> 
     }
 
     const file = files[0];
-    res.set('Content-Type', file.contentType || 'image/png');
+    res.set('Content-Type', (file as any).contentType || file.metadata?.contentType || 'image/png');
     res.set('Cache-Control', 'public, max-age=31536000');
     res.set('Content-Disposition', `inline; filename="${file.filename}"`);
 

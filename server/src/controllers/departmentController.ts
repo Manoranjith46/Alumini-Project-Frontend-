@@ -251,7 +251,7 @@ export const updateDepartment = async (req: Request, res: Response): Promise<voi
 // Hard delete department and all associated faculty
 export const deleteDepartment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({
@@ -307,7 +307,7 @@ export const deleteDepartment = async (req: Request, res: Response): Promise<voi
 // Update alumni count for a department
 export const updateAlumniCount = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const { alumniCount } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {

@@ -14,7 +14,7 @@ const uploadToGridFS = (buffer: Buffer, filename: string, mimetype: string): Pro
     }
     const readStream = Readable.from(buffer);
     const uploadStream = bucket.openUploadStream(filename, {
-      contentType: mimetype,
+      metadata: { contentType: mimetype },
     });
 
     readStream.pipe(uploadStream)
@@ -111,7 +111,7 @@ export const getAllFeedbacks = async (req: Request, res: Response): Promise<void
 
 export const getFeedbackById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({ success: false, message: 'Invalid feedback ID' });
       return;
@@ -133,7 +133,7 @@ export const getFeedbackById = async (req: Request, res: Response): Promise<void
 
 export const getSignatureImage = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({ success: false, message: 'Invalid image ID' });
       return;
@@ -152,9 +152,9 @@ export const getSignatureImage = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    res.set('Content-Type', files[0].contentType);
+    res.set('Content-Type', (files[0] as any).contentType || files[0].metadata?.contentType || 'image/png');
     res.set('Cache-Control', 'public, max-age=86400');
-    const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(id));
+    const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(id as string));
     downloadStream.pipe(res);
   } catch {
     res.status(500).json({ success: false, message: 'Server error' });

@@ -12,7 +12,7 @@ const uploadToGridFS = (buffer: Buffer, filename: string, mimetype: string): Pro
 		if (!bucket) return reject(new Error('GridFSBucket not initialized'));
 		const readStream = Readable.from(buffer);
 		const uploadStream = bucket.openUploadStream(filename, {
-			contentType: mimetype,
+			metadata: { contentType: mimetype },
 		});
 
 		readStream.pipe(uploadStream)
@@ -89,7 +89,7 @@ export const getAllInvitations = async (req: Request, res: Response): Promise<vo
 
 export const getInvitationById = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const { id } = req.params;
+		const { id } = req.params as { id: string };
 		if (!mongoose.Types.ObjectId.isValid(id)) {
 			res.status(400).json({ success: false, message: 'Invalid invitation ID' });
 			return;
@@ -123,16 +123,16 @@ export const getFlyerImage = async (req: Request, res: Response): Promise<void> 
 			return;
 		}
 
-		const files = await bucket.find({ _id: new mongoose.Types.ObjectId(id) }).toArray();
+		const files = await bucket.find({ _id: new mongoose.Types.ObjectId(id as string) }).toArray();
 
 		if (!files.length) {
 			res.status(404).json({ success: false, message: 'Image not found' });
 			return;
 		}
 
-		res.set('Content-Type', files[0].contentType);
+		res.set('Content-Type', (files[0] as any).contentType || files[0].metadata?.contentType || 'image/png');
 		res.set('Cache-Control', 'public, max-age=86400');
-		const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(id));
+		const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(id as string));
 		downloadStream.pipe(res);
 	} catch {
 		res.status(500).json({ success: false, message: 'Server error' });

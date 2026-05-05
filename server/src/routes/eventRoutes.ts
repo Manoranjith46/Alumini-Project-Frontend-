@@ -33,7 +33,7 @@ const upload = multer({
     if (isImage) {
       cb(null, true);
     } else {
-      cb(new Error(`Unsupported file type: ${file.mimetype}. Only image files are allowed.`), false);
+      cb(new Error(`Unsupported file type: ${file.mimetype}. Only image files are allowed.`) as any, false);
     }
   },
 });

@@ -17,7 +17,7 @@ const upload = multer({
       return;
     }
 
-    cb(new Error('Only image files are allowed'), false);
+    cb(new Error('Only image files are allowed') as any, false);
   },
 });
 

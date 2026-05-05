@@ -78,7 +78,7 @@ export const getAllEvents = async (req: Request, res: Response): Promise<void> =
 // Get event by ID
 export const getEventById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({ success: false, message: 'Invalid event ID' });
@@ -278,8 +278,8 @@ export const uploadEventPhoto = async (req: Request, res: Response): Promise<voi
         const filename = `event_${id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
         const uploadStream = bucket.openUploadStream(filename, {
-          contentType: file.mimetype,
           metadata: {
+            contentType: file.mimetype,
             eventId: id,
             type: 'eventPhoto',
             originalName: file.originalname,
@@ -323,7 +323,7 @@ export const uploadEventPhoto = async (req: Request, res: Response): Promise<voi
 // Delete event photo
 export const deleteEventPhoto = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id, photoId } = req.params;
+    const { id, photoId } = req.params as { id: string, photoId: string };
 
     if (!mongoose.Types.ObjectId.isValid(photoId)) {
       res.status(400).json({
@@ -359,7 +359,7 @@ export const deleteEventPhoto = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    await bucket.delete(new mongoose.Types.ObjectId(photoId));
+    await bucket.delete(new mongoose.Types.ObjectId(photoId as string));
 
     event.photos = event.photos.filter((p: string) => p !== photoId);
     await event.save();

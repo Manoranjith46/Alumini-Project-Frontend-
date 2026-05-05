@@ -794,7 +794,7 @@ export const getMailById = async (req: Request, res: Response): Promise<void | a
 
 export const getDepartmentMails = async (req: Request, res: Response): Promise<void | any> => {
     try {
-        const department = await getRequestDepartment(req, req.params.department);
+        const department = await getRequestDepartment(req, req.params.department as string);
 
         if (!department) {
             return res.status(400).json({
@@ -1022,7 +1022,7 @@ export const sendAdminNotification = async (responseData: any, mailData: any, ac
 export const getMailResponsesByDepartment = async (req: Request, res: Response): Promise<void | any> => {
     try {
         const mailId = req.params.mailId as string;
-        const department = await getRequestDepartment(req, req.params.department);
+        const department = await getRequestDepartment(req, req.params.department as string);
 
         const mail = await Mail.findById(mailId);
         if (!mail) {
@@ -1139,7 +1139,7 @@ export const getAlumniMails = async (req: Request, res: Response): Promise<void 
             alumniEmail: email,
         });
     } catch (error: any) {
-        logEmailError(req.params?.email || 'N/A', error);
+        logEmailError(req.params?.email as string || 'N/A', error);
         return res.status(500).json({
             success: false,
             message: 'Failed to fetch alumni mails',

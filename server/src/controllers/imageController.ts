@@ -36,12 +36,11 @@ export const uploadImage = async (req: Request, res: Response): Promise<void> =>
 		const contentType = req.file.mimetype || 'image/png';
 
 		const uploadStream = bucket.openUploadStream(filename, {
-			contentType: contentType,
 			metadata: {
 				userId: req.user._id,
 				type: type || 'image',
 				originalName: req.file.originalname,
-				mimeType: contentType,  // Store as backup in metadata
+				mimeType: contentType,
 			},
 		});
 
@@ -87,7 +86,7 @@ export const uploadImage = async (req: Request, res: Response): Promise<void> =>
  */
 export const getImage = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const { id } = req.params;
+		const { id } = req.params as { id: string };
 
 		if (!mongoose.Types.ObjectId.isValid(id)) {
 			res.status(400).json({
@@ -106,7 +105,7 @@ export const getImage = async (req: Request, res: Response): Promise<void> => {
 			return;
 		}
 
-		const objectId = new mongoose.Types.ObjectId(id);
+		const objectId = new mongoose.Types.ObjectId(id as string);
 
 		// Find the file
 		const files = await bucket.find({ _id: objectId }).toArray();
@@ -121,8 +120,8 @@ export const getImage = async (req: Request, res: Response): Promise<void> => {
 
 		const file = files[0];
 
-		// Set content type header - check file.contentType, metadata.mimeType, or fallback
-		const responseContentType = file.contentType || file.metadata?.mimeType || 'image/png';
+		// Set content type header - check metadata.mimeType, or fallback (contentType is deprecated in GridFSFile)
+		const responseContentType = (file as any).contentType || file.metadata?.mimeType || 'image/png';
 		res.set('Content-Type', responseContentType);
 		res.set('Cache-Control', 'public, max-age=31536000');
 
@@ -157,7 +156,7 @@ export const getImage = async (req: Request, res: Response): Promise<void> => {
  */
 export const deleteImage = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const { id } = req.params;
+		const { id } = req.params as { id: string };
 
 		if (!mongoose.Types.ObjectId.isValid(id)) {
 			res.status(400).json({
@@ -181,7 +180,7 @@ export const deleteImage = async (req: Request, res: Response): Promise<void> =>
 			return;
 		}
 
-		const objectId = new mongoose.Types.ObjectId(id);
+		const objectId = new mongoose.Types.ObjectId(id as string);
 
 		// Check if file exists and belongs to user
 		const files = await bucket.find({ _id: objectId }).toArray();
